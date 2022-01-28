@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "simplequests",
+  "version": "${version}",
+  "name": "Simple Quests",
+  "description": "Server sided questing",
+  "authors": [
+    "Flemmli97"
+  ],
+  "contact": {
+    "homepage": "",
+    "issues": "",
+    "sources": ""
+  },
+  "license": "ARR",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.flemmli97.simplequests.fabric.SimpleQuestsFabric"
+    ]
+  },
+  "mixins": [
+    "simplequests.mixins.json",
+    "simplequests.fabric.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.18"
+  }
+}

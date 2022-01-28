@@ -1,0 +1,18 @@
+modLoader="javafml"
+loaderVersion="[38,)"
+license="All rights reserved"
+issueTrackerURL="https://github.com/Flemmli97/MobBattle/issues"
+[[mods]]
+modId="simplequests"
+version="${version}"
+displayName="Simple Quests"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/mob-battle-mod"
+logoFile="icon.png"
+authors="Flemmli97"
+description='''Creative utensils in creating spectacular mob battles'''
+[[dependencies.simplequests]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.18,)"
+ordering="NONE"
+side="BOTH"
