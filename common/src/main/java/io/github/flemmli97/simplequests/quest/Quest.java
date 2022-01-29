@@ -3,14 +3,18 @@ package io.github.flemmli97.simplequests.quest;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Quest {
@@ -35,21 +39,43 @@ public class Quest {
         this.loot = loot;
     }
 
-    public Component getFormatted(MinecraftServer server) {
-        return new TextComponent(this.questTaskString).append("\n").append(this.getFormattedTasks(server));
+    public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
+        TextComponent main = new TextComponent(this.questTaskString);
+        for (MutableComponent tasks : this.getFormattedTasks(server)) {
+            if (subFormatting != null)
+                main.append("\n").append(tasks.withStyle(subFormatting));
+            else
+                main.append("\n").append(tasks);
+        }
+        return main;
     }
 
-    public Component getFormattedTasks(MinecraftServer server) {
-        BaseComponent tasks = new TextComponent(" - ");
-        boolean start = true;
+    public List<MutableComponent> getFormattedTasks(MinecraftServer server) {
+        List<MutableComponent> list = new ArrayList<>();
         for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
-            if (!start) {
-                tasks.append("\n - ");
-            }
-            tasks.append(e.getValue().translation(server));
-            start = false;
+            list.add(new TextComponent(" - ").append(e.getValue().translation(server)));
         }
-        return tasks;
+        return list;
+    }
+
+    public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
+        List<MutableComponent> list = new ArrayList<>();
+        for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
+            if (!(e.getValue() instanceof QuestEntryImpls.IngredientEntry ing))
+                list.add(new TextComponent(" - ").append(e.getValue().translation(player.getServer())));
+            else {
+                List<MutableComponent> wrapped = SimpleQuests.getHandler().wrapForGui(player, ing);
+                boolean start = true;
+                for (MutableComponent comp : wrapped) {
+                    if (start) {
+                        list.add(new TextComponent(" - ").append(comp));
+                        start = false;
+                    } else
+                        list.add(new TextComponent("   ").append(comp));
+                }
+            }
+        }
+        return list;
     }
 
     public JsonObject serialize() {
@@ -81,10 +107,10 @@ public class Quest {
         });
         return new Quest(id,
                 GsonHelper.getAsString(obj, "task"),
-                obj.has("parent") ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
+                obj.has("parent") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 GsonHelper.getAsInt(obj, "repeat_delay", 0),
-                GsonHelper.getAsInt(obj, "repeat_daily", 0),
+                GsonHelper.getAsInt(obj, "repeat_daily", 1),
                 builder.build());
     }
 }

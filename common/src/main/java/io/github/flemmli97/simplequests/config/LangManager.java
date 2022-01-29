@@ -49,13 +49,28 @@ public class LangManager {
         defaultTranslation.put("simplequests.kill", "Finished kill task %s");
         defaultTranslation.put("simplequests.quest.noexist", "No quest exists with id %s");
 
+        defaultTranslation.put("simplequests.accept.requirements", "Missing requirements for quest");
+        defaultTranslation.put("simplequests.accept.daily", "You can't repeat this quest again today");
+        defaultTranslation.put("simplequests.accept.delay", "Quest on cooldown for %s");
+        defaultTranslation.put("simplequests.accept.onetime", "This is a onetime quest");
+        defaultTranslation.put("simplequests.accept.yes", "Quest acceptable");
+
+        defaultTranslation.put("simplequests.gui.main", "Quests");
+        defaultTranslation.put("simplequests.gui.confirm", "Accept this quest?");
+        defaultTranslation.put("simplequests.gui.yes", "Yes");
+        defaultTranslation.put("simplequests.gui.no", "No");
+
+        defaultTranslation.put("simplequests.gui.next", "Next Page");
+        defaultTranslation.put("simplequests.gui.prev", "Previous Page");
+
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put("simplequests:ingredient", "Any of [%s] x%s");
+        defaultTranslation.put("simplequests:ingredient.single", "%1$s x%2$s");
+        defaultTranslation.put("simplequests:ingredient.multi", "Any of the following x%2$s: %1$s");
         defaultTranslation.put("simplequests:ingredient.no", "<Empty tag/items>");
         defaultTranslation.put("simplequests:xp", "Submit Experience: %s lvl");
         defaultTranslation.put("simplequests:advancement", "Advancement %s");
-        defaultTranslation.put("simplequests:entity", "Kill %s x%s");
+        defaultTranslation.put("simplequests:entity", "Kill %1$s x%2$s");
 
     }
 

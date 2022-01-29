@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.Quest;
@@ -16,9 +17,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,17 +41,8 @@ public class QuestCommand {
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        QuestsManager.instance().getQuests().forEach((res, quest) -> {
-            if (PlayerData.get(player).canAcceptQuest(quest)) {
-                ctx.getSource().sendSuccess(new TextComponent(quest.questTaskString).withStyle(ChatFormatting.GOLD)
-                        .append(" ")
-                        .append(new TextComponent("[x]").withStyle(Style.EMPTY
-                                .applyFormat(ChatFormatting.DARK_GREEN)
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, quest.getFormattedTasks(ctx.getSource().getServer())))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/simplequests accept " + quest.id)))), false);
-            }
-        });
-        return 0;
+        QuestGui.openGui(player);
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -109,7 +98,7 @@ public class QuestCommand {
     private static List<String> acceptableQuests(ServerPlayer player) {
         return QuestsManager.instance().getQuests()
                 .entrySet().stream()
-                .filter(e -> PlayerData.get(player).canAcceptQuest(e.getValue()))
+                .filter(e -> PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 }

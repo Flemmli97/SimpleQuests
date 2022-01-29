@@ -53,8 +53,12 @@ public class PlayerData {
             this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
         }
-        if (!this.canAcceptQuest(quest)) {
-            this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.missing.requirements")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+        AcceptType type = this.canAcceptQuest(quest);
+        if (type != AcceptType.ACCEPT) {
+            if (type == AcceptType.DELAY)
+                this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            else
+                this.player.sendMessage(new TextComponent(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
         }
         this.currentQuest = new QuestProgress(quest);
@@ -122,23 +126,37 @@ public class PlayerData {
         return this.currentQuest;
     }
 
-    public boolean canAcceptQuest(Quest quest) {
+    public AcceptType canAcceptQuest(Quest quest) {
         if (this.questTrackerTime != null && this.questTrackerTime.getDayOfYear() != LocalDateTime.now().getDayOfYear()) {
             this.questTrackerTime = null;
             this.dailyQuestsTracker.clear();
         }
         if (quest.neededParentQuest != null && this.finishedQuests.get(quest.neededParentQuest) == null) {
-            return false;
+            return AcceptType.REQUIREMENTS;
         }
         if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
-            return false;
+            return AcceptType.DAILYFULL;
         //One time quests
         if (quest.repeatDelay < 0 && this.finishedQuests.containsKey(quest.id))
-            return false;
+            return AcceptType.ONETIME;
         if (this.finishedQuests.containsKey(quest.id)) {
-            return quest.repeatDelay == 0 || Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id)) > quest.repeatDelay;
+            return (quest.repeatDelay == 0 || Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
         }
-        return true;
+        return AcceptType.ACCEPT;
+    }
+
+    private String formattedCooldown(Quest quest) {
+        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id))) / 20;
+        if (sec >= 3600) {
+            long hours = sec / 3600;
+            long minutes = (sec % 3600) / 60;
+            return String.format("%dh:%dm:%ds", hours, minutes, sec % 60);
+        }
+        if (sec >= 60) {
+            long minutes = sec / 60;
+            return String.format("%dm:%ds", minutes, sec % 60);
+        }
+        return String.format("%ds", sec);
     }
 
     public CompoundTag save() {
@@ -173,5 +191,23 @@ public class PlayerData {
     public void clone(PlayerData data) {
         this.currentQuest = data.currentQuest;
         this.finishedQuests = data.finishedQuests;
+    }
+
+    public enum AcceptType {
+        REQUIREMENTS("simplequests.accept.requirements"),
+        DAILYFULL("simplequests.accept.daily"),
+        DELAY("simplequests.accept.delay"),
+        ONETIME("simplequests.accept.onetime"),
+        ACCEPT("simplequests.accept.yes");
+
+        String lang;
+
+        AcceptType(String id) {
+            this.lang = id;
+        }
+
+        public String langKey() {
+            return this.lang;
+        }
     }
 }

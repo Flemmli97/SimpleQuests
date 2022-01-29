@@ -25,10 +25,17 @@ import java.util.List;
 
 public class QuestEntryImpls {
 
-    public record IngredientEntry(Ingredient ingredient,
-                                  int amount) implements QuestEntry {
+    public static class IngredientEntry implements QuestEntry {
 
         public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "ingredient");
+
+        public final Ingredient ingredient;
+        public final int amount;
+
+        public IngredientEntry(Ingredient ingredient, int amount) {
+            this.ingredient = ingredient;
+            this.amount = amount;
+        }
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -93,14 +100,18 @@ public class QuestEntryImpls {
         public MutableComponent translation(MinecraftServer server) {
             if (this.ingredient.getItems().length == 0)
                 return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
-            TranslatableComponent items = null;
+            if (this.ingredient.getItems().length == 1) {
+                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".single"), new TranslatableComponent(this.ingredient.getItems()[0].getItem().getDescriptionId()).withStyle(ChatFormatting.AQUA), this.amount);
+            }
+            MutableComponent items = null;
             for (ItemStack stack : this.ingredient.getItems()) {
                 if (items == null)
-                    items = new TranslatableComponent(stack.getItem().getDescriptionId());
+                    items = new TextComponent("[").append(new TranslatableComponent(stack.getItem().getDescriptionId()));
                 else
-                    items.append(new TextComponent(", ").append(new TranslatableComponent(stack.getItem().getDescriptionId())));
+                    items.append(new TextComponent(", ")).append(new TranslatableComponent(stack.getItem().getDescriptionId()));
             }
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), items.withStyle(ChatFormatting.AQUA), this.amount);
+            items.append("]");
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
 

@@ -14,6 +14,9 @@ public class Config {
     public String lang = "en_us";
     public boolean fallBackToEnLang = false;
 
+    public int opPermLevel = 2;
+    public int mainPermLevel = 0;
+
     public Config() {
         File configDir = SimpleQuests.getHandler().getConfigPath().resolve("simplequests").toFile();
         try {
@@ -36,6 +39,8 @@ public class Config {
             reader.close();
             this.lang = obj.lang;
             this.fallBackToEnLang = obj.fallBackToEnLang;
+            this.opPermLevel = obj.opPermLevel;
+            this.mainPermLevel = obj.mainPermLevel;
         } catch (IOException e) {
             e.printStackTrace();
         }

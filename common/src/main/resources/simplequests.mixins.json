@@ -4,7 +4,8 @@
   "package": "io.github.flemmli97.simplequests.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "AbstractContainerAccessor"
   ],
   "server": [
   ],
