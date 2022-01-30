@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LangManager {
@@ -34,7 +35,7 @@ public class LangManager {
     private static final Type mapType = new TypeToken<Map<String, String>>() {
     }.getType();
 
-    private static final Map<String, String> defaultTranslation = new HashMap<>();
+    private static final Map<String, String> defaultTranslation = new LinkedHashMap<>();
 
     static {
         defaultTranslation.put("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
@@ -74,7 +75,7 @@ public class LangManager {
 
     }
 
-    private Map<String, String> translation = new HashMap<>();
+    private Map<String, String> translation = new LinkedHashMap<>();
 
     private final Path confDir;
 
@@ -85,9 +86,9 @@ public class LangManager {
             File dir = configDir.toFile();
             if (!dir.exists())
                 dir.mkdirs();
-            URL url = QuestsManager.class.getClassLoader().getResource("data/simplequests/lang");
+            URL url = LangManager.class.getClassLoader().getResource("data/simplequests/lang");
             if (url != null) {
-                URI uri = QuestsManager.class.getClassLoader().getResource("data/simplequests/lang").toURI();
+                URI uri = LangManager.class.getClassLoader().getResource("data/simplequests/lang").toURI();
                 try {
                     FileSystems.newFileSystem(uri, Collections.emptyMap());
                 } catch (FileSystemAlreadyExistsException | IllegalArgumentException ignored) {
@@ -124,13 +125,17 @@ public class LangManager {
         try {
             FileReader reader = new FileReader(this.confDir.resolve(lang + ".json").toFile());
             this.translation = GSON.fromJson(reader, mapType);
+            reader.close();
             //en_us is basically used as a default modifiable file
             if (lang.equals("en_us")) {
                 defaultTranslation.forEach((key, t) -> this.translation.putIfAbsent(key, t));
                 saveTo(this.confDir.resolve("en_us.json").toFile(), this.translation);
             }
-        } catch (FileNotFoundException e) {
-            this.reload("en_us");
+        } catch (IOException e) {
+            if(lang.equals("en_us"))
+                e.printStackTrace();
+            else
+                this.reload("en_us");
         }
     }
 

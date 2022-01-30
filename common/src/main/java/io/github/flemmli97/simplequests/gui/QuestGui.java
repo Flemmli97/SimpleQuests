@@ -59,7 +59,8 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private static ItemStack ofQuest(Quest quest, ServerPlayer player) {
-        ItemStack stack = new ItemStack(Items.PAPER);
+        PlayerData.AcceptType type = PlayerData.get(player).canAcceptQuest(quest);
+        ItemStack stack = new ItemStack(type == PlayerData.AcceptType.ACCEPT ? Items.PAPER : Items.BOOK);
         stack.setHoverName(new TextComponent(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
@@ -86,6 +87,10 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
             return;
         Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuests();
         this.quests = new ArrayList<>(questMap.keySet());
+        this.quests.removeIf(res -> {
+            PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
+            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME;
+        });
         this.maxPages = (this.quests.size() - 1) / 28;
         int id = 0;
         for (int i = 0; i < 54; i++) {
@@ -97,8 +102,11 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
                 inv.updateStack(i, emptyFiller());
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.quests.size()) {
-                    inv.updateStack(i, ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
-                    id++;
+                    ItemStack stack = ofQuest(questMap.get(this.quests.get(id)), serverPlayer);
+                    if(!stack.isEmpty()) {
+                        inv.updateStack(i, ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
+                        id++;
+                    }
                 }
             }
         }
