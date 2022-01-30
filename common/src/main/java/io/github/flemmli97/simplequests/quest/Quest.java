@@ -29,10 +29,13 @@ public class Quest {
 
     public final String questTaskString;
 
-    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, ResourceLocation loot, int repeatDelay, int repeatDaily, Map<String, QuestEntry> entries) {
+    public final boolean redoParent;
+
+    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, int repeatDelay, int repeatDaily, Map<String, QuestEntry> entries) {
         this.id = id;
         this.questTaskString = questTaskString;
         this.neededParentQuest = parent;
+        this.redoParent = redoParent;
         this.repeatDelay = repeatDelay;
         this.repeatDaily = repeatDaily;
         this.entries = entries;
@@ -82,6 +85,7 @@ public class Quest {
         JsonObject obj = new JsonObject();
         if (this.neededParentQuest != null)
             obj.addProperty("parent_id", this.neededParentQuest.toString());
+        obj.addProperty("redo_parent", this.redoParent);
         obj.addProperty("loot_table", this.loot.toString());
         obj.addProperty("repeat_delay", this.repeatDelay);
         obj.addProperty("repeat_daily", this.repeatDaily);
@@ -108,6 +112,7 @@ public class Quest {
         return new Quest(id,
                 GsonHelper.getAsString(obj, "task"),
                 obj.has("parent") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
+                GsonHelper.getAsBoolean(obj, "redo_parent", false),
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 GsonHelper.getAsInt(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
