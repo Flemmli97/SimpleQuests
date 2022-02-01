@@ -88,9 +88,9 @@ public class PlayerData {
                 this.finishedQuests.put(this.currentQuest.getQuest().id, this.player.level.getGameTime());
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.finish"), this.currentQuest.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                if(this.currentQuest.getQuest().neededParentQuest != null && this.currentQuest.getQuest().redoParent) {
+                if (this.currentQuest.getQuest().neededParentQuest != null && this.currentQuest.getQuest().redoParent) {
                     Quest quest = QuestsManager.instance().getQuests().get(this.currentQuest.getQuest().neededParentQuest);
-                    if(quest != null)
+                    if (quest != null)
                         this.finishedQuests.remove(quest.id);
                 }
                 this.currentQuest = null;

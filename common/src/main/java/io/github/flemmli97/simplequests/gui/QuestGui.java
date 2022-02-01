@@ -103,7 +103,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.quests.size()) {
                     ItemStack stack = ofQuest(questMap.get(this.quests.get(id)), serverPlayer);
-                    if(!stack.isEmpty()) {
+                    if (!stack.isEmpty()) {
                         inv.updateStack(i, ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
                         id++;
                     }

@@ -4,10 +4,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -75,7 +73,7 @@ public class LangManager {
 
     }
 
-    private Map<String, String> translation = new LinkedHashMap<>();
+    private Map<String, String> translation = new HashMap<>();
 
     private final Path confDir;
 
@@ -128,11 +126,12 @@ public class LangManager {
             reader.close();
             //en_us is basically used as a default modifiable file
             if (lang.equals("en_us")) {
-                defaultTranslation.forEach((key, t) -> this.translation.putIfAbsent(key, t));
-                saveTo(this.confDir.resolve("en_us.json").toFile(), this.translation);
+                Map<String, String> ordered = new LinkedHashMap<>();
+                defaultTranslation.forEach((key, t) -> ordered.put(key, this.translation.getOrDefault(key, t)));
+                saveTo(this.confDir.resolve("en_us.json").toFile(), ordered);
             }
         } catch (IOException e) {
-            if(lang.equals("en_us"))
+            if (lang.equals("en_us"))
                 e.printStackTrace();
             else
                 this.reload("en_us");

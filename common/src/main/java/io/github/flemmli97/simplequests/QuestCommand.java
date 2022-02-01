@@ -67,16 +67,18 @@ public class QuestCommand {
             prog.getQuest().entries.entrySet().stream()
                     .filter(e -> !finished.contains(e.getKey()))
                     .forEach(e -> ctx.getSource().sendSuccess(e.getValue().translation(ctx.getSource().getServer()).withStyle(ChatFormatting.RED), false));
+            return Command.SINGLE_SUCCESS;
         } else {
             ctx.getSource().sendSuccess(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
         }
-        return Command.SINGLE_SUCCESS;
+        return 0;
     }
 
     private static int submit(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        PlayerData.get(player).submit();
-        return Command.SINGLE_SUCCESS;
+        if (PlayerData.get(player).submit())
+            return Command.SINGLE_SUCCESS;
+        return 0;
     }
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
