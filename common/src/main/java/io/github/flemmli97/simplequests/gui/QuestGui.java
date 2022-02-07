@@ -59,10 +59,12 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private static ItemStack ofQuest(Quest quest, ServerPlayer player) {
-        PlayerData.AcceptType type = PlayerData.get(player).canAcceptQuest(quest);
+        PlayerData data = PlayerData.get(player);
+        PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = new ItemStack(type == PlayerData.AcceptType.ACCEPT ? Items.PAPER : Items.BOOK);
         stack.setHoverName(new TextComponent(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
+        lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
         stack.getOrCreateTagElement("display").put("Lore", lore);
@@ -89,7 +91,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
-            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME;
+            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME || type == PlayerData.AcceptType.DAILYFULL;
         });
         this.maxPages = (this.quests.size() - 1) / 28;
         int id = 0;

@@ -151,7 +151,7 @@ public class PlayerData {
         return AcceptType.ACCEPT;
     }
 
-    private String formattedCooldown(Quest quest) {
+    public String formattedCooldown(Quest quest) {
         long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id))) / 20;
         if (sec >= 3600) {
             long hours = sec / 3600;
