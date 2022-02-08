@@ -44,6 +44,9 @@ public class LangManager {
         defaultTranslation.put("simplequests.current.no", "No active quest");
         defaultTranslation.put("simplequests.reset", "Reset current quest %s");
         defaultTranslation.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
+        defaultTranslation.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
+        defaultTranslation.put("simplequests.reset.all", "Reset all progress for %s");
+
         defaultTranslation.put("simplequests.missing.advancement", "Advancement with id %s missing");
         defaultTranslation.put("simplequests.kill", "Finished kill task %s");
         defaultTranslation.put("simplequests.quest.noexist", "No quest exists with id %s");

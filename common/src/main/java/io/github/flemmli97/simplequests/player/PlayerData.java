@@ -199,6 +199,17 @@ public class PlayerData {
         this.finishedQuests = data.finishedQuests;
     }
 
+    public void resetAll() {
+        this.currentQuest = null;
+        this.finishedQuests.clear();
+        this.questTrackerTime = null;
+        this.dailyQuestsTracker.clear();
+    }
+
+    public void resetCooldown() {
+        this.finishedQuests.replaceAll((res, old) -> Long.MIN_VALUE);
+    }
+
     public enum AcceptType {
         REQUIREMENTS("simplequests.accept.requirements"),
         DAILYFULL("simplequests.accept.daily"),

@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,11 +38,17 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
 
     private int page, maxPages;
     private List<ResourceLocation> quests;
-    private Player player;
+    private final ServerPlayer player;
+
+    private Map<Integer, Quest> updateList;
+    private final List<Integer> toremove = new ArrayList<>();
 
     protected QuestGui(int syncId, Inventory playerInventory) {
         super(syncId, playerInventory, 6, null);
-        this.player = playerInventory.player;
+        if (playerInventory.player instanceof ServerPlayer)
+            this.player = (ServerPlayer) playerInventory.player;
+        else
+            throw new IllegalStateException("This is a server side container");
     }
 
     public static void openGui(Player player) {
@@ -58,13 +66,16 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         player.openMenu(fac);
     }
 
-    private static ItemStack ofQuest(Quest quest, ServerPlayer player) {
+    private ItemStack ofQuest(int i, Quest quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = new ItemStack(type == PlayerData.AcceptType.ACCEPT ? Items.PAPER : Items.BOOK);
         stack.setHoverName(new TextComponent(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
-        lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
+        if (type == PlayerData.AcceptType.DELAY) {
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
+            this.updateList.put(i, quest);
+        }
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
         stack.getOrCreateTagElement("display").put("Lore", lore);
@@ -85,6 +96,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
+        this.updateList = new HashMap<>();
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
         Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuests();
@@ -104,9 +116,9 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
                 inv.updateStack(i, emptyFiller());
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.quests.size()) {
-                    ItemStack stack = ofQuest(questMap.get(this.quests.get(id)), serverPlayer);
+                    ItemStack stack = this.ofQuest(i, questMap.get(this.quests.get(id)), serverPlayer);
                     if (!stack.isEmpty()) {
-                        inv.updateStack(i, ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
+                        inv.updateStack(i, this.ofQuest(i, questMap.get(this.quests.get(id)), serverPlayer));
                         id++;
                     }
                 }
@@ -115,8 +127,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private void flipPage() {
-        if (!(this.player instanceof ServerPlayer serverPlayer))
-            return;
+        this.updateList.clear();
         Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuests();
         int id = this.page * 12;
         for (int i = 0; i < 54; i++) {
@@ -138,7 +149,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
                 this.slots.get(i).set(emptyFiller());
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.quests.size()) {
-                    this.slots.get(i).set(ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
+                    this.slots.get(i).set(this.ofQuest(i, questMap.get(this.quests.get(id)), this.player));
                     id++;
                 } else
                     this.slots.get(i).set(ItemStack.EMPTY);
@@ -167,6 +178,10 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         CompoundTag tag = stack.getTag().getCompound("SimpleQuests");
         if (!tag.contains("Quest"))
             return false;
+        if (stack.getItem() == Items.BOOK) {
+            playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+            return false;
+        }
         ResourceLocation id = new ResourceLocation(tag.getString("Quest"));
         Quest quest = QuestsManager.instance().getQuests().get(id);
         if (quest == null) {
@@ -175,9 +190,11 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         }
         ConfirmScreenHandler.openConfirmScreen(player, b -> {
             if (b) {
-                PlayerData.get(player).acceptQuest(quest);
                 player.closeContainer();
-                playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
+                if (PlayerData.get(player).acceptQuest(quest))
+                    playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
+                else
+                    playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             } else {
                 player.closeContainer();
                 player.getServer().execute(() -> QuestGui.openGui(player));
@@ -190,5 +207,22 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     @Override
     protected boolean isRightSlot(int slot) {
         return (this.page > 0 && slot == 0) || (this.page < this.maxPages && slot == 8) || (slot < 45 && slot > 8 && (slot % 9 == 1 || slot % 9 == 4 || slot % 9 == 7));
+    }
+
+    public void update() {
+        PlayerData data = PlayerData.get(this.player);
+        this.toremove.removeIf(i -> {
+            this.slots.get(i).set(this.ofQuest(i, this.updateList.get(i), this.player));
+            this.updateList.remove(i);
+            return true;
+        });
+        this.updateList.forEach((i, q) -> {
+            ItemStack stack = this.slots.get(i).getItem();
+            ListTag tag = stack.getOrCreateTagElement("display").getList("Lore", Tag.TAG_STRING);
+            String delay = data.formattedCooldown(q);
+            tag.set(0, StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(PlayerData.AcceptType.DELAY.langKey()), delay)).withStyle(ChatFormatting.DARK_RED))));
+            if (delay.equals("0s"))
+                this.toremove.add(i);
+        });
     }
 }

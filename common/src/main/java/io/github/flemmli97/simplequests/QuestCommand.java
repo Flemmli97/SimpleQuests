@@ -16,6 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +36,10 @@ public class QuestCommand {
                                 .suggests(QuestCommand::quests).executes(QuestCommand::accept)))
                 .then(Commands.literal("submit").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submit)).executes(QuestCommand::submit))
                 .then(Commands.literal("reload").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reload, true)).executes(QuestCommand::reload))
+                .then(Commands.literal("resetCooldown").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.resetCooldown, true))
+                        .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetCooldown)))
+                .then(Commands.literal("resetAll").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.resetAll, true))
+                        .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetAll)))
                 .then(Commands.literal("current").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.current)).executes(QuestCommand::current))
                 .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reset)).executes(QuestCommand::reset)));
     }
@@ -50,7 +55,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         Quest quest = QuestsManager.instance().getQuests().get(id);
         if (quest == null) {
-            ctx.getSource().sendSuccess(new TextComponent(String.format("simplequests.quest.noexist", id)), false);
+            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(quest))
@@ -90,6 +95,22 @@ public class QuestCommand {
     private static int reset(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerData.get(player).reset();
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resetCooldown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
+            PlayerData.get(player).resetCooldown();
+            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName())), true);
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
+            PlayerData.get(player).resetAll();
+            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.all"), player.getName())), true);
+        }
         return Command.SINGLE_SUCCESS;
     }
 
