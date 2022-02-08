@@ -19,6 +19,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -101,7 +102,7 @@ public class QuestCommand {
     private static int resetCooldown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
-            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName())), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName())).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -109,7 +110,7 @@ public class QuestCommand {
     private static int resetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
-            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.all"), player.getName())), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.reset.all"), player.getName())).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }

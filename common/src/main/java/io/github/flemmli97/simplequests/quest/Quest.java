@@ -43,7 +43,7 @@ public class Quest {
     }
 
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
-        TextComponent main = new TextComponent(this.questTaskString);
+        MutableComponent main = new TextComponent("").append(new TextComponent(this.questTaskString).withStyle(ChatFormatting.LIGHT_PURPLE));
         for (MutableComponent tasks : this.getFormattedTasks(server)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));
@@ -111,7 +111,7 @@ public class Quest {
         });
         return new Quest(id,
                 GsonHelper.getAsString(obj, "task"),
-                obj.has("parent") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
+                obj.has("parent_id") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 GsonHelper.getAsInt(obj, "repeat_delay", 0),

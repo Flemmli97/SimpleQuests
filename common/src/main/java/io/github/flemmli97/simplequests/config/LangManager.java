@@ -38,11 +38,11 @@ public class LangManager {
     static {
         defaultTranslation.put("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
         defaultTranslation.put("simplequests.active", "You already have an active quest");
-        defaultTranslation.put("simplequests.accept", "Accepted quest %s");
-        defaultTranslation.put("simplequests.finish", "Finished quest %s");
-        defaultTranslation.put("simplequests.current", "Current quest %s");
+        defaultTranslation.put("simplequests.accept", "Accepted quest [%s]");
+        defaultTranslation.put("simplequests.finish", "Finished quest [%s]");
+        defaultTranslation.put("simplequests.current", "Current quest [%s]");
         defaultTranslation.put("simplequests.current.no", "No active quest");
-        defaultTranslation.put("simplequests.reset", "Reset current quest %s");
+        defaultTranslation.put("simplequests.reset", "Reset current quest [%s]");
         defaultTranslation.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
         defaultTranslation.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
         defaultTranslation.put("simplequests.reset.all", "Reset all progress for %s");
