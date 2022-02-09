@@ -51,7 +51,7 @@ public class QuestProgress {
                 any = true;
             }
         }
-        boolean b = this.entries.containsAll(this.quest.entries.keySet());
+        boolean b = this.isCompleted();
         return b ? SubmitType.COMPLETE : any ? SubmitType.PARTIAL : SubmitType.NOTHING;
     }
 
@@ -69,6 +69,10 @@ public class QuestProgress {
             }
         }
         return fullfilled;
+    }
+
+    public boolean isCompleted() {
+        return this.entries.containsAll(this.quest.entries.keySet());
     }
 
     public int killedOf(ResourceLocation loc) {

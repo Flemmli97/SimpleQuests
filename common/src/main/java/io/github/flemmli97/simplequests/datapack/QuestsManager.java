@@ -26,6 +26,7 @@ public class QuestsManager extends SimpleJsonResourceReloadListener {
         super(GSON, "simplequests");
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void apply(Map<ResourceLocation, JsonElement> object, ResourceManager resourceManager, ProfilerFiller profiler) {
         ImmutableMap.Builder<ResourceLocation, Quest> builder = new ImmutableMap.Builder<>();
@@ -34,6 +35,7 @@ public class QuestsManager extends SimpleJsonResourceReloadListener {
                 builder.put(res, Quest.of(res, el.getAsJsonObject()));
             }
         });
+        builder.orderEntriesByValue(Quest::compareTo);
         this.quests = builder.build();
     }
 

@@ -28,6 +28,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +73,10 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         ItemStack stack = new ItemStack(type == PlayerData.AcceptType.ACCEPT ? Items.PAPER : Items.BOOK);
         stack.setHoverName(new TextComponent(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
+        if (data.isActive(quest)) {
+            stack.enchant(Enchantments.UNBREAKING, 1);
+            stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);
+        }
         if (type == PlayerData.AcceptType.DELAY) {
             lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
             this.updateList.put(i, quest);
@@ -188,19 +193,25 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
             SimpleQuests.logger.error("No such quest " + id);
             return false;
         }
+        boolean remove = stack.isEnchanted();
         ConfirmScreenHandler.openConfirmScreen(player, b -> {
             if (b) {
                 player.closeContainer();
-                if (PlayerData.get(player).acceptQuest(quest))
-                    playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
-                else
-                    playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                if (remove) {
+                    PlayerData.get(player).reset(quest.id, true);
+                    playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
+                } else {
+                    if (PlayerData.get(player).acceptQuest(quest))
+                        playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
+                    else
+                        playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                }
             } else {
                 player.closeContainer();
                 player.getServer().execute(() -> QuestGui.openGui(player));
                 playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
-        });
+        }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
         return true;
     }
 

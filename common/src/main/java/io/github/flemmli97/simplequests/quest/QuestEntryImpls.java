@@ -3,8 +3,6 @@ package io.github.flemmli97.simplequests.quest;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.player.QuestProgress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
@@ -126,12 +124,6 @@ public class QuestEntryImpls {
 
         @Override
         public boolean submit(ServerPlayer player) {
-            QuestProgress prog = PlayerData.get(player).getCurrentQuest();
-            if (prog == null)
-                return false;
-            if (prog.killedOf(this.entity) >= this.amount) {
-                return true;
-            }
             return false;
         }
 

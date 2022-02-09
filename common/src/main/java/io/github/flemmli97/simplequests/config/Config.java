@@ -16,6 +16,7 @@ public class Config {
 
     public int opPermLevel = 2;
     public int mainPermLevel = 0;
+    public int maxConcurrentQuest = 1;
 
     public Config() {
         File configDir = SimpleQuests.getHandler().getConfigPath().resolve("simplequests").toFile();
@@ -41,6 +42,7 @@ public class Config {
             this.fallBackToEnLang = obj.fallBackToEnLang;
             this.opPermLevel = obj.opPermLevel;
             this.mainPermLevel = obj.mainPermLevel;
+            this.maxConcurrentQuest = obj.maxConcurrentQuest;
         } catch (IOException e) {
             e.printStackTrace();
         }

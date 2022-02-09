@@ -37,8 +37,9 @@ public class LangManager {
 
     static {
         defaultTranslation.put("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
-        defaultTranslation.put("simplequests.active", "You already have an active quest");
-        defaultTranslation.put("simplequests.accept", "Accepted quest [%s]");
+        defaultTranslation.put("simplequests.active", "This quest is already active");
+        defaultTranslation.put("simplequests.active.full", "You already have the max amount of active quests");
+        defaultTranslation.put("simplequests.accept", "Accepted quest %s");
         defaultTranslation.put("simplequests.finish", "Finished quest [%s]");
         defaultTranslation.put("simplequests.current", "Current quest [%s]");
         defaultTranslation.put("simplequests.current.no", "No active quest");
@@ -59,6 +60,7 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.gui.main", "Quests");
         defaultTranslation.put("simplequests.gui.confirm", "Accept this quest?");
+        defaultTranslation.put("simplequests.gui.reset", "Reset this quest? No refunds!");
         defaultTranslation.put("simplequests.gui.yes", "Yes");
         defaultTranslation.put("simplequests.gui.no", "No");
 

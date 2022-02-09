@@ -42,7 +42,8 @@ public class QuestCommand {
                 .then(Commands.literal("resetAll").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.resetAll, true))
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetAll)))
                 .then(Commands.literal("current").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.current)).executes(QuestCommand::current))
-                .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reset)).executes(QuestCommand::reset)));
+                .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reset))
+                        .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QuestCommand::activequests).executes(QuestCommand::reset))));
     }
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -66,13 +67,15 @@ public class QuestCommand {
 
     private static int current(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        QuestProgress prog = PlayerData.get(player).getCurrentQuest();
-        if (prog != null) {
-            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.GOLD), false);
-            List<String> finished = prog.finishedTasks();
-            prog.getQuest().entries.entrySet().stream()
-                    .filter(e -> !finished.contains(e.getKey()))
-                    .forEach(e -> ctx.getSource().sendSuccess(e.getValue().translation(ctx.getSource().getServer()).withStyle(ChatFormatting.RED), false));
+        List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
+        if (!quests.isEmpty()) {
+            quests.forEach(prog -> {
+                ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.GOLD), false);
+                List<String> finished = prog.finishedTasks();
+                prog.getQuest().entries.entrySet().stream()
+                        .filter(e -> !finished.contains(e.getKey()))
+                        .forEach(e -> ctx.getSource().sendSuccess(e.getValue().translation(ctx.getSource().getServer()).withStyle(ChatFormatting.RED), false));
+            });
             return Command.SINGLE_SUCCESS;
         } else {
             ctx.getSource().sendSuccess(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
@@ -95,14 +98,15 @@ public class QuestCommand {
 
     private static int reset(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        PlayerData.get(player).reset();
+        ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
+        PlayerData.get(player).reset(res, false);
         return Command.SINGLE_SUCCESS;
     }
 
     private static int resetCooldown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
-            ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName())).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -110,13 +114,19 @@ public class QuestCommand {
     private static int resetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
-            ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.reset.all"), player.getName())).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }
 
     public static CompletableFuture<Suggestions> quests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException()), build);
+    }
+
+    public static CompletableFuture<Suggestions> activequests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        return SharedSuggestionProvider.suggest(PlayerData.get(context.getSource().getPlayerOrException())
+                .getCurrentQuest().stream().map(prog -> prog.getQuest().id.toString())
+                .toList(), build);
     }
 
     private static List<String> acceptableQuests(ServerPlayer player) {

@@ -26,7 +26,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
         this.cons = cons;
     }
 
-    public static void openConfirmScreen(ServerPlayer player, Consumer<Boolean> process) {
+    public static void openConfirmScreen(ServerPlayer player, Consumer<Boolean> process, String guiKey) {
         MenuProvider fac = new MenuProvider() {
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
@@ -35,7 +35,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return new TextComponent(ConfigHandler.lang.get("simplequests.gui.confirm"));
+                return new TextComponent(ConfigHandler.lang.get(guiKey));
             }
         };
         player.openMenu(fac);

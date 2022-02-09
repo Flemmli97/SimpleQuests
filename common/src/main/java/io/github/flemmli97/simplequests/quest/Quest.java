@@ -12,12 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Quest {
+public class Quest implements Comparable<Quest> {
 
     public final Map<String, QuestEntry> entries;
 
@@ -31,7 +32,9 @@ public class Quest {
 
     public final boolean redoParent;
 
-    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, int repeatDelay, int repeatDaily, Map<String, QuestEntry> entries) {
+    public final int sortingId;
+
+    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
         this.id = id;
         this.questTaskString = questTaskString;
         this.neededParentQuest = parent;
@@ -40,6 +43,7 @@ public class Quest {
         this.repeatDaily = repeatDaily;
         this.entries = entries;
         this.loot = loot;
+        this.sortingId = sortingId;
     }
 
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
@@ -116,6 +120,19 @@ public class Quest {
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 GsonHelper.getAsInt(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
+                GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build());
+    }
+
+    @Override
+    public int compareTo(@NotNull Quest quest) {
+        if (this.sortingId == quest.sortingId) {
+            if (this.neededParentQuest == null && quest.neededParentQuest != null)
+                return -1;
+            if (this.neededParentQuest != null && quest.neededParentQuest == null)
+                return 1;
+            return this.id.compareTo(quest.id);
+        }
+        return Integer.compare(this.sortingId, quest.sortingId);
     }
 }
