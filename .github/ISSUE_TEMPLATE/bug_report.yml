@@ -63,7 +63,7 @@ body:
       description: |
         Use a paste site for the logs. If you copy paste the log in here you will be ignored!
         Here are example links for those sites:  
-        [gist](https://gist.github.com/)
-        [paste](https://paste.gg/)
+        [https://gist.github.com/](https://gist.github.com/)
+        [https://paste.gg/](https://paste.gg/)
     validations:
       required: true
