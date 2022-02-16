@@ -50,10 +50,9 @@ body:
     validations:
       required: true
   - type: textarea
-    id: reproduction
+    id: mod_compat
     attributes:
-      label: Steps to reproduce
-      value: 1. Step one
+      label: Mods that might affect the issue
   - type: textarea
     id: logs
     attributes:

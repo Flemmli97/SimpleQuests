@@ -50,11 +50,6 @@ body:
     validations:
       required: true
   - type: textarea
-    id: reproduction
-    attributes:
-      label: Steps to reproduce
-      value: 1. Step one
-  - type: textarea
     id: logs
     attributes:
       label: Link to the logfile(s) uploaded on a site like gist or https://paste.gg/
