@@ -5,6 +5,7 @@ body:
     attributes:
       value: |
         Please fill out this template to report a bug/crash!
+        For the versions latest is NOT a valid version! If you write it your issue will be simply closed.
   - type: dropdown
     id: loader
     attributes:
@@ -24,7 +25,7 @@ body:
     id: version
     attributes:
       label: Modversion
-      description: "Latest is NOT a version"
+      description: "Version of the mod"
     validations:
       required: true
   - type: input
