@@ -1,15 +1,14 @@
 name: Bug Report
-description: File a bug report
+description: Report a bug
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!
+        Please fill out this template to report a bug/crash!
   - type: dropdown
     id: loader
     attributes:
       label: Modloader
-      description: What version of our software are you running?
       options:
         - Forge
         - Fabric
@@ -32,7 +31,7 @@ body:
     id: loader_version
     attributes:
       label: Modloader version
-      description: "Version of the modloader if forge. If fabric version of fabric api?"
+      description: "Version of forge/fabric(api)?"
     validations:
       required: true
   - type: textarea
@@ -56,6 +55,9 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Link to the logfile(s) uploaded on a site like gist or https://paste.gg/
+      label: Logs
+      description: "Use a paste site for the logs. If you copy paste the log in here you will be ignored!
+      Here are example links for those sites: [https://paste.gg/](https://paste.gg/)  
+       [https://gist.github.com/](https://gist.github.com/)"
     validations:
       required: true

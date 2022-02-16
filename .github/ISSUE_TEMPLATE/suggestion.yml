@@ -1,40 +1,10 @@
 name: Suggestions
-description:
+description: Suggest features using this
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
-  - type: dropdown
-    id: loader
-    attributes:
-      label: Modloader
-      description: What version of our software are you running?
-      options:
-        - Forge
-        - Fabric
-    validations:
-      required: true
-  - type: input
-    id: mc_version
-    attributes:
-      label: Minecraft Version
-    validations:
-      required: true
-  - type: input
-    id: version
-    attributes:
-      label: Modversion
-      description: "Latest is NOT a version"
-    validations:
-      required: true
-  - type: input
-    id: loader_version
-    attributes:
-      label: Modloader version
-      description: "Version of the modloader if forge. If fabric version of fabric api?"
-    validations:
-      required: true
   - type: textarea
     id: description
     attributes:
@@ -47,11 +17,5 @@ body:
     attributes:
       label: Steps to reproduce
       value: 1. Step one
-    validations:
-      required: true
-  - type: textarea
-    id: logs
-    attributes:
-      label: Link to the logfile(s) uploaded on a site like gist or https://paste.gg/
     validations:
       required: true
