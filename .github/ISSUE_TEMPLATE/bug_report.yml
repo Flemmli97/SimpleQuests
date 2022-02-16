@@ -22,17 +22,17 @@ body:
     validations:
       required: true
   - type: input
-    id: version
-    attributes:
-      label: Modversion
-      description: "Version of the mod"
-    validations:
-      required: true
-  - type: input
     id: loader_version
     attributes:
       label: Modloader version
       description: "Version of forge/fabric(api)?"
+    validations:
+      required: true
+  - type: input
+    id: modversion
+    attributes:
+      label: Modversion
+      description: "Version of the mod"
     validations:
       required: true
   - type: textarea
