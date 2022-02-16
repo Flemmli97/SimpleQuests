@@ -1,21 +1,21 @@
 name: Suggestions
 description: Suggest features using this
+title: "[Feature Request]: "
+labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
   - type: textarea
-    id: description
+    id: suggestion
     attributes:
-      label: Description
-      description: Description of the issue.
+      label: Suggestions
+      description: What feature would you like to add?
     validations:
       required: true
   - type: textarea
-    id: reproduction
+    id: solution
     attributes:
-      label: Steps to reproduce
-      value: 1. Step one
-    validations:
-      required: true
+      label: Solution
+      description: If you have a solution or implementation idea write it down here.
