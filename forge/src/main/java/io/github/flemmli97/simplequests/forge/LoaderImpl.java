@@ -49,11 +49,13 @@ public class LoaderImpl implements LoaderHandler {
         return player.hasPermissions(!adminCmd ? ConfigHandler.config.mainPermLevel : ConfigHandler.config.opPermLevel);
     }
 
-    //Forge does it already
     private static final int warpAmount = 4;
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.IngredientEntry entry) {
+        if(entry.description != null)
+            return List.of(entry.description);
+        //Forge clients do it already
         if (entry.ingredient.getItems().length < warpAmount || !NetworkHooks.isVanillaConnection(player.connection.connection))
             return List.of(entry.translation(player.getServer()));
         List<MutableComponent> list = new ArrayList<>();

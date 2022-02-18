@@ -29,10 +29,12 @@ public class QuestEntryImpls {
 
         public final Ingredient ingredient;
         public final int amount;
+        public final MutableComponent description;
 
-        public IngredientEntry(Ingredient ingredient, int amount) {
+        public IngredientEntry(Ingredient ingredient, int amount, String description) {
             this.ingredient = ingredient;
             this.amount = amount;
+            this.description = description.isEmpty() ? null : new TextComponent(description);
         }
 
         @Override
@@ -96,6 +98,8 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
+            if(this.description != null)
+                return this.description;
             if (this.ingredient.getItems().length == 0)
                 return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
             if (this.ingredient.getItems().length == 1) {
@@ -114,7 +118,8 @@ public class QuestEntryImpls {
 
 
         public static IngredientEntry fromJson(JsonObject obj) {
-            return new IngredientEntry(Ingredient.fromJson(GsonHelper.getAsJsonObject(obj, "ingredient")), obj.get("amount").getAsInt());
+            return new IngredientEntry(Ingredient.fromJson(GsonHelper.getAsJsonObject(obj, "ingredient")), obj.get("amount").getAsInt(),
+                    GsonHelper.getAsString(obj, "description", ""));
         }
     }
 
