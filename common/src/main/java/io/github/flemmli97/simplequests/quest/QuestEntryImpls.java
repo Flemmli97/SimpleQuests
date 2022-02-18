@@ -98,7 +98,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            if(this.description != null)
+            if (this.description != null)
                 return this.description;
             if (this.ingredient.getItems().length == 0)
                 return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));

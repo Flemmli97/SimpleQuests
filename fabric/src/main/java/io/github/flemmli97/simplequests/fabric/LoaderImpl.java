@@ -61,7 +61,7 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.IngredientEntry entry) {
-        if(entry.description != null)
+        if (entry.description != null)
             return List.of(entry.description);
         if (entry.ingredient.getItems().length < warpAmount)
             return List.of(entry.translation(player.getServer()));
