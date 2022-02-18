@@ -8,9 +8,9 @@
     "Flemmli97"
   ],
   "contact": {
-    "homepage": "",
-    "issues": "",
-    "sources": ""
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-quests",
+    "issues": "https://github.com/Flemmli97/SimpleQuests/issues",
+    "sources": "https://github.com/Flemmli97/SimpleQuests"
   },
   "license": "ARR",
   "icon": "icon.png",
