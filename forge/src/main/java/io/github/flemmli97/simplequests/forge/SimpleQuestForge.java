@@ -11,13 +11,16 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod(value = SimpleQuests.MODID)
 public class SimpleQuestForge {
 
     public SimpleQuestForge() {
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "*", (s1, s2) -> true));
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
