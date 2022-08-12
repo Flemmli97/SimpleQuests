@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[41,)"
 license="All rights reserved"
 issueTrackerURL="https://github.com/Flemmli97/SimpleQuests/issues"
 [[mods]]
@@ -13,6 +13,12 @@ description='''Server sided questing'''
 [[dependencies.simplequests]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.18,)"
+versionRange="[1.19,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.simplequests]]
+modId="forge"
+mandatory=true
+versionRange="[41.1.0,)"
 ordering="NONE"
 side="BOTH"
