@@ -6,8 +6,8 @@ import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +47,7 @@ public class Quest implements Comparable<Quest> {
     }
 
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
-        MutableComponent main = new TextComponent("").append(new TextComponent(this.questTaskString).withStyle(ChatFormatting.LIGHT_PURPLE));
+        MutableComponent main = Component.literal("").append(Component.literal(this.questTaskString).withStyle(ChatFormatting.LIGHT_PURPLE));
         for (MutableComponent tasks : this.getFormattedTasks(server)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));
@@ -60,7 +60,7 @@ public class Quest implements Comparable<Quest> {
     public List<MutableComponent> getFormattedTasks(MinecraftServer server) {
         List<MutableComponent> list = new ArrayList<>();
         for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
-            list.add(new TextComponent(" - ").append(e.getValue().translation(server)));
+            list.add(Component.literal(" - ").append(e.getValue().translation(server)));
         }
         return list;
     }
@@ -69,16 +69,16 @@ public class Quest implements Comparable<Quest> {
         List<MutableComponent> list = new ArrayList<>();
         for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
             if (!(e.getValue() instanceof QuestEntryImpls.IngredientEntry ing))
-                list.add(new TextComponent(" - ").append(e.getValue().translation(player.getServer())));
+                list.add(Component.literal(" - ").append(e.getValue().translation(player.getServer())));
             else {
                 List<MutableComponent> wrapped = SimpleQuests.getHandler().wrapForGui(player, ing);
                 boolean start = true;
                 for (MutableComponent comp : wrapped) {
                     if (start) {
-                        list.add(new TextComponent(" - ").append(comp));
+                        list.add(Component.literal(" - ").append(comp));
                         start = false;
                     } else
-                        list.add(new TextComponent("   ").append(comp));
+                        list.add(Component.literal("   ").append(comp));
                 }
             }
         }

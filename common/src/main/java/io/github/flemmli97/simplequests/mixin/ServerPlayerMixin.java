@@ -8,7 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,8 +23,8 @@ public abstract class ServerPlayerMixin extends Player implements SimpleQuestDat
     @Unique
     private PlayerData simplequestData;
 
-    private ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
-        super(level, blockPos, f, gameProfile);
+    private ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+        super(level, blockPos, f, gameProfile, profilePublicKey);
     }
 
     @Inject(method = "<init>*", at = @At("RETURN"))

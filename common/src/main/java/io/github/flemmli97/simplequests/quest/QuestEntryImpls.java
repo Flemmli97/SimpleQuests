@@ -9,8 +9,6 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +32,7 @@ public class QuestEntryImpls {
         public IngredientEntry(Ingredient ingredient, int amount, String description) {
             this.ingredient = ingredient;
             this.amount = amount;
-            this.description = description.isEmpty() ? null : new TextComponent(description);
+            this.description = description.isEmpty() ? null : Component.literal(description);
         }
 
         @Override
@@ -101,19 +99,19 @@ public class QuestEntryImpls {
             if (this.description != null)
                 return this.description;
             if (this.ingredient.getItems().length == 0)
-                return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
+                return Component.literal(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
             if (this.ingredient.getItems().length == 1) {
-                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".single"), new TranslatableComponent(this.ingredient.getItems()[0].getItem().getDescriptionId()).withStyle(ChatFormatting.AQUA), this.amount);
+                return Component.translatable(ConfigHandler.lang.get(this.getId().toString() + ".single"), Component.translatable(this.ingredient.getItems()[0].getItem().getDescriptionId()).withStyle(ChatFormatting.AQUA), this.amount);
             }
             MutableComponent items = null;
             for (ItemStack stack : this.ingredient.getItems()) {
                 if (items == null)
-                    items = new TextComponent("[").append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                    items = Component.literal("[").append(Component.translatable(stack.getItem().getDescriptionId()));
                 else
-                    items.append(new TextComponent(", ")).append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                    items.append(Component.literal(", ")).append(Component.translatable(stack.getItem().getDescriptionId()));
             }
             items.append("]");
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), this.amount);
+            return Component.translatable(ConfigHandler.lang.get(this.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
 
@@ -147,7 +145,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", this.entity)).withStyle(ChatFormatting.AQUA), this.amount);
+            return Component.translatable(ConfigHandler.lang.get(this.getId().toString()), Component.translatable(Util.makeDescriptionId("entity", this.entity)).withStyle(ChatFormatting.AQUA), this.amount);
         }
 
         public static KillEntry fromJson(JsonObject obj) {
@@ -182,7 +180,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TextComponent(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
+            return Component.literal(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
         }
 
         public static XPEntry fromJson(JsonObject obj) {
@@ -218,10 +216,10 @@ public class QuestEntryImpls {
             Advancement advancement = server.getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = new TextComponent(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
+                adv = Component.literal(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
             else
                 adv = advancement.getChatComponent();
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), adv);
+            return Component.translatable(ConfigHandler.lang.get(this.getId().toString()), adv);
         }
 
         public static AdvancementEntry fromJson(JsonObject obj) {

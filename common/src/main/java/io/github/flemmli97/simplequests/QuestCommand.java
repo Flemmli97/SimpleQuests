@@ -18,8 +18,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -57,7 +56,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         Quest quest = QuestsManager.instance().getQuests().get(id);
         if (quest == null) {
-            ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
+            ctx.getSource().sendSuccess(Component.literal(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(quest))
@@ -70,7 +69,7 @@ public class QuestCommand {
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.GOLD), false);
+                ctx.getSource().sendSuccess(Component.literal(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.GOLD), false);
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
@@ -78,7 +77,7 @@ public class QuestCommand {
             });
             return Command.SINGLE_SUCCESS;
         } else {
-            ctx.getSource().sendSuccess(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
+            ctx.getSource().sendSuccess(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
         }
         return 0;
     }
@@ -92,7 +91,7 @@ public class QuestCommand {
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
         ConfigHandler.reloadConfigs();
-        ctx.getSource().sendSuccess(new TextComponent(ConfigHandler.lang.get("simplequests.reload")), true);
+        ctx.getSource().sendSuccess(Component.literal(ConfigHandler.lang.get("simplequests.reload")), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -106,7 +105,7 @@ public class QuestCommand {
     private static int resetCooldown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -114,7 +113,7 @@ public class QuestCommand {
     private static int resetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
         }
         return Command.SINGLE_SUCCESS;
     }

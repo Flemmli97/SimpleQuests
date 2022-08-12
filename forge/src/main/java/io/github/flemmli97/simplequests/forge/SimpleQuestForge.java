@@ -39,8 +39,8 @@ public class SimpleQuestForge {
     }
 
     public static void kill(LivingDeathEvent event) {
-        if (event.getEntityLiving().getKillCredit() instanceof ServerPlayer player) {
-            PlayerData.get(player).onKill(event.getEntityLiving());
+        if (event.getEntity().getKillCredit() instanceof ServerPlayer player) {
+            PlayerData.get(player).onKill(event.getEntity());
         }
     }
 

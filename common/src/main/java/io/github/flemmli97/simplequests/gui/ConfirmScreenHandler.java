@@ -5,7 +5,6 @@ import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -35,7 +34,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return new TextComponent(ConfigHandler.lang.get(guiKey));
+                return Component.literal(ConfigHandler.lang.get(guiKey));
             }
         };
         player.openMenu(fac);
@@ -48,12 +47,12 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
             switch (i) {
                 case 3 -> {
                     ItemStack yes = new ItemStack(Items.GREEN_WOOL);
-                    yes.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.yes")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    yes.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.yes")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, yes);
                 }
                 case 5 -> {
                     ItemStack no = new ItemStack(Items.RED_WOOL);
-                    no.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.no")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    no.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.no")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, no);
                 }
                 default -> inv.updateStack(i, QuestGui.emptyFiller());

@@ -7,15 +7,15 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public ResourceLocation fromEntity(Entity entity) {
-        return entity.getType().getRegistryName();
+        return ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
     }
 
     @Override
@@ -64,22 +64,22 @@ public class LoaderImpl implements LoaderHandler {
         for (ItemStack stack : entry.ingredient.getItems()) {
             if (items == null) {
                 if (list.size() == 0)
-                    items = new TextComponent("[").append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                    items = Component.literal("[").append(Component.translatable(stack.getItem().getDescriptionId()));
                 else
-                    items = new TranslatableComponent(stack.getItem().getDescriptionId());
+                    items = Component.translatable(stack.getItem().getDescriptionId());
             } else
-                items.append(new TextComponent(", ")).append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                items.append(Component.literal(", ")).append(Component.translatable(stack.getItem().getDescriptionId()));
             i++;
             if ((list.size() == 0 && i >= warpAmount - 1) || i >= warpAmount) {
                 if (list.size() == 0) {
-                    list.add(new TranslatableComponent(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount));
+                    list.add(Component.translatable(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;
                 items = null;
             }
         }
-        list.get(list.size() - 1).append(new TextComponent("]"));
+        list.get(list.size() - 1).append(Component.literal("]"));
         return list;
     }
 }

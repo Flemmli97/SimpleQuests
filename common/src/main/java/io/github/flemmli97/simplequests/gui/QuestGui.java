@@ -14,7 +14,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,7 +60,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return new TextComponent(ConfigHandler.lang.get("simplequests.gui.main"));
+                return Component.literal(ConfigHandler.lang.get("simplequests.gui.main"));
             }
         };
         player.openMenu(fac);
@@ -71,14 +70,14 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = new ItemStack(type == PlayerData.AcceptType.ACCEPT ? Items.PAPER : Items.BOOK);
-        stack.setHoverName(new TextComponent(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.setHoverName(Component.literal(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
         if (data.isActive(quest)) {
             stack.enchant(Enchantments.UNBREAKING, 1);
             stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);
         }
         if (type == PlayerData.AcceptType.DELAY) {
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(String.format(ConfigHandler.lang.get(type.langKey()), data.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED))));
             this.updateList.put(i, quest);
         }
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
@@ -90,13 +89,13 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
 
     public static ItemStack emptyFiller() {
         ItemStack stack = new ItemStack(Items.GRAY_STAINED_GLASS_PANE);
-        stack.setHoverName(new TextComponent(""));
+        stack.setHoverName(Component.literal(""));
         return stack;
     }
 
     private static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
         player.connection.send(
-                new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch));
+                new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
     }
 
     @Override
@@ -115,7 +114,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         for (int i = 0; i < 54; i++) {
             if (i == 8 && this.quests.size() > 12) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                close.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -140,14 +139,14 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
@@ -231,7 +230,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
             ItemStack stack = this.slots.get(i).getItem();
             ListTag tag = stack.getOrCreateTagElement("display").getList("Lore", Tag.TAG_STRING);
             String delay = data.formattedCooldown(q);
-            tag.set(0, StringTag.valueOf(Component.Serializer.toJson(new TextComponent(String.format(ConfigHandler.lang.get(PlayerData.AcceptType.DELAY.langKey()), delay)).withStyle(ChatFormatting.DARK_RED))));
+            tag.set(0, StringTag.valueOf(Component.Serializer.toJson(Component.literal(String.format(ConfigHandler.lang.get(PlayerData.AcceptType.DELAY.langKey()), delay)).withStyle(ChatFormatting.DARK_RED))));
             if (delay.equals("0s"))
                 this.toremove.add(i);
         });
