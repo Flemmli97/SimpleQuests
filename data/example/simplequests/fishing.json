@@ -1,0 +1,35 @@
+{
+  "loot_table": "minecraft:chests/buried_treasure",
+  "repeat_delay": 36000,
+  "task": "Catch fishes!",
+  "entries": {
+    "cod": {
+      "ingredient": {
+        "item": "minecraft:cod"
+      },
+      "amount": 34,
+      "id": "simplequests:ingredient"
+    },
+    "salmon": {
+      "ingredient": {
+        "item": "minecraft:salmon"
+      },
+      "amount": 21,
+      "id": "simplequests:ingredient"
+    },
+    "pufferfish": {
+      "ingredient": {
+        "item": "minecraft:pufferfish"
+      },
+      "amount": 11,
+      "id": "simplequests:ingredient"
+    },
+    "tropical": {
+      "ingredient": {
+        "item": "minecraft:tropical_fish"
+      },
+      "amount": 6,
+      "id": "simplequests:ingredient"
+    }
+  }
+}

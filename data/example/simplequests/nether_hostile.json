@@ -1,0 +1,26 @@
+{
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "repeat_delay": 36000,
+  "task": "Slay some nether mobs",
+  "entries": {
+    "zombiefied_piglin": {
+      "entity": "minecraft:zombified_piglin",
+      "amount": 14,
+      "id": "simplequests:entity"
+    },
+    "blaze": {
+      "entity": "minecraft:blaze",
+      "amount": 13,
+      "id": "simplequests:entity"
+    },
+    "wither_skeleton": {
+      "entity": "minecraft:wither_skeleton",
+      "amount": 10,
+      "id": "simplequests:entity"
+    },
+    "fortress": {
+      "advancement": "minecraft:nether/find_fortress",
+      "id": "simplequests:advancement"
+    }
+  }
+}
