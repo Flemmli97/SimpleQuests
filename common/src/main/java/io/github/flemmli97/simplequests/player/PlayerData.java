@@ -98,15 +98,19 @@ public class PlayerData {
     }
 
     public void onKill(LivingEntity entity) {
+        List<QuestProgress> completed = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
             Set<QuestEntry> fulfilled = prog.onKill(this.player, entity);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.kill"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
             }
-            if (prog.isCompleted())
+            if (prog.isCompleted()) {
                 this.completeQuest(prog);
+                completed.add(prog);
+            }
         });
+        this.currentQuests.removeAll(completed);
     }
 
     private void completeQuest(QuestProgress prog) {
