@@ -202,6 +202,27 @@ task buildUploadAll(group: "publishing") {
     buildAll.mustRunAfter cleanAll
     tasks.findByName("curseforge").mustRunAfter publishAll
 }
+afterEvaluate {
+    task buildUploadFabric(group: "publishing") {
+        dependsOn cleanAll, ":fabric:build", ":fabric:publish", "curseforge${curse_id_fabric}"
+        project("fabric").build.mustRunAfter cleanAll
+        project("fabric").publish.mustRunAfter ":fabric:build"
+        tasks.findByName("curseforge${curse_id_fabric}").mustRunAfter ":fabric:publish"
+        tasks.findByName("curseforge${curse_id_fabric}").doLast {
+            discordNotif(true, false)
+        }
+    }
+
+    task buildUploadForge(group: "publishing") {
+        dependsOn cleanAll, ":forge:build", ":forge:publish", "curseforge${curse_id_forge}"
+        project("forge").build.mustRunAfter cleanAll
+        project("forge").publish.mustRunAfter ":forge:build"
+        tasks.findByName("curseforge${curse_id_forge}").mustRunAfter ":forge:publish"
+        tasks.findByName("curseforge${curse_id_forge}").doLast {
+            discordNotif(false, true)
+        }
+    }
+}
 
 tasks.getByName("curseforge").dependsOn buildAll
 publishAll.dependsOn buildAll
