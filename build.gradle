@@ -162,7 +162,7 @@ def discordNotif(fabric, forge) {
         def message = new Message()
         def version = project.curse_versions.split(', ')[0]
         message.setUsername("Curseforge Release")
-        message.setContent("<@&${project.discord_role}> ${project.project_name} ${project.mod_version} for Minecraft ${version} has been released!")
+        message.setContent("${project.project_name} ${project.mod_version} for Minecraft ${version} has been released!")
         message.setAvatarUrl("https://cdn.discordapp.com/avatars/680540027255652407/e4b7a058b24843ae13389a9a3cc3ae8c.png?size=128")
 
         def embed = new Embed()
@@ -209,7 +209,7 @@ afterEvaluate {
         project("fabric").build.mustRunAfter cleanAll
         project("fabric").publish.mustRunAfter ":fabric:build"
         tasks.findByName("curseforge${curse_id_fabric}").mustRunAfter ":fabric:publish"
-        tasks.findByName("curseforge${curse_id_fabric}").doLast {
+        doLast {
             discordNotif(true, false)
         }
     }
@@ -219,7 +219,7 @@ afterEvaluate {
         project("forge").build.mustRunAfter cleanAll
         project("forge").publish.mustRunAfter ":forge:build"
         tasks.findByName("curseforge${curse_id_forge}").mustRunAfter ":forge:publish"
-        tasks.findByName("curseforge${curse_id_forge}").doLast {
+        doLast {
             discordNotif(false, true)
         }
     }
