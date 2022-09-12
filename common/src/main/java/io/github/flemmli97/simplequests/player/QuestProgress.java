@@ -59,6 +59,8 @@ public class QuestProgress {
         Set<QuestEntry> fullfilled = new HashSet<>();
         for (Map.Entry<String, QuestEntry> e : this.quest.entries.entrySet()) {
             if (e.getValue() instanceof QuestEntryImpls.KillEntry killEntry) {
+                if (this.entries.contains(e.getKey()))
+                    continue;
                 if (killEntry.entity().equals(SimpleQuests.getHandler().fromEntity(entity))) {
                     int killed = this.killCounter.compute(killEntry.entity(), (res, i) -> i == null ? 1 : ++i);
                     if (killed >= killEntry.amount()) {
