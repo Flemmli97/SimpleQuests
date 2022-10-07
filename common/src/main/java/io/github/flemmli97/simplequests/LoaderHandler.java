@@ -6,6 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -15,6 +16,8 @@ public interface LoaderHandler {
     Path getConfigPath();
 
     ResourceLocation fromEntity(Entity entity);
+
+    Item fromID(ResourceLocation id);
 
     default boolean hasPerm(CommandSourceStack src, String perm) {
         return this.hasPerm(src, perm, true);

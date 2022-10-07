@@ -1,3 +1,7 @@
+Simple Quests 1.0.2
+================
+- Add option to specify quest icon
+
 Simple Quests 1.0.1
 ================
 - Fix kill quests giving reward but not actually finishing the quest

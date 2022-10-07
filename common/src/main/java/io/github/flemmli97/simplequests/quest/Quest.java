@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.quest;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
@@ -12,6 +13,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -34,7 +39,9 @@ public class Quest implements Comparable<Quest> {
 
     public final int sortingId;
 
-    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
+    public final ItemStack icon;
+
+    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
         this.id = id;
         this.questTaskString = questTaskString;
         this.neededParentQuest = parent;
@@ -44,6 +51,7 @@ public class Quest implements Comparable<Quest> {
         this.entries = entries;
         this.loot = loot;
         this.sortingId = sortingId;
+        this.icon = icon;
     }
 
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
@@ -118,10 +126,26 @@ public class Quest implements Comparable<Quest> {
                 obj.has("parent_id") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
+                questIcon(obj, "icon", Items.PAPER),
                 GsonHelper.getAsInt(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build());
+    }
+
+    public static ItemStack questIcon(JsonObject obj, String name, Item fallback) {
+        JsonElement element = obj.get(name);
+        if (element == null)
+            return new ItemStack(fallback);
+        if (element.isJsonPrimitive()) {
+            ItemStack stack = new ItemStack(SimpleQuests.getHandler().fromID(new ResourceLocation(element.getAsString())));
+            if (stack.isEmpty())
+                return new ItemStack(fallback);
+            return stack;
+        }
+        if (element.isJsonObject())
+            return ShapedRecipe.itemStackFromJson(element.getAsJsonObject());
+        return new ItemStack(fallback);
     }
 
     @Override
