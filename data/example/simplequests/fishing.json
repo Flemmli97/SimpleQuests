@@ -2,6 +2,7 @@
   "loot_table": "minecraft:chests/buried_treasure",
   "repeat_delay": 36000,
   "task": "Catch fishes!",
+  "icon": "minecraft:cod",
   "entries": {
     "cod": {
       "ingredient": {

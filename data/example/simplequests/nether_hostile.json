@@ -2,6 +2,10 @@
   "loot_table": "minecraft:chests/end_city_treasure",
   "repeat_delay": 36000,
   "task": "Slay some nether mobs",
+  "icon": {
+    "item": "minecraft:netherrack",
+    "count": 5
+  },
   "entries": {
     "zombiefied_piglin": {
       "entity": "minecraft:zombified_piglin",
