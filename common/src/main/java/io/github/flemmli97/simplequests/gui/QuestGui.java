@@ -36,6 +36,8 @@ import java.util.Map;
 
 public class QuestGui extends ServerOnlyScreenHandler<Object> {
 
+    public static int QUEST_PER_PAGE = 12;
+
     private int page, maxPages;
     private List<ResourceLocation> quests;
     private final ServerPlayer player;
@@ -109,10 +111,10 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
             return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME || type == PlayerData.AcceptType.DAILYFULL;
         });
-        this.maxPages = (this.quests.size() - 1) / 28;
+        this.maxPages = (this.quests.size() - 1) / QUEST_PER_PAGE;
         int id = 0;
         for (int i = 0; i < 54; i++) {
-            if (i == 8 && this.quests.size() > 12) {
+            if (i == 8 && this.quests.size() > QUEST_PER_PAGE) {
                 ItemStack close = new ItemStack(Items.ARROW);
                 close.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
@@ -133,13 +135,13 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     private void flipPage() {
         this.updateList.clear();
         Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuests();
-        int id = this.page * 12;
+        int id = this.page * QUEST_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
                 ItemStack stack = emptyFiller();
-                if (this.page < this.maxPages) {
+                if (this.page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.literal(ConfigHandler.lang.get("simplequests.gui.prev")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
