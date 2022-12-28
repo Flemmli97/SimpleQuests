@@ -199,6 +199,11 @@ public class PlayerData {
 
     public String formattedCooldown(Quest quest) {
         long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id))) / 20;
+        if (sec > 86400) {
+            long days = sec / 86400;
+            long hours = (sec % 86400) / 3600;
+            return String.format("%dd:%dh", days, hours);
+        }
         if (sec >= 3600) {
             long hours = sec / 3600;
             long minutes = (sec % 3600) / 60;

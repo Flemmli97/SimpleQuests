@@ -22,8 +22,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Quest implements Comparable<Quest> {
+
+    private static final Pattern DATE_PATTERN = Pattern.compile("(?:(?<weeks>[0-9]{1,2})w)?" +
+            "(?:(?:^|:)(?<days>[0-9])d)?" +
+            "(?:(?:^|:)(?<hours>[0-9]{1,2})h)?" +
+            "(?:(?:^|:)(?<minutes>[0-9]{1,2})m)?" +
+            "(?:(?:^|:)(?<seconds>[0-9]{1,2})s)?");
 
     public final Map<String, QuestEntry> entries;
 
@@ -127,10 +135,41 @@ public class Quest implements Comparable<Quest> {
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 questIcon(obj, "icon", Items.PAPER),
-                GsonHelper.getAsInt(obj, "repeat_delay", 0),
+                tryParseTime(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build());
+    }
+
+    private static int tryParseTime(JsonObject obj, String name, int fallback) {
+        JsonElement e = obj.get(name);
+        if (e == null || !e.isJsonPrimitive())
+            return fallback;
+        if (e.getAsJsonPrimitive().isNumber())
+            return e.getAsInt();
+        String s = e.getAsString();
+        Matcher matcher = DATE_PATTERN.matcher(s);
+        if (!matcher.matches()) {
+            throw new JsonSyntaxException("Malformed date time for " + name + ".");
+        }
+        int ticks = 0;
+        ticks += asTicks(matcher, "weeks", 12096000);
+        ticks += asTicks(matcher, "days", 1728000);
+        ticks += asTicks(matcher, "hours", 72000);
+        ticks += asTicks(matcher, "minutes", 1200);
+        ticks += asTicks(matcher, "seconds", 20);
+        return ticks;
+    }
+
+    private static int asTicks(Matcher matcher, String group, int multiplier) {
+        String val = matcher.group(group);
+        if (val != null) {
+            try {
+                return Integer.parseInt(val) * multiplier;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return 0;
     }
 
     public static ItemStack questIcon(JsonObject obj, String name, Item fallback) {
