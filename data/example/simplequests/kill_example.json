@@ -1,0 +1,15 @@
+{
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "repeat_delay": 36000,
+  "task": "Example for a kill quest",
+  "icon": "minecraft:dirt",
+  "entries": {
+    "cows": {
+      "predicate": {
+        "type":"minecraft:cow"
+      },
+      "amount": 5,
+      "id": "simplequests:entity"
+    }
+  }
+}

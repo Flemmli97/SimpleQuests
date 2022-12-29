@@ -1,0 +1,22 @@
+{
+  "loot_table": "minecraft:chests/bastion_bridge",
+  "repeat_delay": "5h",
+  "task": "Example for a location quest using a structure predicate!",
+  "icon": "minecraft:dirt",
+  "entries": {
+    "structure": {
+      "predicate": {
+        "structure": "minecraft:ocean_ruin_warm"
+      },
+      "description": "Find a warm ocean ruin",
+      "id": "simplequests:location"
+    },
+    "structure_2": {
+      "predicate": {
+        "structure": "minecraft:ocean_ruin_cold"
+      },
+      "description": "Find a cold ocean ruin",
+      "id": "simplequests:location"
+    }
+  }
+}

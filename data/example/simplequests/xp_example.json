@@ -1,0 +1,11 @@
+{
+  "loot_table": "example:diamond",
+  "repeat_delay": 36000,
+  "task": "Example for an xp quest",
+  "entries": {
+    "xp": {
+      "amount": 5,
+      "id": "simplequests:xp"
+    }
+  }
+}

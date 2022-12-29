@@ -1,0 +1,22 @@
+{
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "repeat_delay": "1d",
+  "task": "Example for an interaction quest",
+  "icon": "minecraft:dirt",
+  "entries": {
+    "interact": {
+      "item": {
+        "items": [
+          "minecraft:name_tag"
+        ]
+      },
+      "predicate": {
+        "type": "minecraft:chicken"
+      },
+      "amount": 2,
+      "consume": true,
+      "description": "Use nametag on 2 chickens",
+      "id": "simplequests:entity_interact"
+    }
+  }
+}

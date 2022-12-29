@@ -2,23 +2,30 @@
   "loot_table": "minecraft:chests/end_city_treasure",
   "repeat_delay": 36000,
   "task": "Slay some nether mobs",
+  "need_unlock": true,
   "icon": {
     "item": "minecraft:netherrack",
     "count": 5
   },
   "entries": {
     "zombiefied_piglin": {
-      "entity": "minecraft:zombified_piglin",
+      "predicate": {
+        "type":"minecraft:zombified_piglin"
+      },
       "amount": 14,
       "id": "simplequests:entity"
     },
     "blaze": {
-      "entity": "minecraft:blaze",
+      "predicate": {
+        "type":"minecraft:blaze"
+      },
       "amount": 13,
       "id": "simplequests:entity"
     },
     "wither_skeleton": {
-      "entity": "minecraft:wither_skeleton",
+      "predicate": {
+        "type":"minecraft:wither_skeleton"
+      },
       "amount": 10,
       "id": "simplequests:entity"
     },

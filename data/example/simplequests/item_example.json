@@ -1,0 +1,19 @@
+{
+  "loot_table": "minecraft:chests/buried_treasure",
+  "repeat_delay": 36000,
+  "task": "Example for an item quest!",
+  "icon": "minecraft:dirt",
+  "sorting_id": 0,
+  "entries": {
+    "cod": {
+      "predicate": {
+        "items": [
+          "minecraft:cod"
+        ]
+      },
+      "description": "Give 15 cods",
+      "amount": 15,
+      "id": "simplequests:item"
+    }
+  }
+}

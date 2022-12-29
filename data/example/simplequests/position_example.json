@@ -1,0 +1,15 @@
+{
+  "loot_table": "minecraft:chests/buried_treasure",
+  "repeat_delay": "6d:36s",
+  "task": "Example for a simple position quest!",
+  "icon": "minecraft:dirt",
+  "entries": {
+    "place": {
+      "x": 0,
+      "y": 50,
+      "z": 0,
+      "minDist": 10,
+      "id": "simplequests:position"
+    }
+  }
+}

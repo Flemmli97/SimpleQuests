@@ -2,19 +2,26 @@
   "loot_table": "example:diamond",
   "repeat_delay": 36000,
   "task": "Slay mobs",
+  "sorting_id": 1,
   "entries": {
     "zombies": {
-      "entity": "minecraft:zombie",
+      "predicate":{
+        "type":"minecraft:zombie"
+      },
       "amount": 12,
       "id": "simplequests:entity"
     },
     "skeleton": {
-      "entity": "minecraft:skeleton",
+      "predicate":{
+        "type":"minecraft:skeleton"
+      },
       "amount": 10,
       "id": "simplequests:entity"
     },
     "spiders": {
-      "entity": "minecraft:spider",
+      "predicate":{
+        "type":"minecraft:spider"
+      },
       "amount": 8,
       "id": "simplequests:entity"
     },

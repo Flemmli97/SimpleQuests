@@ -1,0 +1,16 @@
+{
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "repeat_delay": 36000,
+  "task": "Example for an advancement quest",
+  "icon": {
+    "item": "minecraft:emerald",
+    "count": 5
+  },
+  "entries": {
+    "fortress": {
+      "advancement": "minecraft:adventure/trade",
+      "reset": true,
+      "id": "simplequests:advancement"
+    }
+  }
+}
