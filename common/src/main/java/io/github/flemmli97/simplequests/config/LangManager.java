@@ -47,6 +47,8 @@ public class LangManager {
         defaultTranslation.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
         defaultTranslation.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
         defaultTranslation.put("simplequests.reset.all", "Reset all progress for %s");
+        defaultTranslation.put("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
+        defaultTranslation.put("simplequests.unlock.fail", "No such quest %s");
 
         defaultTranslation.put("simplequests.missing.advancement", "Advancement with id %s missing");
         defaultTranslation.put("simplequests.kill", "Finished kill task %s");
@@ -71,11 +73,13 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put("simplequests:ingredient.single", "Give %1$s x%2$s");
-        defaultTranslation.put("simplequests:ingredient.single.keep", "Have %1$s x%2$s");
-        defaultTranslation.put("simplequests:ingredient.multi", "Provide any of the following x%2$s: %1$s");
-        defaultTranslation.put("simplequests:ingredient.multi.keep", "Have any of the following x%2$s: %1$s");
-        defaultTranslation.put("simplequests:ingredient.no", "<Empty tag/items>");
+        defaultTranslation.put("simplequests:item.single", "Give %1$s x%2$s");
+        defaultTranslation.put("simplequests:item.single.keep", "Have %1$s x%2$s");
+        defaultTranslation.put("simplequests:item.multi", "Provide any of the following x%2$s: %1$s");
+        defaultTranslation.put("simplequests:item.multi.keep", "Have any of the following x%2$s: %1$s");
+        defaultTranslation.put("simplequests:item.empty", "<Empty tag/items>");
+        defaultTranslation.put("simplequests:entity", "Kill entity %s");
+        defaultTranslation.put("simplequests:entity.tag", "Kill entities in the tag %s");
         defaultTranslation.put("simplequests:xp", "Submit Experience: %s lvl");
         defaultTranslation.put("simplequests:advancement", "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");

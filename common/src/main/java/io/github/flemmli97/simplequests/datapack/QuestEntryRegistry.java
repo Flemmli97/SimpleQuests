@@ -26,7 +26,7 @@ public class QuestEntryRegistry {
         Deserializer<?> d = map.get(res);
         if (d != null)
             return d.deserialize(obj);
-        return null;
+        throw new IllegalStateException("Missing entry for key " + res);
     }
 
     public interface Deserializer<T extends QuestEntry> {

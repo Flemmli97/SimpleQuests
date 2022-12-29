@@ -109,7 +109,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
-            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME || type == PlayerData.AcceptType.DAILYFULL;
+            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
         });
         this.maxPages = (this.quests.size() - 1) / QUEST_PER_PAGE;
         int id = 0;

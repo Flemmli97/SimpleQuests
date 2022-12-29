@@ -1,6 +1,8 @@
 package io.github.flemmli97.simplequests.quest;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -36,24 +38,25 @@ public class Quest implements Comparable<Quest> {
     public final Map<String, QuestEntry> entries;
 
     public final ResourceLocation id;
-    public final ResourceLocation neededParentQuest;
+    public final List<ResourceLocation> neededParentQuests;
     public final ResourceLocation loot;
 
     public final int repeatDelay, repeatDaily;
 
     public final String questTaskString;
 
-    public final boolean redoParent;
+    public final boolean redoParent, needsUnlock;
 
     public final int sortingId;
 
     public final ItemStack icon;
 
-    private Quest(ResourceLocation id, String questTaskString, ResourceLocation parent, boolean redoParent, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
+    private Quest(ResourceLocation id, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
         this.id = id;
         this.questTaskString = questTaskString;
-        this.neededParentQuest = parent;
+        this.neededParentQuests = parents;
         this.redoParent = redoParent;
+        this.needsUnlock = needsUnlock;
         this.repeatDelay = repeatDelay;
         this.repeatDaily = repeatDaily;
         this.entries = entries;
@@ -103,8 +106,15 @@ public class Quest implements Comparable<Quest> {
 
     public JsonObject serialize() {
         JsonObject obj = new JsonObject();
-        if (this.neededParentQuest != null)
-            obj.addProperty("parent_id", this.neededParentQuest.toString());
+        if (!this.neededParentQuests.isEmpty()) {
+            if (this.neededParentQuests.size() == 1)
+                obj.addProperty("parent_id", this.neededParentQuests.get(0).toString());
+            else {
+                JsonArray arr = new JsonArray();
+                this.neededParentQuests.forEach(r -> arr.add(r.toString()));
+                obj.add("parent_id", arr);
+            }
+        }
         obj.addProperty("redo_parent", this.redoParent);
         obj.addProperty("loot_table", this.loot.toString());
         obj.addProperty("repeat_delay", this.repeatDelay);
@@ -131,14 +141,35 @@ public class Quest implements Comparable<Quest> {
         });
         return new Quest(id,
                 GsonHelper.getAsString(obj, "task"),
-                obj.has("parent_id") && !GsonHelper.getAsString(obj, "parent_id").isEmpty() ? new ResourceLocation(GsonHelper.getAsString(obj, "parent_id")) : null,
+                getParentQuests(obj, "parent_id"),
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
+                GsonHelper.getAsBoolean(obj, "need_unlock", false),
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 questIcon(obj, "icon", Items.PAPER),
                 tryParseTime(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build());
+    }
+
+    private static List<ResourceLocation> getParentQuests(JsonObject obj, String name) {
+        if (obj.has(name)) {
+            JsonElement e = obj.get(name);
+            if (e.isJsonPrimitive())
+                return e.getAsString().isEmpty() ? List.of() : List.of(new ResourceLocation(e.getAsString()));
+            if (e.isJsonArray()) {
+                ImmutableList.Builder<ResourceLocation> list = new ImmutableList.Builder<>();
+                e.getAsJsonArray().forEach(ea -> {
+                    if (ea.isJsonPrimitive()) {
+                        String s = ea.getAsString();
+                        if (!s.isEmpty())
+                            list.add(new ResourceLocation(s));
+                    }
+                });
+                return list.build();
+            }
+        }
+        return List.of();
     }
 
     private static int tryParseTime(JsonObject obj, String name, int fallback) {
@@ -190,9 +221,9 @@ public class Quest implements Comparable<Quest> {
     @Override
     public int compareTo(@NotNull Quest quest) {
         if (this.sortingId == quest.sortingId) {
-            if (this.neededParentQuest == null && quest.neededParentQuest != null)
+            if (this.neededParentQuests.isEmpty() && !quest.neededParentQuests.isEmpty())
                 return -1;
-            if (this.neededParentQuest != null && quest.neededParentQuest == null)
+            if (!this.neededParentQuests.isEmpty() && quest.neededParentQuests.isEmpty())
                 return 1;
             return this.id.compareTo(quest.id);
         }

@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,8 +40,10 @@ public class PlayerData {
 
     private final ServerPlayer player;
     private List<QuestProgress> currentQuests = new ArrayList<>();
-    private Map<ResourceLocation, Long> finishedQuests = new HashMap<>();
+    private Map<ResourceLocation, Long> cooldownTracker = new HashMap<>();
     private List<QuestProgress> tickables = new ArrayList<>();
+
+    private Set<ResourceLocation> unlockTracker = new HashSet<>();
 
     private long resetTick = -1;
 
@@ -154,16 +158,19 @@ public class PlayerData {
                 }
             }
         });
-        if (this.finishedQuests.isEmpty()) {
+        if (this.cooldownTracker.isEmpty()) {
             this.questTrackerTime = LocalDateTime.now();
         }
-        this.finishedQuests.put(prog.getQuest().id, this.player.level.getGameTime());
+        this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
+        this.unlockTracker.add(prog.getQuest().id);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_GREEN));
-        if (prog.getQuest().neededParentQuest != null && prog.getQuest().redoParent) {
-            Quest quest = QuestsManager.instance().getQuests().get(prog.getQuest().neededParentQuest);
-            if (quest != null)
-                this.finishedQuests.remove(quest.id);
+        if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
+            prog.getQuest().neededParentQuests.forEach(res -> {
+                Quest quest = QuestsManager.instance().getQuests().get(res);
+                if (quest != null)
+                    this.unlockTracker.remove(quest.id);
+            });
         }
     }
 
@@ -207,16 +214,19 @@ public class PlayerData {
             this.questTrackerTime = null;
             this.dailyQuestsTracker.clear();
         }
-        if (quest.neededParentQuest != null && this.finishedQuests.get(quest.neededParentQuest) == null) {
+        if (quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
+            return AcceptType.LOCKED;
+        }
+        if (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests)) {
             return AcceptType.REQUIREMENTS;
         }
         if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
             return AcceptType.DAILYFULL;
         //One time quests
-        if (quest.repeatDelay < 0 && this.finishedQuests.containsKey(quest.id))
+        if (quest.repeatDelay < 0 && this.cooldownTracker.containsKey(quest.id))
             return AcceptType.ONETIME;
-        if (this.finishedQuests.containsKey(quest.id)) {
-            return (quest.repeatDelay == 0 || Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
+        if (this.cooldownTracker.containsKey(quest.id)) {
+            return (quest.repeatDelay == 0 || Math.abs(this.player.level.getGameTime() - this.cooldownTracker.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
         }
         return AcceptType.ACCEPT;
     }
@@ -232,6 +242,14 @@ public class PlayerData {
 
     public void removeQuestProgress(QuestProgress progress) {
         this.tickables.remove(progress);
+    }
+
+    public void unlockQuest(ResourceLocation quest) {
+        this.unlockTracker.add(quest);
+    }
+
+    public void lockQuest(ResourceLocation quest) {
+        this.unlockTracker.remove(quest);
     }
 
     public void tick() {
@@ -254,7 +272,7 @@ public class PlayerData {
     }
 
     public String formattedCooldown(Quest quest) {
-        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id))) / 20;
+        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.cooldownTracker.get(quest.id))) / 20;
         if (sec > 86400) {
             long days = sec / 86400;
             long hours = (sec % 86400) / 3600;
@@ -278,13 +296,16 @@ public class PlayerData {
         this.currentQuests.forEach(prog -> quests.add(prog.save()));
         tag.put("ActiveQuests", quests);
         CompoundTag list = new CompoundTag();
-        this.finishedQuests.forEach((res, time) -> list.putLong(res.toString(), time));
+        this.cooldownTracker.forEach((res, time) -> list.putLong(res.toString(), time));
         tag.put("FinishedQuests", list);
         if (this.questTrackerTime != null)
             tag.putString("TimeTracker", this.questTrackerTime.format(time));
         CompoundTag daily = new CompoundTag();
         this.dailyQuestsTracker.forEach((res, amount) -> daily.putInt(res.toString(), amount));
         tag.put("DailyQuestTracker", daily);
+        ListTag unlocked = new ListTag();
+        this.unlockTracker.forEach(res -> unlocked.add(StringTag.valueOf(res.toString())));
+        tag.put("UnlockedQuests", unlocked);
         return tag;
     }
 
@@ -298,27 +319,31 @@ public class PlayerData {
             });
         }
         CompoundTag done = tag.getCompound("FinishedQuests");
-        done.getAllKeys().forEach(key -> this.finishedQuests.put(new ResourceLocation(key), done.getLong(key)));
+        done.getAllKeys().forEach(key -> this.cooldownTracker.put(new ResourceLocation(key), done.getLong(key)));
         if (tag.contains("TimeTracker"))
             this.questTrackerTime = LocalDateTime.parse(tag.getString("TimeTracker"), time);
         CompoundTag daily = tag.getCompound("DailyQuestTracker");
         daily.getAllKeys().forEach(key -> this.dailyQuestsTracker.put(new ResourceLocation(key), done.getInt(key)));
+        ListTag unlocked = tag.getList("UnlockedQuests", Tag.TAG_STRING);
+        unlocked.forEach(t -> this.unlockTracker.add(new ResourceLocation(t.getAsString())));
     }
 
     public void clone(PlayerData data) {
         this.currentQuests = data.currentQuests;
-        this.finishedQuests = data.finishedQuests;
+        this.cooldownTracker = data.cooldownTracker;
+        this.unlockTracker = data.unlockTracker;
     }
 
     public void resetAll() {
         this.currentQuests.clear();
-        this.finishedQuests.clear();
+        this.cooldownTracker.clear();
+        this.unlockTracker.clear();
         this.questTrackerTime = null;
         this.dailyQuestsTracker.clear();
     }
 
     public void resetCooldown() {
-        this.finishedQuests.replaceAll((res, old) -> Long.MIN_VALUE);
+        this.cooldownTracker.replaceAll((res, old) -> Long.MIN_VALUE);
     }
 
     public enum AcceptType {
@@ -326,9 +351,10 @@ public class PlayerData {
         DAILYFULL("simplequests.accept.daily"),
         DELAY("simplequests.accept.delay"),
         ONETIME("simplequests.accept.onetime"),
-        ACCEPT("simplequests.accept.yes");
+        ACCEPT("simplequests.accept.yes"),
+        LOCKED("simplequests.accept.locked");
 
-        String lang;
+        final String lang;
 
         AcceptType(String id) {
             this.lang = id;
