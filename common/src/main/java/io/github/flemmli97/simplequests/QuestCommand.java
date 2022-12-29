@@ -44,7 +44,7 @@ public class QuestCommand {
                 .then(Commands.literal("current").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.current)).executes(QuestCommand::current))
                 .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reset))
                         .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QuestCommand::activequests).executes(QuestCommand::reset)))
-                .then(Commands.literal("unlock").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.unlock))
+                .then(Commands.literal("unlock").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.unlock, true))
                         .then(Commands.argument("target", EntityArgument.players())
                                 .then(Commands.argument("quest", ResourceLocationArgument.id())
                                         .suggests(QuestCommand::lockedQuests).executes(QuestCommand::unlock)))));
