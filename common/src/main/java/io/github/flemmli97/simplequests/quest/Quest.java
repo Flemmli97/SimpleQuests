@@ -45,13 +45,13 @@ public class Quest implements Comparable<Quest> {
 
     public final String questTaskString;
 
-    public final boolean redoParent, needsUnlock;
+    public final boolean redoParent, needsUnlock, isDailyQuest;
 
     public final int sortingId;
 
     public final ItemStack icon;
 
-    private Quest(ResourceLocation id, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries) {
+    private Quest(ResourceLocation id, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest) {
         this.id = id;
         this.questTaskString = questTaskString;
         this.neededParentQuests = parents;
@@ -63,6 +63,7 @@ public class Quest implements Comparable<Quest> {
         this.loot = loot;
         this.sortingId = sortingId;
         this.icon = icon;
+        this.isDailyQuest = isDailyQuest;
     }
 
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
@@ -116,10 +117,13 @@ public class Quest implements Comparable<Quest> {
             }
         }
         obj.addProperty("redo_parent", this.redoParent);
+        obj.addProperty("need_unlock", this.needsUnlock);
         obj.addProperty("loot_table", this.loot.toString());
         obj.addProperty("repeat_delay", this.repeatDelay);
         obj.addProperty("repeat_daily", this.repeatDaily);
+        obj.addProperty("sorting_id", this.sortingId);
         obj.addProperty("task", this.questTaskString);
+        obj.addProperty("daily_quest", this.isDailyQuest);
         JsonObject entries = new JsonObject();
         this.entries.forEach((res, entry) -> {
             JsonObject val = entry.serialize();
@@ -149,7 +153,8 @@ public class Quest implements Comparable<Quest> {
                 tryParseTime(obj, "repeat_delay", 0),
                 GsonHelper.getAsInt(obj, "repeat_daily", 1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
-                builder.build());
+                builder.build(),
+                GsonHelper.getAsBoolean(obj, "daily_quest", false));
     }
 
     private static List<ResourceLocation> getParentQuests(JsonObject obj, String name) {

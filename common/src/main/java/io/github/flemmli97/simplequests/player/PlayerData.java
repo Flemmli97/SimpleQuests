@@ -49,7 +49,7 @@ public class PlayerData {
 
     private long resetTick = -1;
 
-    private LocalDateTime questTrackerTime = null;
+    private LocalDateTime questTrackerTime = LocalDateTime.now();
     private final Map<ResourceLocation, Integer> dailyQuestsTracker = new HashMap<>();
 
     private int interactionCooldown;
@@ -160,9 +160,6 @@ public class PlayerData {
                 }
             }
         });
-        if (this.cooldownTracker.isEmpty()) {
-            this.questTrackerTime = LocalDateTime.now();
-        }
         this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
         this.unlockTracker.add(prog.getQuest().id);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
@@ -177,8 +174,13 @@ public class PlayerData {
     }
 
     public void reset(ResourceLocation res, boolean forced) {
+        this.reset(res, forced, true);
+    }
+
+    public void reset(ResourceLocation res, boolean forced, boolean sendMsg) {
         if (this.currentQuests.isEmpty()) {
-            this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            if (sendMsg)
+                this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return;
         }
         QuestProgress prog = null;
@@ -189,15 +191,18 @@ public class PlayerData {
             }
         }
         if (prog == null) {
-            this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.notfound"), res)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            if (sendMsg)
+                this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset.notfound"), res)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return;
         }
         if (!forced && this.resetTick == -1) {
             this.resetTick = this.player.level.getGameTime();
-            this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            if (sendMsg)
+                this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return;
         } else if (forced || this.player.level.getGameTime() - this.resetTick < 600) {
-            this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            if (sendMsg)
+                this.player.sendMessage(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             this.currentQuests.remove(prog);
         }
         this.resetTick = -1;
@@ -212,11 +217,7 @@ public class PlayerData {
     }
 
     public AcceptType canAcceptQuest(Quest quest) {
-        if (this.questTrackerTime != null && this.questTrackerTime.getDayOfYear() != LocalDateTime.now().getDayOfYear()) {
-            this.questTrackerTime = null;
-            this.dailyQuestsTracker.clear();
-        }
-        if (quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
+        if (quest.isDailyQuest || quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
             return AcceptType.LOCKED;
         }
         if (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests)) {
@@ -271,6 +272,21 @@ public class PlayerData {
             return fulfilled.getFirst();
         });
         this.currentQuests.removeAll(completed);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (this.questTrackerTime == null || this.questTrackerTime.getDayOfYear() != now.getDayOfYear()) {
+            this.questTrackerTime = now;
+            this.dailyQuestsTracker.forEach((r, i) -> {
+                Quest quest = QuestsManager.instance().getQuests().get(r);
+                if (quest != null && quest.isDailyQuest)
+                    this.reset(r, true, false);
+            });
+            this.dailyQuestsTracker.clear();
+            QuestsManager.instance().getDailyQuests().forEach(quest -> {
+                this.currentQuests.add(new QuestProgress(quest, this));
+                this.dailyQuestsTracker.put(quest.id, 1);
+            });
+        }
     }
 
     public String formattedCooldown(Quest quest) {
