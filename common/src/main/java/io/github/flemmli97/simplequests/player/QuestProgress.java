@@ -9,12 +9,13 @@ import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestEntry;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -109,7 +110,7 @@ public class QuestProgress {
                 if (this.entries.contains(e.getKey()))
                     continue;
                 if (interacted.contains(entity.getUUID())) {
-                    player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
+                    player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                     continue;
                 }
                 if (entry.check(player, entity)) {
