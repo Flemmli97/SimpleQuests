@@ -43,7 +43,11 @@ public class QuestCommand {
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetAll)))
                 .then(Commands.literal("current").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.current)).executes(QuestCommand::current))
                 .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reset))
-                        .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QuestCommand::activequests).executes(QuestCommand::reset))));
+                        .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QuestCommand::activequests).executes(QuestCommand::reset)))
+                .then(Commands.literal("unlock").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.unlock))
+                        .then(Commands.argument("target", EntityArgument.players())
+                                .then(Commands.argument("quest", ResourceLocationArgument.id())
+                                        .suggests(QuestCommand::lockedQuests).executes(QuestCommand::unlock)))));
     }
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -104,19 +108,39 @@ public class QuestCommand {
     }
 
     private static int resetCooldown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
             ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            i++;
         }
-        return Command.SINGLE_SUCCESS;
+        return i;
     }
 
     private static int resetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
             ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            i++;
         }
-        return Command.SINGLE_SUCCESS;
+        return i;
+    }
+
+    private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
+        if (!QuestsManager.instance().getQuests().containsKey(res)) {
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.unlock.fail"), res), true);
+            return 0;
+        }
+        int i = 0;
+        for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
+            PlayerData.get(player)
+                    .unlockQuest(res);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.unlock"), player.getName(), res), true);
+            i++;
+        }
+        return i;
     }
 
     public static CompletableFuture<Suggestions> quests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
@@ -134,5 +158,12 @@ public class QuestCommand {
                 .entrySet().stream()
                 .filter(e -> PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList());
+    }
+
+    public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        return SharedSuggestionProvider.suggest(QuestsManager.instance().getQuests()
+                .entrySet().stream()
+                .filter(e -> e.getValue().needsUnlock)
+                .map(e -> e.getKey().toString()).collect(Collectors.toList()), build);
     }
 }

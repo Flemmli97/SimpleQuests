@@ -10,5 +10,6 @@ public class QuestCommandPerms {
     public static final String resetAll = "simplequests.command.resetAll";
     public static final String current = "simplequests.command.current";
     public static final String reset = "simplequests.command.reset";
+    public static final String unlock = "simplequests.command.unlock";
 
 }
