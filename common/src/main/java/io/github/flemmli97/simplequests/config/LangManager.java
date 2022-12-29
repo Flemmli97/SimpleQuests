@@ -61,6 +61,7 @@ public class LangManager {
         defaultTranslation.put("simplequests.accept.delay", "Quest on cooldown for %s");
         defaultTranslation.put("simplequests.accept.onetime", "This is a onetime quest");
         defaultTranslation.put("simplequests.accept.yes", "Quest acceptable");
+        defaultTranslation.put("simplequests.accept.locked", "You can't accept this quest");
 
         defaultTranslation.put("simplequests.gui.main", "Quests");
         defaultTranslation.put("simplequests.gui.confirm", "Accept this quest?");
