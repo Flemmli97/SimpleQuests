@@ -20,7 +20,7 @@ public interface LoaderHandler {
     Item fromID(ResourceLocation id);
 
     default boolean hasPerm(CommandSourceStack src, String perm) {
-        return this.hasPerm(src, perm, true);
+        return this.hasPerm(src, perm, false);
     }
 
     boolean hasPerm(CommandSourceStack src, String perm, boolean adminCmd);

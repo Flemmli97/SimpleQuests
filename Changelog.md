@@ -26,6 +26,7 @@ Simple Quests 1.2.0
 - Fix completing child quests resetting parent quest cooldown
 - Add daily quests: set "daily_quest" in the quest json to true.
   Daily quests will auto accepted and lasts for the day. Failing to complete them simply resets them
+- Fix command permissions
 
 Simple Quests 1.0.2
 ================
