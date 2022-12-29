@@ -47,6 +47,7 @@ public abstract class ServerPlayerMixin extends Player implements SimpleQuestDat
         if (this.containerMenu instanceof QuestGui gui && this.tickCount % 20 == 0) {
             gui.update();
         }
+        this.simplequestData.tick();
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))

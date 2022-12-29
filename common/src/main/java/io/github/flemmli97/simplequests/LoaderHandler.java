@@ -27,5 +27,5 @@ public interface LoaderHandler {
 
     boolean hasPerm(ServerPlayer src, String perm, boolean adminCmd);
 
-    List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.IngredientEntry entry);
+    List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry);
 }

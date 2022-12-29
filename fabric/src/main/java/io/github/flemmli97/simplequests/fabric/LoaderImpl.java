@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,22 +64,23 @@ public class LoaderImpl implements LoaderHandler {
     private static final int warpAmount = 4;
 
     @Override
-    public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.IngredientEntry entry) {
+    public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
         if (entry.description != null)
             return List.of(entry.description);
-        if (entry.ingredient.getItems().length < warpAmount)
+        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
+        if (all.size() < warpAmount)
             return List.of(entry.translation(player.getServer()));
         List<MutableComponent> list = new ArrayList<>();
         MutableComponent items = null;
         int i = 0;
-        for (ItemStack stack : entry.ingredient.getItems()) {
+        for (MutableComponent comp : all) {
             if (items == null) {
                 if (list.size() == 0)
-                    items = Component.literal("[").append(Component.translatable(stack.getItem().getDescriptionId()));
+                    items = Component.literal("[").append(comp);
                 else
-                    items = Component.translatable(stack.getItem().getDescriptionId());
+                    items = comp;
             } else
-                items.append(Component.literal(", ")).append(Component.translatable(stack.getItem().getDescriptionId()));
+                items.append(Component.literal(", ")).append(comp);
             i++;
             if ((list.size() == 0 && i >= warpAmount - 1) || i >= warpAmount) {
                 if (list.size() == 0) {

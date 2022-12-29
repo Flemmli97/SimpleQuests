@@ -7,10 +7,12 @@ import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -25,6 +27,11 @@ public class SimpleQuestsFabric implements ModInitializer {
         ConfigHandler.init();
         SimpleQuests.permissionAPI = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
         SimpleQuests.ftbRanks = FabricLoader.getInstance().isModLoaded("ftbranks");
+        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            if (player instanceof ServerPlayer serverPlayer)
+                SimpleQuests.onInteractEntity(serverPlayer, entity, hand);
+            return InteractionResult.PASS;
+        });
     }
 
     public static void onDeath(LivingEntity entity, DamageSource source) {
