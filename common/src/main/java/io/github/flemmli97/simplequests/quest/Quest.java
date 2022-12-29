@@ -151,7 +151,7 @@ public class Quest implements Comparable<Quest> {
                 new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
                 questIcon(obj, "icon", Items.PAPER),
                 tryParseTime(obj, "repeat_delay", 0),
-                GsonHelper.getAsInt(obj, "repeat_daily", 1),
+                GsonHelper.getAsInt(obj, "repeat_daily", 0),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build(),
                 GsonHelper.getAsBoolean(obj, "daily_quest", false));
