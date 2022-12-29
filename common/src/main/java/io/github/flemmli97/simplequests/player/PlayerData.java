@@ -1,5 +1,6 @@
 package io.github.flemmli97.simplequests.player;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
@@ -16,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -39,11 +41,14 @@ public class PlayerData {
     private final ServerPlayer player;
     private List<QuestProgress> currentQuests = new ArrayList<>();
     private Map<ResourceLocation, Long> finishedQuests = new HashMap<>();
+    private List<QuestProgress> tickables = new ArrayList<>();
 
     private long resetTick = -1;
 
     private LocalDateTime questTrackerTime = null;
     private final Map<ResourceLocation, Integer> dailyQuestsTracker = new HashMap<>();
+
+    private int interactionCooldown;
 
     public static PlayerData get(ServerPlayer player) {
         return ((SimpleQuestDataGet) player).simpleQuestPlayerData();
@@ -70,7 +75,7 @@ public class PlayerData {
                 this.player.sendMessage(new TextComponent(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
         }
-        this.currentQuests.add(new QuestProgress(quest));
+        this.currentQuests.add(new QuestProgress(quest, this));
         this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
         return true;
     }
@@ -104,6 +109,25 @@ public class PlayerData {
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.kill"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+            }
+            if (prog.isCompleted()) {
+                this.completeQuest(prog);
+                completed.add(prog);
+            }
+        });
+        this.currentQuests.removeAll(completed);
+    }
+
+    public void onInteractWith(Entity entity) {
+        if (this.interactionCooldown > 0)
+            return;
+        this.interactionCooldown = 2;
+        List<QuestProgress> completed = new ArrayList<>();
+        this.currentQuests.forEach(prog -> {
+            Set<QuestEntry> fulfilled = prog.onInteractWith(this.player, entity);
+            if (!fulfilled.isEmpty()) {
+                this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                fulfilled.forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
             }
             if (prog.isCompleted()) {
                 this.completeQuest(prog);
@@ -199,6 +223,38 @@ public class PlayerData {
         return AcceptType.ACCEPT;
     }
 
+    public ServerPlayer getPlayer() {
+        return this.player;
+    }
+
+    public void addTickableProgress(QuestProgress progress) {
+        if (!this.tickables.contains(progress))
+            this.tickables.add(progress);
+    }
+
+    public void removeQuestProgress(QuestProgress progress) {
+        this.tickables.remove(progress);
+    }
+
+    public void tick() {
+        --this.interactionCooldown;
+        List<QuestProgress> completed = new ArrayList<>();
+        this.tickables.removeIf(prog -> {
+            Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
+            if (!fulfilled.getSecond().isEmpty()) {
+                this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                fulfilled.getSecond().forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+            }
+            if (prog.isCompleted()) {
+                this.completeQuest(prog);
+                completed.add(prog);
+                return true;
+            }
+            return fulfilled.getFirst();
+        });
+        this.currentQuests.removeAll(completed);
+    }
+
     public String formattedCooldown(Quest quest) {
         long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.finishedQuests.get(quest.id))) / 20;
         if (sec > 86400) {
@@ -238,7 +294,7 @@ public class PlayerData {
         if (tag.contains("ActiveQuests")) {
             ListTag quests = tag.getList("ActiveQuests", Tag.TAG_COMPOUND);
             quests.forEach(q -> {
-                QuestProgress prog = new QuestProgress((CompoundTag) q);
+                QuestProgress prog = new QuestProgress((CompoundTag) q, this);
                 if (prog.getQuest() != null)
                     this.currentQuests.add(prog);
             });

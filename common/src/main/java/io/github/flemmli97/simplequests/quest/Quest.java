@@ -84,7 +84,7 @@ public class Quest implements Comparable<Quest> {
     public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
         List<MutableComponent> list = new ArrayList<>();
         for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
-            if (!(e.getValue() instanceof QuestEntryImpls.IngredientEntry ing))
+            if (!(e.getValue() instanceof QuestEntryImpls.ItemEntry ing))
                 list.add(new TextComponent(" - ").append(e.getValue().translation(player.getServer())));
             else {
                 List<MutableComponent> wrapped = SimpleQuests.getHandler().wrapForGui(player, ing);

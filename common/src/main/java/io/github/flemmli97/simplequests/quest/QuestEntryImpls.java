@@ -3,9 +3,18 @@ package io.github.flemmli97.simplequests.quest;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.mixin.EntityPredicateAccessor;
+import io.github.flemmli97.simplequests.mixin.ItemPredicateAccessor;
+import io.github.flemmli97.simplequests.player.PlayerData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.LocationPredicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,26 +24,29 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class QuestEntryImpls {
 
-    public static class IngredientEntry implements QuestEntry {
+    public static class ItemEntry implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "ingredient");
+        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "item");
 
-        public final Ingredient ingredient;
+        public final ItemPredicate predicate;
         public final int amount;
         public final MutableComponent description;
+        public final boolean consumeItems;
 
-        public IngredientEntry(Ingredient ingredient, int amount, String description) {
-            this.ingredient = ingredient;
+        public ItemEntry(ItemPredicate predicate, int amount, String description, boolean consumeItems) {
+            this.predicate = predicate;
             this.amount = amount;
             this.description = description.isEmpty() ? null : new TextComponent(description);
+            this.consumeItems = consumeItems;
         }
 
         @Override
@@ -42,7 +54,7 @@ public class QuestEntryImpls {
             List<ItemStack> matching = new ArrayList<>();
             int i = 0;
             for (ItemStack stack : player.getInventory().items) {
-                if (this.ingredient.test(stack)) {
+                if (this.predicate.matches(stack)) {
                     if (stack.isDamageableItem()) {
                         if (stack.getDamageValue() != 0) {
                             continue;
@@ -58,15 +70,17 @@ public class QuestEntryImpls {
             }
             if (i < this.amount)
                 return false;
-            i = this.amount;
-            for (ItemStack stack : matching) {
-                if (i > stack.getCount()) {
-                    int count = stack.getCount();
-                    stack.setCount(0);
-                    i -= count;
-                } else {
-                    stack.shrink(i);
-                    break;
+            if (this.consumeItems) {
+                i = this.amount;
+                for (ItemStack stack : matching) {
+                    if (i > stack.getCount()) {
+                        int count = stack.getCount();
+                        stack.setCount(0);
+                        i -= count;
+                    } else {
+                        stack.shrink(i);
+                        break;
+                    }
                 }
             }
             return true;
@@ -86,8 +100,10 @@ public class QuestEntryImpls {
         @Override
         public JsonObject serialize() {
             JsonObject obj = new JsonObject();
-            obj.add("ingredient", this.ingredient.toJson());
+            obj.add("predicate", this.predicate.serializeToJson());
+            obj.addProperty("description", this.description.getString());
             obj.addProperty("amount", this.amount);
+            obj.addProperty("consumeItems", this.consumeItems);
             return obj;
         }
 
@@ -100,30 +116,40 @@ public class QuestEntryImpls {
         public MutableComponent translation(MinecraftServer server) {
             if (this.description != null)
                 return this.description;
-            if (this.ingredient.getItems().length == 0)
+            List<MutableComponent> formattedItems = itemComponents(this.predicate);
+            if (formattedItems.isEmpty())
                 return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
-            if (this.ingredient.getItems().length == 1) {
-                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".single"), new TranslatableComponent(this.ingredient.getItems()[0].getItem().getDescriptionId()).withStyle(ChatFormatting.AQUA), this.amount);
+            if (formattedItems.size() == 1) {
+                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".single" + (this.consumeItems ? "" : ".keep")), formattedItems.get(0).withStyle(ChatFormatting.AQUA), this.amount);
             }
             MutableComponent items = null;
-            for (ItemStack stack : this.ingredient.getItems()) {
+            for (MutableComponent c : formattedItems) {
                 if (items == null)
-                    items = new TextComponent("[").append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                    items = new TextComponent("[").append(c);
                 else
-                    items.append(new TextComponent(", ")).append(new TranslatableComponent(stack.getItem().getDescriptionId()));
+                    items.append(new TextComponent(", ")).append(c);
             }
             items.append("]");
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), this.amount);
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".multi" + (this.consumeItems ? "" : ".keep")), items.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
+        public static ItemEntry fromJson(JsonObject obj) {
+            return new ItemEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), obj.get("amount").getAsInt(),
+                    GsonHelper.getAsString(obj, "description", ""), GsonHelper.getAsBoolean(obj, "consumeItems", true));
+        }
 
-        public static IngredientEntry fromJson(JsonObject obj) {
-            return new IngredientEntry(Ingredient.fromJson(GsonHelper.getAsJsonObject(obj, "ingredient")), obj.get("amount").getAsInt(),
-                    GsonHelper.getAsString(obj, "description", ""));
+        public static List<MutableComponent> itemComponents(ItemPredicate predicate) {
+            ItemPredicateAccessor acc = (ItemPredicateAccessor) predicate;
+            List<MutableComponent> formattedItems = new ArrayList<>();
+            if (acc.getItems() != null)
+                acc.getItems().forEach(i -> formattedItems.add(new TranslatableComponent(i.getDescriptionId())));
+            if (acc.getTag() != null)
+                Registry.ITEM.getTag(acc.getTag()).ifPresent(n -> n.forEach(h -> formattedItems.add(new TranslatableComponent(h.value().getDescriptionId()))));
+            return formattedItems;
         }
     }
 
-    public record KillEntry(ResourceLocation entity, int amount) implements QuestEntry {
+    public record KillEntry(EntityPredicate predicate, int amount) implements QuestEntry {
 
         public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "entity");
 
@@ -135,7 +161,7 @@ public class QuestEntryImpls {
         @Override
         public JsonObject serialize() {
             JsonObject obj = new JsonObject();
-            obj.addProperty("entity", this.entity.toString());
+            obj.add("predicate", this.predicate.serializeToJson());
             obj.addProperty("amount", this.amount);
             return obj;
         }
@@ -147,11 +173,16 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", this.entity)).withStyle(ChatFormatting.AQUA), this.amount);
+            EntityPredicateAccessor acc = (EntityPredicateAccessor) this.predicate;
+            String s = acc.getEntityType().serializeToJson().getAsString();
+            if (s.startsWith("#")) {
+                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".tag"), new TextComponent(s).withStyle(ChatFormatting.AQUA), this.amount);
+            }
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
         }
 
         public static KillEntry fromJson(JsonObject obj) {
-            return new KillEntry(new ResourceLocation(GsonHelper.getAsString(obj, "entity")), GsonHelper.getAsInt(obj, "amount", 1));
+            return new KillEntry(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsInt(obj, "amount", 1));
         }
     }
 
@@ -190,20 +221,26 @@ public class QuestEntryImpls {
         }
     }
 
-    public record AdvancementEntry(ResourceLocation advancement) implements QuestEntry {
+    public record AdvancementEntry(ResourceLocation advancement, boolean reset) implements QuestEntry {
 
         public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "advancement");
 
         @Override
         public boolean submit(ServerPlayer player) {
             Advancement adv = player.getServer().getAdvancements().getAdvancement(this.advancement);
-            return adv != null && (player.getAdvancements().getOrStartProgress(adv).isDone());
+            boolean ret = adv != null && (player.getAdvancements().getOrStartProgress(adv).isDone());
+            if (ret && this.reset) {
+                AdvancementProgress prog = player.getAdvancements().getOrStartProgress(adv);
+                prog.getCompletedCriteria().forEach(s -> player.getAdvancements().revoke(adv, s));
+            }
+            return ret;
         }
 
         @Override
         public JsonObject serialize() {
             JsonObject obj = new JsonObject();
             obj.addProperty("advancement", this.advancement.toString());
+            obj.addProperty("reset", this.reset);
             return obj;
         }
 
@@ -211,7 +248,6 @@ public class QuestEntryImpls {
         public ResourceLocation getId() {
             return id;
         }
-
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
@@ -225,7 +261,151 @@ public class QuestEntryImpls {
         }
 
         public static AdvancementEntry fromJson(JsonObject obj) {
-            return new AdvancementEntry(new ResourceLocation(GsonHelper.getAsString(obj, "advancement")));
+            return new AdvancementEntry(new ResourceLocation(GsonHelper.getAsString(obj, "advancement")), GsonHelper.getAsBoolean(obj, "reset", false));
         }
     }
+
+    public record PositionEntry(BlockPos pos, int minDist) implements QuestEntry {
+
+        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "position");
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public JsonObject serialize() {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("x", this.pos.getX());
+            obj.addProperty("y", this.pos.getY());
+            obj.addProperty("z", this.pos.getZ());
+            obj.addProperty("minDist", this.minDist);
+            return obj;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public MutableComponent translation(MinecraftServer server) {
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
+        }
+
+        @Override
+        public Function<PlayerData, Boolean> tickable() {
+            return d -> {
+                ServerPlayer p = d.getPlayer();
+                return p.tickCount % 20 == 0 && p.blockPosition().distSqr(this.pos) < this.minDist * this.minDist;
+            };
+        }
+
+        public static PositionEntry fromJson(JsonObject obj) {
+            return new PositionEntry(new BlockPos(GsonHelper.getAsInt(obj, "x"), GsonHelper.getAsInt(obj, "y"), GsonHelper.getAsInt(obj, "z")),
+                    GsonHelper.getAsInt(obj, "minDist"));
+        }
+    }
+
+    /**
+     * Quest entry to check if a player matches a given location.
+     *
+     * @param location    The LocationPredicate to check
+     * @param description Parsing a location predicate is way too complicated. Its easier instead to have the datapack maker provide a description instead
+     */
+    public record LocationEntry(LocationPredicate location, String description) implements QuestEntry {
+
+        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "location");
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public JsonObject serialize() {
+            JsonObject obj = new JsonObject();
+            obj.add("predicate", this.location.serializeToJson());
+            obj.addProperty("description", this.description);
+            return obj;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public MutableComponent translation(MinecraftServer server) {
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.description);
+        }
+
+        @Override
+        public Function<PlayerData, Boolean> tickable() {
+            return d -> {
+                ServerPlayer p = d.getPlayer();
+                return p.tickCount % 20 == 0 && this.location.matches(p.getLevel(), p.getX(), p.getY(), p.getZ());
+            };
+        }
+
+        public static LocationEntry fromJson(JsonObject obj) {
+            return new LocationEntry(LocationPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsString(obj, "description"));
+        }
+    }
+
+    /**
+     * Quest entry to check if a player matches a given location.
+     *
+     * @param description Parsing a the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
+     */
+    public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount,
+                                      boolean consume,
+                                      String description) implements QuestEntry {
+
+        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public JsonObject serialize() {
+            JsonObject obj = new JsonObject();
+            obj.add("item", this.heldItem.serializeToJson());
+            obj.add("predicate", this.entityPredicate.serializeToJson());
+            obj.addProperty("amount", this.amount);
+            obj.addProperty("consume", this.consume);
+            obj.addProperty("description", this.description);
+            return obj;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public MutableComponent translation(MinecraftServer server) {
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.description);
+        }
+
+        public boolean check(ServerPlayer player, Entity entity) {
+            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.entityPredicate.matches(player, entity);
+            if (b && this.consume && !player.isCreative()) {
+                player.getMainHandItem().shrink(1);
+            }
+            return b;
+        }
+
+        public static EntityInteractEntry fromJson(JsonObject obj) {
+            return new EntityInteractEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null)),
+                    EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")),
+                    GsonHelper.getAsInt(obj, "amount", 1),
+                    GsonHelper.getAsBoolean(obj, "consume", false),
+                    GsonHelper.getAsString(obj, "description"));
+        }
+    }
+
 }

@@ -51,6 +51,8 @@ public class LangManager {
         defaultTranslation.put("simplequests.missing.advancement", "Advancement with id %s missing");
         defaultTranslation.put("simplequests.kill", "Finished kill task %s");
         defaultTranslation.put("simplequests.quest.noexist", "No quest exists with id %s");
+        defaultTranslation.put("simplequests.task", "Finished task %s");
+        defaultTranslation.put("simplequests.interaction.dupe", "You already interacted with this predicate");
 
         defaultTranslation.put("simplequests.accept.requirements", "Missing requirements for quest");
         defaultTranslation.put("simplequests.accept.daily", "You can't repeat this quest again today");
@@ -69,13 +71,17 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put("simplequests:ingredient.single", "%1$s x%2$s");
-        defaultTranslation.put("simplequests:ingredient.multi", "Any of the following x%2$s: %1$s");
+        defaultTranslation.put("simplequests:ingredient.single", "Give %1$s x%2$s");
+        defaultTranslation.put("simplequests:ingredient.single.keep", "Have %1$s x%2$s");
+        defaultTranslation.put("simplequests:ingredient.multi", "Provide any of the following x%2$s: %1$s");
+        defaultTranslation.put("simplequests:ingredient.multi.keep", "Have any of the following x%2$s: %1$s");
         defaultTranslation.put("simplequests:ingredient.no", "<Empty tag/items>");
         defaultTranslation.put("simplequests:xp", "Submit Experience: %s lvl");
         defaultTranslation.put("simplequests:advancement", "Advancement %s");
-        defaultTranslation.put("simplequests:entity", "Kill %1$s x%2$s");
-
+        defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
+        defaultTranslation.put("simplequests:position", "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        defaultTranslation.put("simplequests:location", "%1$s");
+        defaultTranslation.put("simplequests:entity_interact", "%1$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

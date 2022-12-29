@@ -11,6 +11,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -25,6 +26,7 @@ public class SimpleQuestForge {
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
+        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
         QuestEntryRegistry.register();
         ConfigHandler.init();
         SimpleQuests.ftbRanks = ModList.get().isLoaded("ftbranks");
@@ -44,4 +46,8 @@ public class SimpleQuestForge {
         }
     }
 
+    public static void interactSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer)
+            SimpleQuests.onInteractEntity(serverPlayer, event.getTarget(), event.getHand());
+    }
 }
