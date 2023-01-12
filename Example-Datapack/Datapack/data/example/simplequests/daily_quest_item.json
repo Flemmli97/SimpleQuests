@@ -1,0 +1,25 @@
+{
+  "task": "Example for an daily item quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/buried_treasure",
+  "icon": "minecraft:dirt",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": true,
+  "entries": {
+    "interact": {
+      "predicate": {
+        "items": [
+          "minecraft:cod"
+        ]
+      },
+      "description": "Give 5 cods",
+      "amount": 5,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    }
+  }
+}

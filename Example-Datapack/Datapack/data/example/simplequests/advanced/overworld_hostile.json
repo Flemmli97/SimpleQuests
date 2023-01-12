@@ -1,0 +1,53 @@
+{
+  "task": "Slay mobs",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "icon": {
+    "item": "minecraft:diamond_sword",
+    "count": 1,
+    "tag": "{Damage:0}"
+  },
+  "repeat_delay": "1w",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "zombies": {
+      "predicate": {
+        "type": "minecraft:zombie"
+      },
+      "amount": 10,
+      "id": "simplequests:entity"
+    },
+    "zombies_baby": {
+      "predicate": {
+        "type": "minecraft:zombie",
+        "flags": {
+          "is_baby": true
+        }
+      },
+      "amount": 3,
+      "id": "simplequests:entity"
+    },
+    "skeleton": {
+      "predicate": {
+        "type": "minecraft:skeleton"
+      },
+      "amount": 10,
+      "id": "simplequests:entity"
+    },
+    "spiders": {
+      "predicate": {
+        "type": "minecraft:spider"
+      },
+      "amount": 5,
+      "id": "simplequests:entity"
+    },
+    "xp": {
+      "amount": 5,
+      "id": "simplequests:xp"
+    }
+  }
+}

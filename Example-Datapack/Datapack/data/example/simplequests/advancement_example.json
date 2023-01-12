@@ -1,0 +1,22 @@
+{
+  "task": "Example for an advancement quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": {
+    "item": "minecraft:emerald",
+    "count": 5
+  },
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "trade": {
+      "advancement": "minecraft:adventure/trade",
+      "reset": true,
+      "id": "simplequests:advancement"
+    }
+  }
+}

@@ -125,7 +125,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestCategory> {
                 inv.updateStack(i, close);
             } else if (i == 45) {
                 ItemStack stack = new ItemStack(Items.TNT);
-                stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -162,7 +162,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestCategory> {
                 this.slots.get(i).set(stack);
             } else if (i == 45) {
                 ItemStack stack = new ItemStack(Items.TNT);
-                stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.setHoverName(new TextComponent(ConfigHandler.lang.get("simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 this.slots.get(i).set(emptyFiller());

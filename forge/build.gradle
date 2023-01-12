@@ -7,6 +7,22 @@ architectury {
     forge()
 }
 
+loom {
+    forge {
+        dataGen {
+            mod "simplequests"
+        }
+    }
+}
+
+configureLaunch.doLast {
+    def file = file(".gradle/loom-cache/launch.cfg");
+    def cfg = file.getText('UTF-8')
+    cfg = cfg.replaceAll(project(":forge").file("src/generated/resources").absolutePath,
+            rootProject.file("Example-Datapack/Datapack").absolutePath)
+    file.write(cfg, 'UTF-8')
+}
+
 configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
@@ -41,6 +57,7 @@ processResources {
 }
 
 shadowJar {
+    exclude "forge/test/**"
     exclude "fabric.mod.json"
 
     configurations = [project.configurations.shadowCommon]

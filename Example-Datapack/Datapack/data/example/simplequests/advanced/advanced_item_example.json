@@ -1,0 +1,34 @@
+{
+  "task": "Example for an item quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "icon": "minecraft:dirt",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "sword": {
+      "predicate": {
+        "items": [
+          "minecraft:diamond_sword"
+        ],
+        "enchantments": [
+          {
+            "enchantment": "minecraft:sharpness",
+            "levels": {
+              "min": 2,
+              "max": 3
+            }
+          }
+        ]
+      },
+      "description": "Give 1 diamond sword with sharp 2 or 3",
+      "amount": 1,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    }
+  }
+}

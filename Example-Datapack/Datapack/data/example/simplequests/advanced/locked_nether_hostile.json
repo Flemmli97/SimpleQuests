@@ -1,0 +1,40 @@
+{
+  "task": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": true,
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "icon": "minecraft:nether_brick",
+  "repeat_delay": "2w",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "piglin": {
+      "predicate": {
+        "type": "minecraft:zombified_piglin"
+      },
+      "amount": 15,
+      "id": "simplequests:entity"
+    },
+    "blaze": {
+      "predicate": {
+        "type": "minecraft:blaze"
+      },
+      "amount": 5,
+      "id": "simplequests:entity"
+    },
+    "wither_skeleton": {
+      "predicate": {
+        "type": "minecraft:wither_skeleton"
+      },
+      "amount": 5,
+      "id": "simplequests:entity"
+    },
+    "fortress": {
+      "advancement": "minecraft:nether/find_fortress",
+      "reset": false,
+      "id": "simplequests:advancement"
+    }
+  }
+}

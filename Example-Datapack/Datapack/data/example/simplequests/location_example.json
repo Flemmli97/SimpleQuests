@@ -1,0 +1,28 @@
+{
+  "task": "Example for a location quest using a location predicate",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": "minecraft:map",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 1,
+  "daily_quest": false,
+  "entries": {
+    "structure": {
+      "predicate": {
+        "feature": "minecraft:ocean_ruin_warm"
+      },
+      "description": "Find a warm ocean ruin",
+      "id": "simplequests:location"
+    },
+    "structure2": {
+      "predicate": {
+        "feature": "minecraft:ocean_ruin_cold"
+      },
+      "description": "Find a cold ocean ruin",
+      "id": "simplequests:location"
+    }
+  }
+}
