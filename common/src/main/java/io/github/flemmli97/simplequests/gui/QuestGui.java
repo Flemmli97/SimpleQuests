@@ -71,7 +71,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Object> {
     private ItemStack ofQuest(int i, Quest quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
-        ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.icon.copy() : new ItemStack(Items.BOOK);
+        ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
         stack.setHoverName(Component.literal(quest.questTaskString).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
         if (data.isActive(quest)) {

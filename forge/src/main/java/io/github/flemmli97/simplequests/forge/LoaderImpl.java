@@ -12,7 +12,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -31,11 +30,6 @@ public class LoaderImpl implements LoaderHandler {
     @Override
     public ResourceLocation fromEntity(Entity entity) {
         return ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
-    }
-
-    @Override
-    public Item fromID(ResourceLocation id) {
-        return ForgeRegistries.ITEMS.getValue(id);
     }
 
     @Override
