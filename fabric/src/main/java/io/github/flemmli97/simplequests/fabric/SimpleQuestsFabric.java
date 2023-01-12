@@ -7,6 +7,8 @@ import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -32,6 +34,16 @@ public class SimpleQuestsFabric implements ModInitializer {
                 SimpleQuests.onInteractEntity(serverPlayer, entity, hand);
             return InteractionResult.PASS;
         });
+        UseBlockCallback.EVENT.register(((player, world, hand, hitResult) -> {
+            if (player instanceof ServerPlayer serverPlayer)
+                PlayerData.get(serverPlayer).onBlockInteract(hitResult.getBlockPos(), true);
+            return InteractionResult.PASS;
+        }));
+        PlayerBlockBreakEvents.BEFORE.register(((world, player, pos, state, entity) -> {
+            if (player instanceof ServerPlayer serverPlayer)
+                PlayerData.get(serverPlayer).onBlockInteract(pos, false);
+            return true;
+        }));
     }
 
     public static void onDeath(LivingEntity entity, DamageSource source) {

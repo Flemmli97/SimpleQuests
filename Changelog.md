@@ -1,3 +1,9 @@
+Simple Quests 1.3.0
+================
+- Add quest categories
+- Add triggers for breaking and interacting with a block
+  See the wiki for all the syntaxes
+
 Simple Quests 1.2.0
 ================
 - Add support for week, days etc. for quest cooldown.  

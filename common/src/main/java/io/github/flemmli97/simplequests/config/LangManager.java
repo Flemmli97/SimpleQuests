@@ -56,6 +56,8 @@ public class LangManager {
         defaultTranslation.put("simplequests.quest.category.noexist", "No quest category exists with id %s");
         defaultTranslation.put("simplequests.task", "Finished task %s");
         defaultTranslation.put("simplequests.interaction.dupe", "You already interacted with this predicate");
+        defaultTranslation.put("simplequests.interaction.block.dupe.true", "You already interacted with this block");
+        defaultTranslation.put("simplequests.interaction.block.dupe.false", "You already broke this block");
 
         defaultTranslation.put("simplequests.accept.requirements", "Missing requirements for quest");
         defaultTranslation.put("simplequests.accept.daily", "You can't repeat this quest again today");
@@ -89,6 +91,7 @@ public class LangManager {
         defaultTranslation.put("simplequests:position", "Go to [x:%1$s;y:%2$s;z:%3$s]");
         defaultTranslation.put("simplequests:location", "%1$s");
         defaultTranslation.put("simplequests:entity_interact", "%1$s");
+        defaultTranslation.put("simplequests:block_interact", "%1$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

@@ -1,0 +1,26 @@
+{
+  "task": "Example of using block interaction as block place detection",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": "minecraft:emerald_block",
+  "repeat_delay": "1w:5d:3h:2m",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "place": {
+      "item": {
+        "items": [
+          "minecraft:emerald_block"
+        ]
+      },
+      "amount": 3,
+      "use": true,
+      "consumeItem": false,
+      "description": "Place 3 emerald blocks",
+      "id": "simplequests:block_interact"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "task": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": {
+    "item": "minecraft:diamond_pickaxe",
+    "count": 1,
+    "tag": "{Damage:0}"
+  },
+  "repeat_delay": "1w:5d:3h:2m",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "break": {
+      "item": {
+        "items": [
+          "minecraft:diamond_pickaxe"
+        ],
+        "enchantments": [
+          {
+            "enchantment": "minecraft:unbreaking",
+            "levels": {
+              "min": 1
+            }
+          }
+        ]
+      },
+      "block": {
+        "blocks": [
+          "minecraft:quartz_stairs"
+        ],
+        "state": {
+          "facing": "east"
+        }
+      },
+      "amount": 3,
+      "use": false,
+      "consumeItem": false,
+      "description": "Quartz Stairs",
+      "id": "simplequests:block_interact"
+    }
+  }
+}

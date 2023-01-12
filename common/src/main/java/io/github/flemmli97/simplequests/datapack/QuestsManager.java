@@ -101,7 +101,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         categoryBuilder.orderEntriesByValue(QuestCategory::compareTo);
         this.categories = categoryBuilder.build();
         this.selectableCategories = this.categories.entrySet().stream().filter(e -> e.getValue().canBeSelected)
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         this.categoryView = this.categories.values().stream().toList();
 
         Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, Quest>> map = new HashMap<>();

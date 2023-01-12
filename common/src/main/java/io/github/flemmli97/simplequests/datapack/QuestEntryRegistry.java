@@ -20,6 +20,7 @@ public class QuestEntryRegistry {
         map.put(QuestEntryImpls.PositionEntry.id, QuestEntryImpls.PositionEntry::fromJson);
         map.put(QuestEntryImpls.LocationEntry.id, QuestEntryImpls.LocationEntry::fromJson);
         map.put(QuestEntryImpls.EntityInteractEntry.id, QuestEntryImpls.EntityInteractEntry::fromJson);
+        map.put(QuestEntryImpls.BlockInteractEntry.id, QuestEntryImpls.BlockInteractEntry::fromJson);
     }
 
     public static QuestEntry deserialize(ResourceLocation res, JsonObject obj) {
