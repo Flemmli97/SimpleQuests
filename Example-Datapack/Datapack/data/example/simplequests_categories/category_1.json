@@ -1,0 +1,7 @@
+{
+  "name": "Example category 1",
+  "description": [],
+  "icon": "minecraft:diamond_block",
+  "sorting_id": 0,
+  "selectable": true
+}

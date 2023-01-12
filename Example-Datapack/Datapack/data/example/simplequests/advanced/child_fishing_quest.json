@@ -1,0 +1,36 @@
+{
+  "task": "Catch lots of fishes! Needs parent quest completed before doing this quest",
+  "parent_id": "example:item_example",
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "icon": "minecraft:cod",
+  "repeat_delay": "2h",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "fish": {
+      "predicate": {
+        "items": [
+          "minecraft:cod"
+        ]
+      },
+      "description": "Give 15 cods",
+      "amount": 15,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    },
+    "fish_2": {
+      "predicate": {
+        "items": [
+          "minecraft:salmon"
+        ]
+      },
+      "description": "Give 15 salmon",
+      "amount": 15,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    }
+  }
+}

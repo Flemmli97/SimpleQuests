@@ -1,0 +1,18 @@
+{
+  "task": "Example for an xp quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": "minecraft:purpur_block",
+  "repeat_delay": "1w:5d:3h:2m",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "xp": {
+      "amount": 5,
+      "id": "simplequests:xp"
+    }
+  }
+}

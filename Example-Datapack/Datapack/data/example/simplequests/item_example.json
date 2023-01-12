@@ -1,0 +1,25 @@
+{
+  "task": "Example for an item quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": "minecraft:dirt",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "fish": {
+      "predicate": {
+        "items": [
+          "minecraft:cod"
+        ]
+      },
+      "description": "Give 15 cods",
+      "amount": 15,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    }
+  }
+}

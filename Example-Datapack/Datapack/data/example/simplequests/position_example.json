@@ -1,0 +1,21 @@
+{
+  "task": "Example for a simple position quest",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "icon": "minecraft:purpur_block",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "entries": {
+    "place": {
+      "x": 0,
+      "y": 50,
+      "z": 0,
+      "minDist": 15,
+      "id": "simplequests:position"
+    }
+  }
+}
