@@ -57,7 +57,7 @@ processResources {
 }
 
 shadowJar {
-    exclude "forge/test/**"
+    exclude "**/forge/test/**"
     exclude "fabric.mod.json"
 
     configurations = [project.configurations.shadowCommon]
