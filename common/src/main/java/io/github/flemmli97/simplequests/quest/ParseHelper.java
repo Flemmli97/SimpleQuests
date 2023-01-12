@@ -51,10 +51,13 @@ public class ParseHelper {
             return fallback;
         if (e.getAsJsonPrimitive().isNumber())
             return e.getAsInt();
-        String s = e.getAsString();
-        Matcher matcher = DATE_PATTERN.matcher(s);
+        return tryParseTime(e.getAsString(), name);
+    }
+
+    public static int tryParseTime(String time, String id) {
+        Matcher matcher = DATE_PATTERN.matcher(time);
         if (!matcher.matches()) {
-            throw new JsonSyntaxException("Malformed date time for " + name + ".");
+            throw new JsonSyntaxException("Malformed date time for " + id + ".");
         }
         int ticks = 0;
         ticks += asTicks(matcher, "weeks", 12096000);
@@ -86,7 +89,7 @@ public class ParseHelper {
                 return new ItemStack(fallback);
             return stack;
         }
-        ItemStack result = STACK_CODEC.parse(JsonOps.INSTANCE, obj)
+        ItemStack result = STACK_CODEC.parse(JsonOps.INSTANCE, element)
                 .resultOrPartial(SimpleQuests.logger::error).orElse(ItemStack.EMPTY);
         if (result.isEmpty())
             return new ItemStack(fallback);

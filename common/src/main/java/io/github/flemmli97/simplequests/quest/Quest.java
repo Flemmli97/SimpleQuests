@@ -20,6 +20,7 @@ import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class Quest implements Comparable<Quest> {
     public final Map<String, QuestEntry> entries;
 
     public final ResourceLocation id;
+    public final QuestCategory category;
     public final List<ResourceLocation> neededParentQuests;
     public final ResourceLocation loot;
 
@@ -41,8 +43,11 @@ public class Quest implements Comparable<Quest> {
 
     private final ItemStack icon;
 
-    private Quest(ResourceLocation id, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest) {
+    private String repeatDelayString;
+
+    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest) {
         this.id = id;
+        this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
         this.neededParentQuests = parents;
         this.redoParent = redoParent;
@@ -56,7 +61,7 @@ public class Quest implements Comparable<Quest> {
         this.isDailyQuest = isDailyQuest;
     }
 
-    public static Quest of(ResourceLocation id, JsonObject obj) {
+    public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
         ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
         JsonObject entries = GsonHelper.getAsJsonObject(obj, "entries");
         entries.entrySet().forEach(ent -> {
@@ -71,15 +76,15 @@ public class Quest implements Comparable<Quest> {
             if (e.isJsonPrimitive() && !e.getAsString().isEmpty())
                 parents.add(new ResourceLocation(e.getAsString()));
             else if (e.isJsonArray()) {
-                ImmutableList.Builder<ResourceLocation> list = new ImmutableList.Builder<>();
                 e.getAsJsonArray().forEach(ea -> {
                     if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
-                        list.add(new ResourceLocation(ea.getAsString()));
+                        parents.add(new ResourceLocation(ea.getAsString()));
                     }
                 });
             }
         }
         return new Quest(id,
+                category,
                 GsonHelper.getAsString(obj, "task"),
                 parents.build(),
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
@@ -97,6 +102,8 @@ public class Quest implements Comparable<Quest> {
         JsonObject obj = new JsonObject();
         if (withId)
             obj.addProperty("id", this.id.toString());
+        if (this.category != QuestCategory.DEFAULT_CATEGORY)
+            obj.addProperty("category", this.category.id.toString());
         obj.addProperty("task", this.questTaskString);
         if (!this.neededParentQuests.isEmpty() || full) {
             if (this.neededParentQuests.size() == 1)
@@ -114,7 +121,9 @@ public class Quest implements Comparable<Quest> {
         obj.addProperty("loot_table", this.loot.toString());
         ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
                 .ifPresent(icon -> obj.add("icon", icon));
-        if (this.repeatDelay != 0 || full)
+        if (this.repeatDelayString != null)
+            obj.addProperty("repeat_delay", this.repeatDelayString);
+        else if (this.repeatDelay != 0 || full)
             obj.addProperty("repeat_delay", this.repeatDelay);
         if (this.repeatDaily != 0 || full)
             obj.addProperty("repeat_daily", this.repeatDaily);
@@ -175,6 +184,18 @@ public class Quest implements Comparable<Quest> {
         return this.icon.copy();
     }
 
+    /**
+     * For datageneration
+     */
+    private void setDelayString(String repeatDelayString) {
+        this.repeatDelayString = repeatDelayString;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[Quest:%s]", this.id);
+    }
+
     @Override
     public int compareTo(@NotNull Quest quest) {
         if (this.sortingId == quest.sortingId) {
@@ -185,5 +206,94 @@ public class Quest implements Comparable<Quest> {
             return this.id.compareTo(quest.id);
         }
         return Integer.compare(this.sortingId, quest.sortingId);
+    }
+
+    public static class Builder {
+
+        private final Map<String, QuestEntry> entries = new LinkedHashMap<>();
+
+        private final ResourceLocation id;
+        private QuestCategory category = QuestCategory.DEFAULT_CATEGORY;
+        private final List<ResourceLocation> neededParentQuests = new ArrayList<>();
+        private final ResourceLocation loot;
+
+        private int repeatDelay, repeatDaily;
+        private String repeatDelayString;
+
+        private final String questTaskString;
+
+        private boolean redoParent, needsUnlock, isDailyQuest;
+
+        private int sortingId;
+
+        private ItemStack icon = new ItemStack(Items.PAPER);
+
+        public Builder(ResourceLocation id, String task, ResourceLocation loot) {
+            this.id = id;
+            this.questTaskString = task;
+            this.loot = loot;
+        }
+
+        public Builder withCategory(QuestCategory category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder addParent(ResourceLocation parent) {
+            this.neededParentQuests.add(parent);
+            return this;
+        }
+
+        public Builder setRedoParent() {
+            this.redoParent = true;
+            return this;
+        }
+
+        public Builder needsUnlocking() {
+            this.needsUnlock = true;
+            return this;
+        }
+
+        public Builder withIcon(ItemStack stack) {
+            this.icon = stack;
+            return this;
+        }
+
+        public Builder setRepeatDelay(int delay) {
+            this.repeatDelay = delay;
+            return this;
+        }
+
+        public Builder setRepeatDelay(String delay) {
+            this.repeatDelayString = delay;
+            this.repeatDelay = ParseHelper.tryParseTime(this.repeatDelayString, this.repeatDelayString);
+            return this;
+        }
+
+        public Builder setMaxDaily(int max) {
+            this.repeatDaily = max;
+            return this;
+        }
+
+        public Builder withSortingNum(int num) {
+            this.sortingId = num;
+            return this;
+        }
+
+        public Builder addTaskEntry(String name, QuestEntry entry) {
+            this.entries.put(name, entry);
+            return this;
+        }
+
+        public Builder setDailyQuest() {
+            this.isDailyQuest = true;
+            return this;
+        }
+
+        public Quest build() {
+            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock, this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest);
+            quest.setDelayString(this.repeatDelayString);
+            return quest;
+        }
     }
 }

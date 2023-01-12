@@ -8,10 +8,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -31,7 +33,9 @@ public class QuestCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("simplequests")
-                .then(Commands.literal("show").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.show)).executes(QuestCommand::show))
+                .then(Commands.literal("show").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.show)).executes(QuestCommand::show)
+                        .then(Commands.argument("category", ResourceLocationArgument.id())
+                                .requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.showCategory, true)).suggests(QuestCommand::questCategories).executes(QuestCommand::showCategory)))
                 .then(Commands.literal("accept").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.accept))
                         .then(Commands.argument("quest", ResourceLocationArgument.id())
                                 .suggests(QuestCommand::quests).executes(QuestCommand::accept)))
@@ -52,14 +56,28 @@ public class QuestCommand {
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        QuestGui.openGui(player);
+        if (QuestsManager.instance().categories().size() == 1)
+            QuestGui.openGui(player, QuestsManager.instance().categories().get(0));
+        QuestCategoryGui.openGui(player);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int showCategory(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "category");
+        QuestCategory category = QuestsManager.instance().getQuestCategory(id);
+        if (category == null) {
+            ctx.getSource().sendFailure(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id)));
+            return 0;
+        }
+        QuestGui.openGui(player, category);
         return Command.SINGLE_SUCCESS;
     }
 
     private static int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        Quest quest = QuestsManager.instance().getQuests().get(id);
+        Quest quest = QuestsManager.instance().getAllQuests().get(id);
         if (quest == null) {
             ctx.getSource().sendSuccess(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
             return 0;
@@ -129,7 +147,7 @@ public class QuestCommand {
 
     private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
-        if (!QuestsManager.instance().getQuests().containsKey(res)) {
+        if (!QuestsManager.instance().getAllQuests().containsKey(res)) {
             ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.unlock.fail"), res), true);
             return 0;
         }
@@ -154,16 +172,22 @@ public class QuestCommand {
     }
 
     private static List<String> acceptableQuests(ServerPlayer player) {
-        return QuestsManager.instance().getQuests()
+        return QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
                 .filter(e -> PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 
     public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
-        return SharedSuggestionProvider.suggest(QuestsManager.instance().getQuests()
+        return SharedSuggestionProvider.suggest(QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
                 .filter(e -> e.getValue().needsUnlock)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList()), build);
+    }
+
+    public static CompletableFuture<Suggestions> questCategories(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        return SharedSuggestionProvider.suggest(QuestsManager.instance().getCategories()
+                .keySet().stream()
+                .map(ResourceLocation::toString).collect(Collectors.toList()), build);
     }
 }
