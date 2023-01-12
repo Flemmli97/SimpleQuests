@@ -53,6 +53,7 @@ public class LangManager {
         defaultTranslation.put("simplequests.missing.advancement", "Advancement with id %s missing");
         defaultTranslation.put("simplequests.kill", "Finished kill task %s");
         defaultTranslation.put("simplequests.quest.noexist", "No quest exists with id %s");
+        defaultTranslation.put("simplequests.quest.category.noexist", "No quest category exists with id %s");
         defaultTranslation.put("simplequests.task", "Finished task %s");
         defaultTranslation.put("simplequests.interaction.dupe", "You already interacted with this predicate");
 
@@ -71,6 +72,7 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.gui.next", "Next Page");
         defaultTranslation.put("simplequests.gui.prev", "Previous Page");
+        defaultTranslation.put("simplequests.gui.button.main", "Back");
 
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 

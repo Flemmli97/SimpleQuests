@@ -164,7 +164,7 @@ public class PlayerData {
         this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
-                Quest quest = QuestsManager.instance().getQuests().get(res);
+                Quest quest = QuestsManager.instance().getAllQuests().get(res);
                 if (quest != null)
                     this.unlockTracker.remove(quest.id);
             });
@@ -275,7 +275,7 @@ public class PlayerData {
         if (this.questTrackerTime == null || this.questTrackerTime.getDayOfYear() != now.getDayOfYear()) {
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
-                Quest quest = QuestsManager.instance().getQuests().get(r);
+                Quest quest = QuestsManager.instance().getAllQuests().get(r);
                 if (quest != null && quest.isDailyQuest)
                     this.reset(r, true, false);
             });

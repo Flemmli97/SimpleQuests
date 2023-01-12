@@ -170,7 +170,7 @@ public class QuestProgress {
     }
 
     public void load(CompoundTag tag) {
-        this.quest = QuestsManager.instance().getQuests().get(new ResourceLocation(tag.getString("Quest")));
+        this.quest = QuestsManager.instance().getAllQuests().get(new ResourceLocation(tag.getString("Quest")));
         if (this.quest == null)
             SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest"));
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);

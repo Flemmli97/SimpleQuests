@@ -99,7 +99,8 @@ public class QuestEntryImpls {
         public JsonObject serialize() {
             JsonObject obj = new JsonObject();
             obj.add("predicate", this.predicate.serializeToJson());
-            obj.addProperty("description", this.description.getString());
+            if (this.description != null)
+                obj.addProperty("description", this.description.getString());
             obj.addProperty("amount", this.amount);
             obj.addProperty("consumeItems", this.consumeItems);
             return obj;
