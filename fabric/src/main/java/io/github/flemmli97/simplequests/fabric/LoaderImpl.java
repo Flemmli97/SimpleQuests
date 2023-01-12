@@ -16,7 +16,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,11 +31,6 @@ public class LoaderImpl implements LoaderHandler {
     @Override
     public ResourceLocation fromEntity(Entity entity) {
         return Registry.ENTITY_TYPE.getKey(entity.getType());
-    }
-
-    @Override
-    public Item fromID(ResourceLocation id) {
-        return Registry.ITEM.get(id);
     }
 
     @Override

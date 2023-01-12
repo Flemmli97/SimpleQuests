@@ -13,10 +13,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,11 +30,6 @@ public class LoaderImpl implements LoaderHandler {
     @Override
     public ResourceLocation fromEntity(Entity entity) {
         return entity.getType().getRegistryName();
-    }
-
-    @Override
-    public Item fromID(ResourceLocation id) {
-        return ForgeRegistries.ITEMS.getValue(id);
     }
 
     @Override
