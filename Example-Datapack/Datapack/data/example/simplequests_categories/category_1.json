@@ -2,6 +2,8 @@
   "name": "Example category 1",
   "description": [],
   "icon": "minecraft:diamond_block",
+  "only_same_category": false,
+  "max_concurrent_quests": 0,
   "sorting_id": 0,
   "selectable": true
 }

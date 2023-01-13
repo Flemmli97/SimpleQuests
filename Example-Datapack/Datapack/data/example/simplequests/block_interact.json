@@ -9,6 +9,7 @@
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "submission_trigger": "",
   "entries": {
     "task": {
       "block": {
