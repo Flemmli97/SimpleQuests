@@ -86,9 +86,10 @@ public class PlayerData {
         return true;
     }
 
-    public boolean submit(String trigger) {
+    public boolean submit(String trigger, boolean sendFailMessage) {
         if (this.currentQuests.isEmpty()) {
-            this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
+            if (sendFailMessage)
+                this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         boolean any = false;

@@ -35,11 +35,12 @@ public class SimpleQuestAPI {
     /**
      * Try completing accepted quests of the given player
      *
-     * @param trigger String representing a trigger for what quests should be completed.
-     *                Quests without a trigger specified check for empty strings
+     * @param trigger         String representing a trigger for what quests should be completed.
+     *                        Quests without a trigger specified check for empty strings
+     * @param sendFailMessage If true and player has no active quests notifies the player
      */
-    public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @Nonnull String trigger) {
-        return PlayerData.get(serverPlayer).submit(trigger);
+    public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @Nonnull String trigger, boolean sendFailMessage) {
+        return PlayerData.get(serverPlayer).submit(trigger, sendFailMessage);
     }
 
     public interface QuestEntryPredicate<T extends QuestEntry> {
