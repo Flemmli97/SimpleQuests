@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.config.ConfigHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -17,22 +18,32 @@ import java.util.List;
 public class QuestCategory implements Comparable<QuestCategory> {
 
     public static final QuestCategory DEFAULT_CATEGORY = new QuestCategory(new ResourceLocation(SimpleQuests.MODID, "default_category"),
-            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), -1, true);
+            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, true);
 
     public final ResourceLocation id;
     public final String name;
     public final List<String> description;
     private final ItemStack icon;
+    public final boolean sameCategoryOnly;
+    private final int maxConcurrentQuests;
     public final int sortingId;
     public boolean canBeSelected;
 
-    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, int sortingID, boolean canBeSelected) {
+    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, boolean sameCategoryOnly, int maxConcurrentQuests, int sortingID, boolean canBeSelected) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.icon = icon;
+        this.sameCategoryOnly = sameCategoryOnly;
+        this.maxConcurrentQuests = maxConcurrentQuests;
         this.sortingId = sortingID;
         this.canBeSelected = canBeSelected;
+    }
+
+    public int getMaxConcurrentQuests() {
+        if (this.maxConcurrentQuests == -1)
+            return ConfigHandler.config.maxConcurrentQuest;
+        return this.maxConcurrentQuests;
     }
 
     public static QuestCategory of(ResourceLocation id, JsonObject obj) {
@@ -53,6 +64,8 @@ public class QuestCategory implements Comparable<QuestCategory> {
                 GsonHelper.getAsString(obj, "name"),
                 description.build(),
                 ParseHelper.icon(obj, "icon", Items.WRITTEN_BOOK),
+                GsonHelper.getAsBoolean(obj, "only_same_category", false),
+                GsonHelper.getAsInt(obj, "max_concurrent_quests", -1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 GsonHelper.getAsBoolean(obj, "selectable", true));
     }
@@ -71,6 +84,10 @@ public class QuestCategory implements Comparable<QuestCategory> {
         }
         ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.WRITTEN_BOOK)
                 .ifPresent(icon -> obj.add("icon", icon));
+        if (this.sameCategoryOnly || full)
+            obj.addProperty("only_same_category", this.sameCategoryOnly);
+        if (this.maxConcurrentQuests != -1 || full)
+            obj.addProperty("max_concurrent_quests", this.sortingId);
         if (this.sortingId != 0 || full)
             obj.addProperty("sorting_id", this.sortingId);
         if (!this.canBeSelected || full)
@@ -117,6 +134,8 @@ public class QuestCategory implements Comparable<QuestCategory> {
         private ItemStack icon = new ItemStack(Items.WRITTEN_BOOK);
         private int sortingID;
         private boolean canBeSelected = true;
+        private boolean sameCategoryOnly;
+        private int maxConcurrentQuests;
 
         public Builder(ResourceLocation id, String name) {
             this.id = id;
@@ -143,8 +162,18 @@ public class QuestCategory implements Comparable<QuestCategory> {
             return this;
         }
 
+        public Builder countSameCategoryOnly() {
+            this.sameCategoryOnly = true;
+            return this;
+        }
+
+        public Builder setMaxConcurrent(int maxConcurrent) {
+            this.maxConcurrentQuests = maxConcurrent;
+            return this;
+        }
+
         public QuestCategory build() {
-            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sortingID, this.canBeSelected);
+            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sameCategoryOnly, this.maxConcurrentQuests, this.sortingID, this.canBeSelected);
         }
     }
 }

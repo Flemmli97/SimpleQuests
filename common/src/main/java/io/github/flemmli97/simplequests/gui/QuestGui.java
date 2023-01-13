@@ -75,7 +75,8 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
 
             @Override
             public Component getDisplayName() {
-                return new TextComponent(ConfigHandler.lang.get("simplequests.gui.main"));
+                return new TextComponent(category == null || category == QuestCategory.DEFAULT_CATEGORY ?
+                        ConfigHandler.lang.get("simplequests.gui.main") : category.name);
             }
         };
         player.openMenu(fac);

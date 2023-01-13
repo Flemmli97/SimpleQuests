@@ -67,7 +67,9 @@ public class PlayerData {
     }
 
     public boolean acceptQuest(Quest quest) {
-        if (this.currentQuests.stream().filter(p -> !p.getQuest().isDailyQuest).toList().size() >= ConfigHandler.config.maxConcurrentQuest) {
+        int maxConcurrent = quest.category.getMaxConcurrentQuests();
+        if (maxConcurrent > 0 && this.currentQuests.stream()
+                .filter(p -> !p.getQuest().isDailyQuest && !quest.category.sameCategoryOnly || p.getQuest().category == quest.category).toList().size() >= maxConcurrent) {
             this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
         }
