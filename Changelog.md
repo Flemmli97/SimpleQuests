@@ -3,6 +3,8 @@ Simple Quests 1.3.0
 - Add quest categories
 - Add triggers for breaking and interacting with a block
   See the wiki for all the syntaxes
+- Fix mixin metadata missing on forge thus causing the mod to not work properly.
+  How did no one report on this?
 
 Simple Quests 1.2.0
 ================
