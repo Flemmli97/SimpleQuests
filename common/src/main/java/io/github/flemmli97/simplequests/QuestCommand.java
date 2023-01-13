@@ -57,7 +57,7 @@ public class QuestCommand {
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         if (QuestsManager.instance().categories().size() == 1)
-            QuestGui.openGui(player, QuestsManager.instance().categories().get(0));
+            QuestGui.openGui(player, QuestsManager.instance().categories().get(0), false);
         QuestCategoryGui.openGui(player);
         return Command.SINGLE_SUCCESS;
     }
@@ -70,7 +70,7 @@ public class QuestCommand {
             ctx.getSource().sendFailure(new TextComponent(String.format(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id)));
             return 0;
         }
-        QuestGui.openGui(player, category);
+        QuestGui.openGui(player, category, false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -107,7 +107,7 @@ public class QuestCommand {
 
     private static int submit(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        if (PlayerData.get(player).submit(""))
+        if (PlayerData.get(player).submit("", true))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
