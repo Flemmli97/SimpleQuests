@@ -106,7 +106,7 @@ public class QuestCommand {
 
     private static int submit(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        if (PlayerData.get(player).submit())
+        if (PlayerData.get(player).submit(""))
             return Command.SINGLE_SUCCESS;
         return 0;
     }

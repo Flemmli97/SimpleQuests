@@ -10,21 +10,30 @@ import java.util.Map;
 
 public class QuestEntryRegistry {
 
-    private static final Map<ResourceLocation, Deserializer<?>> map = new HashMap<>();
+    private static final Map<ResourceLocation, Deserializer<?>> MAP = new HashMap<>();
 
     public static void register() {
-        map.put(QuestEntryImpls.ItemEntry.id, QuestEntryImpls.ItemEntry::fromJson);
-        map.put(QuestEntryImpls.XPEntry.id, QuestEntryImpls.XPEntry::fromJson);
-        map.put(QuestEntryImpls.AdvancementEntry.id, QuestEntryImpls.AdvancementEntry::fromJson);
-        map.put(QuestEntryImpls.KillEntry.id, QuestEntryImpls.KillEntry::fromJson);
-        map.put(QuestEntryImpls.PositionEntry.id, QuestEntryImpls.PositionEntry::fromJson);
-        map.put(QuestEntryImpls.LocationEntry.id, QuestEntryImpls.LocationEntry::fromJson);
-        map.put(QuestEntryImpls.EntityInteractEntry.id, QuestEntryImpls.EntityInteractEntry::fromJson);
-        map.put(QuestEntryImpls.BlockInteractEntry.id, QuestEntryImpls.BlockInteractEntry::fromJson);
+        registerSerializer(QuestEntryImpls.ItemEntry.id, QuestEntryImpls.ItemEntry::fromJson);
+        registerSerializer(QuestEntryImpls.XPEntry.id, QuestEntryImpls.XPEntry::fromJson);
+        registerSerializer(QuestEntryImpls.AdvancementEntry.id, QuestEntryImpls.AdvancementEntry::fromJson);
+        registerSerializer(QuestEntryImpls.KillEntry.id, QuestEntryImpls.KillEntry::fromJson);
+        registerSerializer(QuestEntryImpls.PositionEntry.id, QuestEntryImpls.PositionEntry::fromJson);
+        registerSerializer(QuestEntryImpls.LocationEntry.id, QuestEntryImpls.LocationEntry::fromJson);
+        registerSerializer(QuestEntryImpls.EntityInteractEntry.id, QuestEntryImpls.EntityInteractEntry::fromJson);
+        registerSerializer(QuestEntryImpls.BlockInteractEntry.id, QuestEntryImpls.BlockInteractEntry::fromJson);
+    }
+
+    /**
+     * Register a deserializer for a {@link QuestEntry}
+     */
+    public static synchronized void registerSerializer(ResourceLocation id, Deserializer<?> deserializer) {
+        if (MAP.containsKey(id))
+            throw new IllegalStateException("Deserializer for " + id + " already registered");
+        MAP.put(id, deserializer);
     }
 
     public static QuestEntry deserialize(ResourceLocation res, JsonObject obj) {
-        Deserializer<?> d = map.get(res);
+        Deserializer<?> d = MAP.get(res);
         if (d != null)
             return d.deserialize(obj);
         throw new IllegalStateException("Missing entry for key " + res);
