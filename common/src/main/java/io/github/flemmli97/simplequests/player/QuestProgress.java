@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.player;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
@@ -58,7 +59,7 @@ public class QuestProgress {
             data.addTickableProgress(this);
     }
 
-    public static QuestEntryPredicate<QuestEntryImpls.KillEntry> createKillPredicate(ServerPlayer player, LivingEntity entity) {
+    public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.KillEntry> createKillPredicate(ServerPlayer player, LivingEntity entity) {
         return (name, entry, prog) -> {
             if (entry.predicate().matches(player, entity)) {
                 int killed = prog.killCounter.compute(name, (res, i) -> i == null ? 1 : ++i);
@@ -68,7 +69,7 @@ public class QuestProgress {
         };
     }
 
-    public static QuestEntryPredicate<QuestEntryImpls.EntityInteractEntry> createInteractionPredicate(ServerPlayer player, Entity entity) {
+    public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.EntityInteractEntry> createInteractionPredicate(ServerPlayer player, Entity entity) {
         return (name, entry, prog) -> {
             Set<UUID> interacted = prog.interactionCounter.computeIfAbsent(name, s -> new HashSet<>());
             if (interacted.contains(entity.getUUID())) {
@@ -84,7 +85,7 @@ public class QuestProgress {
         };
     }
 
-    public static QuestEntryPredicate<QuestEntryImpls.BlockInteractEntry> createBlockInteractionPredicate(ServerPlayer player, BlockPos pos, boolean use) {
+    public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.BlockInteractEntry> createBlockInteractionPredicate(ServerPlayer player, BlockPos pos, boolean use) {
         return (name, entry, prog) -> {
             Set<BlockPos> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> new HashSet<>());
             if (interacted.contains(pos)) {
@@ -115,7 +116,7 @@ public class QuestProgress {
         return this.quest;
     }
 
-    public SubmitType submit(ServerPlayer player) {
+    public SubmitType submit(ServerPlayer player, String trigger) {
         boolean any = false;
         for (Map.Entry<String, QuestEntry> entry : this.quest.entries.entrySet()) {
             if (this.entries.contains(entry.getKey()))
@@ -125,12 +126,12 @@ public class QuestProgress {
                 any = true;
             }
         }
-        boolean b = this.isCompleted();
+        boolean b = this.isCompleted(trigger);
         return b ? SubmitType.COMPLETE : any ? SubmitType.PARTIAL : SubmitType.NOTHING;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends QuestEntry> Set<T> tryFullFill(Class<T> clss, QuestEntryPredicate<T> pred) {
+    public <T extends QuestEntry> Set<T> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred) {
         Set<T> fullfilled = new HashSet<>();
         for (Map.Entry<String, QuestEntry> e : this.quest.entries.entrySet()) {
             if (this.entries.contains(e.getKey()))
@@ -146,8 +147,8 @@ public class QuestProgress {
         return fullfilled;
     }
 
-    public boolean isCompleted() {
-        return this.entries.containsAll(this.quest.entries.keySet());
+    public boolean isCompleted(String trigger) {
+        return this.quest.questSubmissionTrigger.equals(trigger) && this.entries.containsAll(this.quest.entries.keySet());
     }
 
     public List<String> finishedTasks() {
@@ -220,11 +221,5 @@ public class QuestProgress {
         COMPLETE,
         PARTIAL,
         NOTHING
-    }
-
-    interface QuestEntryPredicate<T extends QuestEntry> {
-
-        boolean matches(String entryName, T entry, QuestProgress progress);
-
     }
 }

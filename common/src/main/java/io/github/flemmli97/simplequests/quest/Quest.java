@@ -35,7 +35,7 @@ public class Quest implements Comparable<Quest> {
 
     public final int repeatDelay, repeatDaily;
 
-    public final String questTaskString;
+    public final String questTaskString, questSubmissionTrigger;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -45,7 +45,7 @@ public class Quest implements Comparable<Quest> {
 
     private String repeatDelayString;
 
-    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest) {
+    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest, String questSubmissionTrigger) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
@@ -59,6 +59,7 @@ public class Quest implements Comparable<Quest> {
         this.sortingId = sortingId;
         this.icon = icon;
         this.isDailyQuest = isDailyQuest;
+        this.questSubmissionTrigger = questSubmissionTrigger;
     }
 
     public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
@@ -95,7 +96,8 @@ public class Quest implements Comparable<Quest> {
                 GsonHelper.getAsInt(obj, "repeat_daily", 0),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build(),
-                GsonHelper.getAsBoolean(obj, "daily_quest", false));
+                GsonHelper.getAsBoolean(obj, "daily_quest", false),
+                GsonHelper.getAsString(obj, "submission_trigger", ""));
     }
 
     public JsonObject serialize(boolean withId, boolean full) {
@@ -131,6 +133,8 @@ public class Quest implements Comparable<Quest> {
             obj.addProperty("sorting_id", this.sortingId);
         if (this.isDailyQuest || full)
             obj.addProperty("daily_quest", this.isDailyQuest);
+        if (!this.questSubmissionTrigger.isEmpty() || full)
+            obj.addProperty("submission_trigger", this.questSubmissionTrigger);
         JsonObject entries = new JsonObject();
         this.entries.forEach((res, entry) -> {
             JsonObject val = entry.serialize();
@@ -219,6 +223,7 @@ public class Quest implements Comparable<Quest> {
 
         private int repeatDelay, repeatDaily;
         private String repeatDelayString;
+        private String submissionTrigger = "";
 
         private final String questTaskString;
 
@@ -290,8 +295,13 @@ public class Quest implements Comparable<Quest> {
             return this;
         }
 
+        public Builder withSubmissionTrigger(String trigger) {
+            this.submissionTrigger = trigger;
+            return this;
+        }
+
         public Quest build() {
-            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock, this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest);
+            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock, this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest, this.submissionTrigger);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }

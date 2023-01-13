@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.player;
 
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
@@ -87,7 +88,7 @@ public class PlayerData {
         return true;
     }
 
-    public boolean submit() {
+    public boolean submit(String trigger) {
         if (this.currentQuests.isEmpty()) {
             this.player.sendMessage(new TextComponent(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
@@ -95,7 +96,7 @@ public class PlayerData {
         boolean any = false;
         List<QuestProgress> completed = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
-            switch (prog.submit(this.player)) {
+            switch (prog.submit(this.player, trigger)) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
@@ -109,7 +110,11 @@ public class PlayerData {
         return any;
     }
 
-    public <T extends QuestEntry> void tryFullFill(Class<T> clss, QuestProgress.QuestEntryPredicate<T> pred, Consumer<T> onFullfill) {
+    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, Consumer<T> onFullfill) {
+        this.tryFullFill(clss, pred, onFullfill, "");
+    }
+
+    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, Consumer<T> onFullfill, String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
             Set<T> fulfilled = prog.tryFullFill(clss, pred);
@@ -117,7 +122,7 @@ public class PlayerData {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(onFullfill);
             }
-            if (prog.isCompleted()) {
+            if (prog.isCompleted(trigger)) {
                 this.completeQuest(prog);
                 completed.add(prog);
             }
@@ -266,7 +271,7 @@ public class PlayerData {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.getSecond().forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
             }
-            if (prog.isCompleted()) {
+            if (prog.isCompleted("")) {
                 this.completeQuest(prog);
                 completed.add(prog);
                 return true;
