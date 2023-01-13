@@ -31,7 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,7 +122,8 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
-            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
+            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
+                    || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
         });
         this.maxPages = (this.quests.size() - 1) / QUEST_PER_PAGE;
         int id = 0;

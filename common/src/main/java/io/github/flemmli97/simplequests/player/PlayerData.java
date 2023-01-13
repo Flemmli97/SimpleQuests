@@ -67,7 +67,8 @@ public class PlayerData {
     public boolean acceptQuest(Quest quest) {
         int maxConcurrent = quest.category.getMaxConcurrentQuests();
         if (maxConcurrent > 0 && this.currentQuests.stream()
-                .filter(p -> !p.getQuest().isDailyQuest && !quest.category.sameCategoryOnly || p.getQuest().category == quest.category).toList().size() >= maxConcurrent) {            this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
+                .filter(p -> !p.getQuest().isDailyQuest && !quest.category.sameCategoryOnly || p.getQuest().category == quest.category).toList().size() >= maxConcurrent) {
+            this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         if (this.isActive(quest)) {
@@ -227,7 +228,8 @@ public class PlayerData {
         if (quest.isDailyQuest || quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
             return AcceptType.LOCKED;
         }
-        if (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests)) {
+        if (!quest.unlockCondition.matches(this.player, this.player)
+                || (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests))) {
             return AcceptType.REQUIREMENTS;
         }
         if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
@@ -372,6 +374,7 @@ public class PlayerData {
     }
 
     public enum AcceptType {
+
         REQUIREMENTS("simplequests.accept.requirements"),
         DAILYFULL("simplequests.accept.daily"),
         DELAY("simplequests.accept.delay"),
