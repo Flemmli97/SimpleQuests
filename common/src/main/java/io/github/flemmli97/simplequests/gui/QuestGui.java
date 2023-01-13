@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +75,8 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
 
             @Override
             public Component getDisplayName() {
-                return Component.literal(ConfigHandler.lang.get("simplequests.gui.main"));
+                return Component.literal(category == null || category == QuestCategory.DEFAULT_CATEGORY ?
+                        ConfigHandler.lang.get("simplequests.gui.main") : category.name);
             }
         };
         player.openMenu(fac);
