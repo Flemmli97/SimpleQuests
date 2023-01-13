@@ -6,6 +6,7 @@ import io.github.flemmli97.simplequests.datapack.provider.QuestProvider;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -13,7 +14,9 @@ import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -24,6 +27,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -96,6 +101,27 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .withIcon(new ItemStack(Items.PURPUR_BLOCK))
                 .addTaskEntry("xp", new QuestEntryImpls.XPEntry(5))
                 .build());
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "block_interact"),
+                "Example for block interaction task",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay("1w:5d:3h:2m")
+                .withIcon(new ItemStack(Items.PURPUR_BLOCK))
+                .addTaskEntry("task", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.ANY, BlockPredicate.Builder.block().of(Blocks.CHEST).build(), 3, true, false, "Interact with chest x3"))
+                .build());
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "block_break"),
+                "Example for block breaking task",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay("1w:5d:3h:2m")
+                .withIcon(new ItemStack(Items.PURPUR_BLOCK))
+                .addTaskEntry("break", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.DIAMOND_PICKAXE).build(), BlockPredicate.Builder.block().of(Blocks.DIAMOND_ORE).build(), 3, false, false, "Mine diamond ore x3"))
+                .build());
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "block_place"),
+                "Example of using block interaction as block place detection",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay("1w:5d:3h:2m")
+                .withIcon(new ItemStack(Items.EMERALD_BLOCK))
+                .addTaskEntry("place", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), BlockPredicate.ANY, 3, true, false, "Place 3 emerald blocks"))
+                .build());
 
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "daily_quest_item"),
                 "Example for an daily item quest",
@@ -145,6 +171,16 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .withIcon(new ItemStack(Items.COD))
                 .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.COD).build(), 15, "Give 15 cods", true))
                 .addTaskEntry("fish_2", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.SALMON).build(), 15, "Give 15 salmon", true))
+                .build());
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "advanced/advanced_block_break"),
+                "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay("1w:5d:3h:2m")
+                .withIcon(new ItemStack(Items.DIAMOND_PICKAXE))
+                .addTaskEntry("break", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.DIAMOND_PICKAXE)
+                        .hasEnchantment(new EnchantmentPredicate(Enchantments.UNBREAKING, MinMaxBounds.Ints.atLeast(1))).build(),
+                        BlockPredicate.Builder.block().of(Blocks.QUARTZ_STAIRS)
+                                .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(HorizontalDirectionalBlock.FACING, Direction.EAST).build()).build(), 3, false, false, "Quartz Stairs"))
                 .build());
 
         QuestCategory category = new QuestCategory.Builder(new ResourceLocation("example", "category_1"), "Example category 1")

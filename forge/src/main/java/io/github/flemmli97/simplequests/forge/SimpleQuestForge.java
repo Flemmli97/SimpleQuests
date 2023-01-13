@@ -12,6 +12,8 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -27,6 +29,8 @@ public class SimpleQuestForge {
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
+        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactBlock);
+        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::breakBlock);
         QuestEntryRegistry.register();
         ConfigHandler.init();
         SimpleQuests.ftbRanks = ModList.get().isLoaded("ftbranks");
@@ -49,5 +53,15 @@ public class SimpleQuestForge {
     public static void interactSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer)
             SimpleQuests.onInteractEntity(serverPlayer, event.getTarget(), event.getHand());
+    }
+
+    public static void interactBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer && event.getUseBlock() != Event.Result.DENY)
+            PlayerData.get(serverPlayer).onBlockInteract(event.getPos(), true);
+    }
+
+    public static void breakBlock(BlockEvent.BreakEvent event) {
+        if (event.getPlayer() instanceof ServerPlayer serverPlayer)
+            PlayerData.get(serverPlayer).onBlockInteract(event.getPos(), false);
     }
 }

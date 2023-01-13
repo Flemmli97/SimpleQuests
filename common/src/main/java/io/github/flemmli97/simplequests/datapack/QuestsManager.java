@@ -12,7 +12,6 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
@@ -20,9 +19,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +57,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
     private Map<ResourceLocation, JsonElement> readFiles(ResourceManager resourceManager, String directory) {
         int i = directory.length() + 1;
         Map<ResourceLocation, JsonElement> map = Maps.newHashMap();
-        resourceManager.listResources(directory, file -> file.getPath().endsWith(".json")).forEach((fileRes, resource)-> {
+        resourceManager.listResources(directory, file -> file.getPath().endsWith(".json")).forEach((fileRes, resource) -> {
             String path = fileRes.getPath();
             ResourceLocation id = new ResourceLocation(fileRes.getNamespace(), path.substring(i, path.length() - PATH_SUFFIX_LENGTH));
             try (BufferedReader reader = resource.openAsReader()) {
@@ -97,7 +93,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         categoryBuilder.orderEntriesByValue(QuestCategory::compareTo);
         this.categories = categoryBuilder.build();
         this.selectableCategories = this.categories.entrySet().stream().filter(e -> e.getValue().canBeSelected)
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         this.categoryView = this.categories.values().stream().toList();
 
         Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, Quest>> map = new HashMap<>();

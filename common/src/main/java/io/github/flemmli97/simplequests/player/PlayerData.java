@@ -5,8 +5,10 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestEntry;
+import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -33,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class PlayerData {
 
@@ -104,13 +107,13 @@ public class PlayerData {
         return any;
     }
 
-    public void onKill(LivingEntity entity) {
+    public <T extends QuestEntry> void tryFullFill(Class<T> clss, QuestProgress.QuestEntryPredicate<T> pred, Consumer<T> onFullfill) {
         List<QuestProgress> completed = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
-            Set<QuestEntry> fulfilled = prog.onKill(this.player, entity);
+            Set<T> fulfilled = prog.tryFullFill(clss, pred);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                fulfilled.forEach(onFullfill);
             }
             if (prog.isCompleted()) {
                 this.completeQuest(prog);
@@ -120,23 +123,22 @@ public class PlayerData {
         this.currentQuests.removeAll(completed);
     }
 
+    public void onKill(LivingEntity entity) {
+        this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
+                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+    }
+
     public void onInteractWith(Entity entity) {
         if (this.interactionCooldown > 0)
             return;
         this.interactionCooldown = 2;
-        List<QuestProgress> completed = new ArrayList<>();
-        this.currentQuests.forEach(prog -> {
-            Set<QuestEntry> fulfilled = prog.onInteractWith(this.player, entity);
-            if (!fulfilled.isEmpty()) {
-                this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
-            }
-            if (prog.isCompleted()) {
-                this.completeQuest(prog);
-                completed.add(prog);
-            }
-        });
-        this.currentQuests.removeAll(completed);
+        this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
+                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+    }
+
+    public void onBlockInteract(BlockPos pos, boolean use) {
+        this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
+                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     private void completeQuest(QuestProgress prog) {

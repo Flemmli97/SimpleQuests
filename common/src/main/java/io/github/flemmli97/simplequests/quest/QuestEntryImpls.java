@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
@@ -407,4 +408,61 @@ public class QuestEntryImpls {
         }
     }
 
+
+    /**
+     * Quest entry to check when a player interacts with a block
+     *
+     * @param use If the player should use (right click) or break the block
+     */
+    public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
+                                     boolean consumeItem, String description) implements QuestEntry {
+
+        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "block_interact");
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public JsonObject serialize() {
+            JsonObject obj = new JsonObject();
+            obj.add("item", this.heldItem.serializeToJson());
+            obj.add("block", this.blockPredicate.serializeToJson());
+            obj.addProperty("amount", this.amount);
+            obj.addProperty("use", this.use);
+            obj.addProperty("consumeItem", this.consumeItem);
+            obj.addProperty("description", this.description);
+            return obj;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public MutableComponent translation(MinecraftServer server) {
+            return Component.translatable(ConfigHandler.lang.get(this.getId().toString()), this.description);
+        }
+
+        public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
+            if (use != this.use)
+                return false;
+            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.blockPredicate.matches(player.getLevel(), pos);
+            if (b && this.consumeItem && !player.isCreative()) {
+                player.getMainHandItem().shrink(1);
+            }
+            return b;
+        }
+
+        public static BlockInteractEntry fromJson(JsonObject obj) {
+            return new BlockInteractEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null)),
+                    BlockPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "block")),
+                    GsonHelper.getAsInt(obj, "amount", 1),
+                    GsonHelper.getAsBoolean(obj, "use"),
+                    GsonHelper.getAsBoolean(obj, "consumeItem", false),
+                    GsonHelper.getAsString(obj, "description"));
+        }
+    }
 }
