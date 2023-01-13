@@ -71,7 +71,8 @@ public abstract class QuestProvider implements DataProvider {
         return "Quests";
     }
 
-    public void addQuest(Quest quest) {
+    public void addQuest(Quest.Builder builder) {
+        Quest quest = builder.build();
         if (quest.category != QuestCategory.DEFAULT_CATEGORY) {
             QuestCategory prev = this.categories.get(quest.category.id);
             if (prev != null && prev != quest.category)
