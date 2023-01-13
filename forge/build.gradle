@@ -12,6 +12,7 @@ loom {
         dataGen {
             mod "simplequests"
         }
+        mixinConfigs = ["simplequests.mixins.json"]
     }
 }
 
