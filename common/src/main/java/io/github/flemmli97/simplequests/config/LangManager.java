@@ -4,6 +4,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.player.PlayerData;
+import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,12 +61,12 @@ public class LangManager {
         defaultTranslation.put("simplequests.interaction.block.dupe.true", "You already interacted with this block");
         defaultTranslation.put("simplequests.interaction.block.dupe.false", "You already broke this block");
 
-        defaultTranslation.put("simplequests.accept.requirements", "Missing requirements for quest");
-        defaultTranslation.put("simplequests.accept.daily", "You can't repeat this quest again today");
-        defaultTranslation.put("simplequests.accept.delay", "Quest on cooldown for %s");
-        defaultTranslation.put("simplequests.accept.onetime", "This is a onetime quest");
-        defaultTranslation.put("simplequests.accept.yes", "Quest acceptable");
-        defaultTranslation.put("simplequests.accept.locked", "You can't accept this quest");
+        defaultTranslation.put(PlayerData.AcceptType.REQUIREMENTS.langKey(), "Missing requirements for quest");
+        defaultTranslation.put(PlayerData.AcceptType.DAILYFULL.langKey(), "You can't repeat this quest again today");
+        defaultTranslation.put(PlayerData.AcceptType.DELAY.langKey(), "Quest on cooldown for %s");
+        defaultTranslation.put(PlayerData.AcceptType.ONETIME.langKey(), "This is a onetime quest");
+        defaultTranslation.put(PlayerData.AcceptType.ACCEPT.langKey(), "Quest acceptable");
+        defaultTranslation.put(PlayerData.AcceptType.LOCKED.langKey(), "You can't accept this quest");
 
         defaultTranslation.put("simplequests.gui.main", "Quests");
         defaultTranslation.put("simplequests.gui.confirm", "Accept this quest?");
@@ -78,20 +80,20 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put("simplequests:item.single", "Give %1$s x%2$s");
-        defaultTranslation.put("simplequests:item.single.keep", "Have %1$s x%2$s");
-        defaultTranslation.put("simplequests:item.multi", "Provide any of the following x%2$s: %1$s");
-        defaultTranslation.put("simplequests:item.multi.keep", "Have any of the following x%2$s: %1$s");
-        defaultTranslation.put("simplequests:item.empty", "<Empty tag/items>");
-        defaultTranslation.put("simplequests:entity", "Kill entity %s");
-        defaultTranslation.put("simplequests:entity.tag", "Kill entities in the tag %s");
-        defaultTranslation.put("simplequests:xp", "Submit Experience: %s lvl");
-        defaultTranslation.put("simplequests:advancement", "Advancement %s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".single", "Give %1$s x%2$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".single.keep", "Have %1$s x%2$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".multi", "Provide any of the following x%2$s: %1$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".multi.keep", "Have any of the following x%2$s: %1$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".empty", "<Empty tag/items>");
+        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id.toString(), "Kill entity %s");
+        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id + ".tag", "Kill entities in the tag %s");
+        defaultTranslation.put(QuestEntryImpls.XPEntry.id.toString(), "Submit Experience: %s lvl");
+        defaultTranslation.put(QuestEntryImpls.AdvancementEntry.id.toString(), "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
-        defaultTranslation.put("simplequests:position", "Go to [x:%1$s;y:%2$s;z:%3$s]");
-        defaultTranslation.put("simplequests:location", "%1$s");
-        defaultTranslation.put("simplequests:entity_interact", "%1$s");
-        defaultTranslation.put("simplequests:block_interact", "%1$s");
+        defaultTranslation.put(QuestEntryImpls.PositionEntry.id.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        defaultTranslation.put(QuestEntryImpls.LocationEntry.id.toString(), "%1$s");
+        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id.toString(), "%1$s");
+        defaultTranslation.put(QuestEntryImpls.BlockInteractEntry.id.toString(), "%1$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +46,11 @@ public class Quest implements Comparable<Quest> {
 
     private String repeatDelayString;
 
-    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock, ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries, boolean isDailyQuest, String questSubmissionTrigger) {
+    public final EntityPredicate unlockCondition;
+
+    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
+                  ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
+                  boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
@@ -60,6 +65,7 @@ public class Quest implements Comparable<Quest> {
         this.icon = icon;
         this.isDailyQuest = isDailyQuest;
         this.questSubmissionTrigger = questSubmissionTrigger;
+        this.unlockCondition = unlockCondition;
     }
 
     public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
@@ -97,7 +103,8 @@ public class Quest implements Comparable<Quest> {
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 builder.build(),
                 GsonHelper.getAsBoolean(obj, "daily_quest", false),
-                GsonHelper.getAsString(obj, "submission_trigger", ""));
+                GsonHelper.getAsString(obj, "submission_trigger", ""),
+                EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
     }
 
     public JsonObject serialize(boolean withId, boolean full) {
@@ -120,6 +127,8 @@ public class Quest implements Comparable<Quest> {
             obj.addProperty("redo_parent", this.redoParent);
         if (this.needsUnlock || full)
             obj.addProperty("need_unlock", this.needsUnlock);
+        if (this.unlockCondition != EntityPredicate.ANY || full)
+            obj.add("unlock_condition", this.unlockCondition.serializeToJson());
         obj.addProperty("loot_table", this.loot.toString());
         ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
                 .ifPresent(icon -> obj.add("icon", icon));
@@ -231,6 +240,8 @@ public class Quest implements Comparable<Quest> {
 
         private int sortingId;
 
+        private EntityPredicate unlockCondition = EntityPredicate.ANY;
+
         private ItemStack icon = new ItemStack(Items.PAPER);
 
         public Builder(ResourceLocation id, String task, ResourceLocation loot) {
@@ -300,8 +311,14 @@ public class Quest implements Comparable<Quest> {
             return this;
         }
 
+        public Builder withUnlockCondition(EntityPredicate unlockCondition) {
+            this.unlockCondition = unlockCondition;
+            return this;
+        }
+
         public Quest build() {
-            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock, this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest, this.submissionTrigger);
+            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock,
+                    this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest, this.submissionTrigger, this.unlockCondition);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }

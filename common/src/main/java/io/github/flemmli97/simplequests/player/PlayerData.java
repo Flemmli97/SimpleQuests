@@ -230,7 +230,8 @@ public class PlayerData {
         if (quest.isDailyQuest || quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
             return AcceptType.LOCKED;
         }
-        if (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests)) {
+        if (!quest.unlockCondition.matches(this.player, this.player)
+                || (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests))) {
             return AcceptType.REQUIREMENTS;
         }
         if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
@@ -375,6 +376,7 @@ public class PlayerData {
     }
 
     public enum AcceptType {
+
         REQUIREMENTS("simplequests.accept.requirements"),
         DAILYFULL("simplequests.accept.daily"),
         DELAY("simplequests.accept.delay"),
