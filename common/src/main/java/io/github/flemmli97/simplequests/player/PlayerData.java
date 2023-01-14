@@ -68,19 +68,19 @@ public class PlayerData {
         int maxConcurrent = quest.category.getMaxConcurrentQuests();
         if (maxConcurrent > 0 && this.currentQuests.stream()
                 .filter(p -> !p.getQuest().isDailyQuest && !quest.category.sameCategoryOnly || p.getQuest().category == quest.category).toList().size() >= maxConcurrent) {
-            this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         if (this.isActive(quest)) {
-            this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED));
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         AcceptType type = this.canAcceptQuest(quest);
         if (type != AcceptType.ACCEPT) {
             if (type == AcceptType.DELAY)
-                this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(String.format(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(quest))).withStyle(ChatFormatting.DARK_RED));
             else
-                this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         this.currentQuests.add(new QuestProgress(quest, this));
@@ -91,7 +91,7 @@ public class PlayerData {
     public boolean submit(String trigger, boolean sendFailMessage) {
         if (this.currentQuests.isEmpty()) {
             if (sendFailMessage)
-                this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         boolean any = false;
@@ -176,7 +176,7 @@ public class PlayerData {
         this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
         this.unlockTracker.add(prog.getQuest().id);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-        this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_GREEN));
+        this.player.sendSystemMessage(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().getTask())).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
                 Quest quest = QuestsManager.instance().getAllQuests().get(res);
@@ -193,7 +193,7 @@ public class PlayerData {
     public void reset(ResourceLocation res, boolean forced, boolean sendMsg) {
         if (this.currentQuests.isEmpty()) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
             return;
         }
         QuestProgress prog = null;
@@ -205,17 +205,17 @@ public class PlayerData {
         }
         if (prog == null) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get("simplequests.reset.notfound"), res)).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.reset.notfound"), res)).withStyle(ChatFormatting.DARK_RED));
             return;
         }
         if (!forced && this.resetTick == -1) {
             this.resetTick = this.player.level.getGameTime();
             if (sendMsg)
-                this.player.sendSystemMessage(Component.literal(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED));
             return;
         } else if (forced || this.player.level.getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.literal(String.format(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().getTask())).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
         }
         this.resetTick = -1;

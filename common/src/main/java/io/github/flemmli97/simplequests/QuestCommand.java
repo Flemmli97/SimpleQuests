@@ -66,7 +66,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "category");
         QuestCategory category = QuestsManager.instance().getQuestCategory(id);
         if (category == null) {
-            ctx.getSource().sendFailure(Component.literal(String.format(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id)));
+            ctx.getSource().sendFailure(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id)));
             return 0;
         }
         QuestGui.openGui(player, category, false);
@@ -78,7 +78,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         Quest quest = QuestsManager.instance().getAllQuests().get(id);
         if (quest == null) {
-            ctx.getSource().sendSuccess(Component.literal(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
+            ctx.getSource().sendSuccess(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(quest))
@@ -91,7 +91,7 @@ public class QuestCommand {
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(Component.literal(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().questTaskString)).withStyle(ChatFormatting.GOLD), false);
+                ctx.getSource().sendSuccess(Component.translatable(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask())).withStyle(ChatFormatting.GOLD), false);
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
@@ -99,7 +99,7 @@ public class QuestCommand {
             });
             return Command.SINGLE_SUCCESS;
         } else {
-            ctx.getSource().sendSuccess(Component.literal(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
+            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
         }
         return 0;
     }
@@ -113,7 +113,7 @@ public class QuestCommand {
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
         ConfigHandler.reloadConfigs();
-        ctx.getSource().sendSuccess(Component.literal(ConfigHandler.lang.get("simplequests.reload")), true);
+        ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reload")), true);
         return Command.SINGLE_SUCCESS;
     }
 

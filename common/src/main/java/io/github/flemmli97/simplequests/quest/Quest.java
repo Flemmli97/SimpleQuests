@@ -37,7 +37,8 @@ public class Quest implements Comparable<Quest> {
 
     public final int repeatDelay, repeatDaily;
 
-    public final String questTaskString, questSubmissionTrigger;
+    private final String questTaskString;
+    public final String questSubmissionTrigger;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -159,8 +160,12 @@ public class Quest implements Comparable<Quest> {
         return obj;
     }
 
+    public MutableComponent getTask() {
+        return Component.translatable(this.questTaskString);
+    }
+
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
-        MutableComponent main = Component.literal("").append(Component.literal(this.questTaskString).withStyle(ChatFormatting.LIGHT_PURPLE));
+        MutableComponent main = Component.literal("").append(this.getTask().withStyle(ChatFormatting.LIGHT_PURPLE));
         for (MutableComponent tasks : this.getFormattedTasks(server)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));
