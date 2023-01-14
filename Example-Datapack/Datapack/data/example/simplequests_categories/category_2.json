@@ -3,7 +3,7 @@
   "description": [],
   "icon": "minecraft:beacon",
   "only_same_category": false,
-  "max_concurrent_quests": 0,
+  "max_concurrent_quests": -1,
   "sorting_id": 0,
   "selectable": false
 }

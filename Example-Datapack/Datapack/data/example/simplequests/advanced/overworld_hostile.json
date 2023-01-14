@@ -4,6 +4,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "icon": {
     "item": "minecraft:diamond_sword",
     "count": 1,

@@ -77,7 +77,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("3d:5h")
                 .withIcon(new ItemStack(Items.PURPUR_BLOCK))
-                .addTaskEntry("cows", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.COW)).build(), 15)));
+                .addTaskEntry("cows", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.COW)).build(), 15, "")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "location_example"),
                 "Example for a location quest using a location predicate",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -89,7 +89,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 "Example for a simple position quest",
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withIcon(new ItemStack(Items.PURPUR_BLOCK))
-                .addTaskEntry("place", new QuestEntryImpls.PositionEntry(new BlockPos(0, 50, 0), 15)));
+                .addTaskEntry("place", new QuestEntryImpls.PositionEntry(new BlockPos(0, 50, 0), 15, "")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "xp_example"),
                 "Example for an xp quest",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -135,11 +135,11 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/end_city_treasure"))
                 .setRepeatDelay("1w")
                 .withIcon(new ItemStack(Items.DIAMOND_SWORD))
-                .addTaskEntry("zombies", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.ZOMBIE)).build(), 10))
+                .addTaskEntry("zombies", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.ZOMBIE)).build(), 10, ""))
                 .addTaskEntry("zombies_baby", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.ZOMBIE))
-                        .flags(EntityFlagsPredicate.Builder.flags().setIsBaby(true).build()).build(), 3))
-                .addTaskEntry("skeleton", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.SKELETON)).build(), 10))
-                .addTaskEntry("spiders", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.SPIDER)).build(), 5))
+                        .flags(EntityFlagsPredicate.Builder.flags().setIsBaby(true).build()).build(), 3, ""))
+                .addTaskEntry("skeleton", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.SKELETON)).build(), 10, ""))
+                .addTaskEntry("spiders", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.SPIDER)).build(), 5, ""))
                 .addTaskEntry("xp", new QuestEntryImpls.XPEntry(5)));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "advanced/locked_nether_hostile"),
                 "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
@@ -147,9 +147,9 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .setRepeatDelay("2w")
                 .needsUnlocking()
                 .withIcon(new ItemStack(Items.NETHER_BRICK))
-                .addTaskEntry("piglin", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.ZOMBIFIED_PIGLIN)).build(), 15))
-                .addTaskEntry("blaze", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.BLAZE)).build(), 5))
-                .addTaskEntry("wither_skeleton", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.WITHER_SKELETON)).build(), 5))
+                .addTaskEntry("piglin", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.ZOMBIFIED_PIGLIN)).build(), 15, ""))
+                .addTaskEntry("blaze", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.BLAZE)).build(), 5, ""))
+                .addTaskEntry("wither_skeleton", new QuestEntryImpls.KillEntry(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.WITHER_SKELETON)).build(), 5, ""))
                 .addTaskEntry("fortress", new QuestEntryImpls.AdvancementEntry(new ResourceLocation("minecraft:nether/find_fortress"), false)));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "advanced/child_fishing_quest"),
                 "Catch lots of fishes! Needs parent quest completed before doing this quest",

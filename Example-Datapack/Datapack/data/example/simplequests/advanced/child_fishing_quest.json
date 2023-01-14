@@ -4,6 +4,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "icon": "minecraft:cod",
   "repeat_delay": "2h",
   "repeat_daily": 0,
