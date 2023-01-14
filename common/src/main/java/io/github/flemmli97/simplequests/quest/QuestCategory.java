@@ -87,7 +87,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         if (this.sameCategoryOnly || full)
             obj.addProperty("only_same_category", this.sameCategoryOnly);
         if (this.maxConcurrentQuests != -1 || full)
-            obj.addProperty("max_concurrent_quests", this.sortingId);
+            obj.addProperty("max_concurrent_quests", this.maxConcurrentQuests);
         if (this.sortingId != 0 || full)
             obj.addProperty("sorting_id", this.sortingId);
         if (!this.canBeSelected || full)
