@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +38,8 @@ public class Quest implements Comparable<Quest> {
 
     public final int repeatDelay, repeatDaily;
 
-    public final String questTaskString, questSubmissionTrigger;
+    private final String questTaskString;
+    public final String questSubmissionTrigger;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -159,8 +161,12 @@ public class Quest implements Comparable<Quest> {
         return obj;
     }
 
+    public MutableComponent getTask() {
+        return new TranslatableComponent(this.questTaskString);
+    }
+
     public MutableComponent getFormatted(MinecraftServer server, ChatFormatting... subFormatting) {
-        MutableComponent main = new TextComponent("").append(new TextComponent(this.questTaskString).withStyle(ChatFormatting.LIGHT_PURPLE));
+        MutableComponent main = new TextComponent("").append(this.getTask().withStyle(ChatFormatting.LIGHT_PURPLE));
         for (MutableComponent tasks : this.getFormattedTasks(server)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));

@@ -6,6 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +23,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
             "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, true);
 
     public final ResourceLocation id;
-    public final String name;
+    private final String name;
     public final List<String> description;
     private final ItemStack icon;
     public final boolean sameCategoryOnly;
@@ -44,6 +46,10 @@ public class QuestCategory implements Comparable<QuestCategory> {
         if (this.maxConcurrentQuests == -1)
             return ConfigHandler.config.maxConcurrentQuest;
         return this.maxConcurrentQuests;
+    }
+
+    public MutableComponent getName() {
+        return new TranslatableComponent(this.name);
     }
 
     public static QuestCategory of(ResourceLocation id, JsonObject obj) {

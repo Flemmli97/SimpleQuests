@@ -91,9 +91,6 @@ public class LangManager {
         defaultTranslation.put(QuestEntryImpls.AdvancementEntry.id.toString(), "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
         defaultTranslation.put(QuestEntryImpls.PositionEntry.id.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
-        defaultTranslation.put(QuestEntryImpls.LocationEntry.id.toString(), "%1$s");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id.toString(), "%1$s");
-        defaultTranslation.put(QuestEntryImpls.BlockInteractEntry.id.toString(), "%1$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

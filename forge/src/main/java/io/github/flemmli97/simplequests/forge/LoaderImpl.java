@@ -52,8 +52,8 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
-        if (entry.description != null)
-            return List.of(entry.description);
+        if (!entry.description.isEmpty())
+            return List.of(new TranslatableComponent(entry.description));
         //Forge clients do it already
         List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
         if (all.size() < warpAmount || !NetworkHooks.isVanillaConnection(player.connection.connection))

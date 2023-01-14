@@ -40,13 +40,13 @@ public class QuestEntryImpls {
 
         public final ItemPredicate predicate;
         public final int amount;
-        public final MutableComponent description;
+        public final String description;
         public final boolean consumeItems;
 
         public ItemEntry(ItemPredicate predicate, int amount, String description, boolean consumeItems) {
             this.predicate = predicate;
             this.amount = amount;
-            this.description = description.isEmpty() ? null : new TextComponent(description);
+            this.description = description;
             this.consumeItems = consumeItems;
         }
 
@@ -102,8 +102,8 @@ public class QuestEntryImpls {
         public JsonObject serialize() {
             JsonObject obj = new JsonObject();
             obj.add("predicate", this.predicate.serializeToJson());
-            if (this.description != null)
-                obj.addProperty("description", this.description.getString());
+            if (!this.description.isEmpty())
+                obj.addProperty("description", this.description);
             obj.addProperty("amount", this.amount);
             obj.addProperty("consumeItems", this.consumeItems);
             return obj;
@@ -116,13 +116,12 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            if (this.description != null)
-                return this.description;
+            Function<String, String> key = s -> !this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString() + s);
             List<MutableComponent> formattedItems = itemComponents(this.predicate);
             if (formattedItems.isEmpty())
-                return new TextComponent(ConfigHandler.lang.get(this.getId().toString() + ".empty"));
+                return new TranslatableComponent(key.apply(".empty"));
             if (formattedItems.size() == 1) {
-                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".single" + (this.consumeItems ? "" : ".keep")), formattedItems.get(0).withStyle(ChatFormatting.AQUA), this.amount);
+                return new TranslatableComponent(key.apply(".single" + (this.consumeItems ? "" : ".keep")), formattedItems.get(0).withStyle(ChatFormatting.AQUA), this.amount);
             }
             MutableComponent items = null;
             for (MutableComponent c : formattedItems) {
@@ -132,7 +131,7 @@ public class QuestEntryImpls {
                     items.append(new TextComponent(", ")).append(c);
             }
             items.append("]");
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".multi" + (this.consumeItems ? "" : ".keep")), items.withStyle(ChatFormatting.AQUA), this.amount);
+            return new TranslatableComponent(key.apply(".multi" + (this.consumeItems ? "" : ".keep")), items.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
         public static ItemEntry fromJson(JsonObject obj) {
@@ -151,7 +150,7 @@ public class QuestEntryImpls {
         }
     }
 
-    public record KillEntry(EntityPredicate predicate, int amount) implements QuestEntry {
+    public record KillEntry(EntityPredicate predicate, int amount, String description) implements QuestEntry {
 
         public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "entity");
 
@@ -165,6 +164,8 @@ public class QuestEntryImpls {
             JsonObject obj = new JsonObject();
             obj.add("predicate", this.predicate.serializeToJson());
             obj.addProperty("amount", this.amount);
+            if (!this.description.isEmpty())
+                obj.addProperty("description", this.description);
             return obj;
         }
 
@@ -178,13 +179,13 @@ public class QuestEntryImpls {
             EntityPredicateAccessor acc = (EntityPredicateAccessor) this.predicate;
             String s = acc.getEntityType().serializeToJson().getAsString();
             if (s.startsWith("#")) {
-                return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString() + ".tag"), new TextComponent(s).withStyle(ChatFormatting.AQUA), this.amount);
+                return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString() + ".tag"), new TextComponent(s).withStyle(ChatFormatting.AQUA), this.amount);
             }
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
+            return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
         }
 
         public static KillEntry fromJson(JsonObject obj) {
-            return new KillEntry(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsInt(obj, "amount", 1));
+            return new KillEntry(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsInt(obj, "amount", 1), GsonHelper.getAsString(obj, "description", ""));
         }
     }
 
@@ -215,7 +216,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TextComponent(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
+            return new TranslatableComponent(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
         }
 
         public static XPEntry fromJson(JsonObject obj) {
@@ -256,7 +257,7 @@ public class QuestEntryImpls {
             Advancement advancement = server.getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = new TextComponent(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
+                adv = new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
             else
                 adv = advancement.getChatComponent();
             return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), adv);
@@ -267,7 +268,7 @@ public class QuestEntryImpls {
         }
     }
 
-    public record PositionEntry(BlockPos pos, int minDist) implements QuestEntry {
+    public record PositionEntry(BlockPos pos, int minDist, String description) implements QuestEntry {
 
         public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "position");
 
@@ -283,6 +284,8 @@ public class QuestEntryImpls {
             obj.addProperty("y", this.pos.getY());
             obj.addProperty("z", this.pos.getZ());
             obj.addProperty("minDist", this.minDist);
+            if (!this.description.isEmpty())
+                obj.addProperty("description", this.description);
             return obj;
         }
 
@@ -293,7 +296,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
+            return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
         }
 
         @Override
@@ -306,7 +309,7 @@ public class QuestEntryImpls {
 
         public static PositionEntry fromJson(JsonObject obj) {
             return new PositionEntry(new BlockPos(GsonHelper.getAsInt(obj, "x"), GsonHelper.getAsInt(obj, "y"), GsonHelper.getAsInt(obj, "z")),
-                    GsonHelper.getAsInt(obj, "minDist"));
+                    GsonHelper.getAsInt(obj, "minDist"), GsonHelper.getAsString(obj, "description", ""));
         }
     }
 
@@ -340,7 +343,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.description);
+            return new TranslatableComponent(this.description);
         }
 
         @Override
@@ -390,7 +393,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.description);
+            return new TranslatableComponent(this.description);
         }
 
         public boolean check(ServerPlayer player, Entity entity) {
@@ -445,7 +448,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(MinecraftServer server) {
-            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.description);
+            return new TranslatableComponent(this.description);
         }
 
         public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
