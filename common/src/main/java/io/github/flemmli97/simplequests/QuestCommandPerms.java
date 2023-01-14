@@ -6,6 +6,7 @@ public class QuestCommandPerms {
     public static final String showCategory = "simplequests.command.show.category";
     public static final String accept = "simplequests.command.accept";
     public static final String submit = "simplequests.command.submit";
+    public static final String submitType = "simplequests.command.submit.type";
     public static final String reload = "simplequests.command.reload";
     public static final String resetCooldown = "simplequests.command.resetCooldown";
     public static final String resetAll = "simplequests.command.resetAll";

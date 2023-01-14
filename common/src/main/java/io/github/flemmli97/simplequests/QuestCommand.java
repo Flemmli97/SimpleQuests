@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -38,7 +39,9 @@ public class QuestCommand {
                 .then(Commands.literal("accept").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.accept))
                         .then(Commands.argument("quest", ResourceLocationArgument.id())
                                 .suggests(QuestCommand::quests).executes(QuestCommand::accept)))
-                .then(Commands.literal("submit").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submit)).executes(QuestCommand::submit))
+                .then(Commands.literal("submit").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submit)).executes(QuestCommand::submit)
+                        .then(Commands.argument("type", StringArgumentType.string()).requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submitType, true))
+                                .executes(QuestCommand::submitType)))
                 .then(Commands.literal("reload").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.reload, true)).executes(QuestCommand::reload))
                 .then(Commands.literal("resetCooldown").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.resetCooldown, true))
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetCooldown)))
@@ -107,6 +110,14 @@ public class QuestCommand {
     private static int submit(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         if (PlayerData.get(player).submit("", true))
+            return Command.SINGLE_SUCCESS;
+        return 0;
+    }
+
+    private static int submitType(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String type = StringArgumentType.getString(ctx, "type");
+        if (PlayerData.get(player).submit(type, true))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
