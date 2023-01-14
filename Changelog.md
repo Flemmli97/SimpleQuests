@@ -5,6 +5,11 @@ Simple Quests 1.3.0
   See the wiki for all the syntaxes
 - Fix mixin metadata missing on forge thus causing the mod to not work properly.
   How did no one report on this?
+- Add submission triggers. default to "". If a quest has this defined it can only be completed via
+  command **/simplequest submit \<type\>** which requires op
+- Add an player sensitive unlock condition
+- Made it so errors during loading of datapack or players gets logged but does not prevent loading the whole thing completely
+- Add option to execute a command upon completing a quest
 
 Simple Quests 1.2.0
 ================
