@@ -99,18 +99,22 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, Quest>> map = new HashMap<>();
         result.quests.forEach((res, el) -> {
             if (el.isJsonObject()) {
-                JsonObject obj = el.getAsJsonObject();
-                if (!obj.keySet().isEmpty()) {
-                    String cat = GsonHelper.getAsString(obj, "category", "");
-                    QuestCategory questCategory = QuestCategory.DEFAULT_CATEGORY;
-                    if (!cat.isEmpty()) {
-                        questCategory = this.categories.get(new ResourceLocation(cat));
-                        if (questCategory == null)
-                            throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
+                try {
+                    JsonObject obj = el.getAsJsonObject();
+                    if (!obj.keySet().isEmpty()) {
+                        String cat = GsonHelper.getAsString(obj, "category", "");
+                        QuestCategory questCategory = QuestCategory.DEFAULT_CATEGORY;
+                        if (!cat.isEmpty()) {
+                            questCategory = this.categories.get(new ResourceLocation(cat));
+                            if (questCategory == null)
+                                throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
+                        }
+                        Quest quest = Quest.of(res, questCategory, el.getAsJsonObject());
+                        map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
+                                .put(res, quest);
                     }
-                    Quest quest = Quest.of(res, questCategory, el.getAsJsonObject());
-                    map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
-                            .put(res, quest);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
