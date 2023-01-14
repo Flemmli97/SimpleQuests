@@ -4,6 +4,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "icon": {
     "item": "minecraft:diamond_pickaxe",
     "count": 1,

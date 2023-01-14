@@ -4,6 +4,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "icon": "minecraft:emerald_block",
   "repeat_delay": "1w:5d:3h:2m",
   "repeat_daily": 0,

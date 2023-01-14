@@ -5,6 +5,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "icon": "minecraft:andesite",
   "repeat_delay": 36000,
   "repeat_daily": 0,
