@@ -135,7 +135,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         private int sortingID;
         private boolean canBeSelected = true;
         private boolean sameCategoryOnly;
-        private int maxConcurrentQuests;
+        private int maxConcurrentQuests = -1;
 
         public Builder(ResourceLocation id, String name) {
             this.id = id;

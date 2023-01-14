@@ -33,6 +33,7 @@ public class Quest implements Comparable<Quest> {
     public final QuestCategory category;
     public final List<ResourceLocation> neededParentQuests;
     public final ResourceLocation loot;
+    public final String command;
 
     public final int repeatDelay, repeatDaily;
 
@@ -50,7 +51,7 @@ public class Quest implements Comparable<Quest> {
 
     private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                   ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
-                  boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition) {
+                  boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
@@ -66,6 +67,7 @@ public class Quest implements Comparable<Quest> {
         this.isDailyQuest = isDailyQuest;
         this.questSubmissionTrigger = questSubmissionTrigger;
         this.unlockCondition = unlockCondition;
+        this.command = command;
     }
 
     public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
@@ -104,7 +106,8 @@ public class Quest implements Comparable<Quest> {
                 builder.build(),
                 GsonHelper.getAsBoolean(obj, "daily_quest", false),
                 GsonHelper.getAsString(obj, "submission_trigger", ""),
-                EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
+                EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)),
+                GsonHelper.getAsString(obj, "command", ""));
     }
 
     public JsonObject serialize(boolean withId, boolean full) {
@@ -130,6 +133,8 @@ public class Quest implements Comparable<Quest> {
         if (this.unlockCondition != EntityPredicate.ANY || full)
             obj.add("unlock_condition", this.unlockCondition.serializeToJson());
         obj.addProperty("loot_table", this.loot.toString());
+        if (!this.command.isEmpty() || full)
+            obj.addProperty("command", this.command);
         ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
                 .ifPresent(icon -> obj.add("icon", icon));
         if (this.repeatDelayString != null)
@@ -243,6 +248,7 @@ public class Quest implements Comparable<Quest> {
         private EntityPredicate unlockCondition = EntityPredicate.ANY;
 
         private ItemStack icon = new ItemStack(Items.PAPER);
+        private String command = "";
 
         public Builder(ResourceLocation id, String task, ResourceLocation loot) {
             this.id = id;
@@ -316,9 +322,15 @@ public class Quest implements Comparable<Quest> {
             return this;
         }
 
+        public Builder setCompletionCommand(String command) {
+            this.command = command;
+            return this;
+        }
+
         public Quest build() {
             Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock,
-                    this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest, this.submissionTrigger, this.unlockCondition);
+                    this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest,
+                    this.submissionTrigger, this.unlockCondition, this.command);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }

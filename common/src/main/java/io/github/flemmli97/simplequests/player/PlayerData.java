@@ -168,6 +168,8 @@ public class PlayerData {
                 }
             }
         });
+        if (!prog.getQuest().command.isEmpty())
+            this.player.getServer().getCommands().performPrefixedCommand(this.player.createCommandSourceStack(), prog.getQuest().command);
         this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
         this.unlockTracker.add(prog.getQuest().id);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
