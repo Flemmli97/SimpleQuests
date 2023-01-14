@@ -197,8 +197,10 @@ public class QuestProgress {
 
     public void load(CompoundTag tag) {
         this.quest = QuestsManager.instance().getAllQuests().get(new ResourceLocation(tag.getString("Quest")));
-        if (this.quest == null)
-            SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest"));
+        if (this.quest == null) {
+            SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest") + ". Skipping");
+            throw new IllegalStateException();
+        }
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));
         CompoundTag kills = tag.getCompound("KillCounter");

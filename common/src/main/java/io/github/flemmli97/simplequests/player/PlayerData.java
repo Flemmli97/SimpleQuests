@@ -346,9 +346,11 @@ public class PlayerData {
         if (tag.contains("ActiveQuests")) {
             ListTag quests = tag.getList("ActiveQuests", Tag.TAG_COMPOUND);
             quests.forEach(q -> {
-                QuestProgress prog = new QuestProgress((CompoundTag) q, this);
-                if (prog.getQuest() != null)
-                    this.currentQuests.add(prog);
+                try {
+                    QuestProgress prog = new QuestProgress((CompoundTag) q, this);
+                    if (prog.getQuest() != null)
+                        this.currentQuests.add(prog);
+                } catch (IllegalStateException ignored) {}
             });
         }
         CompoundTag done = tag.getCompound("FinishedQuests");
