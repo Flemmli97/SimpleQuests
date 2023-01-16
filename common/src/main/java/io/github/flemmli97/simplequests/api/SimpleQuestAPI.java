@@ -1,12 +1,13 @@
 package io.github.flemmli97.simplequests.api;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.QuestEntry;
 import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nonnull;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class SimpleQuestAPI {
 
@@ -17,7 +18,7 @@ public class SimpleQuestAPI {
      * @param pred       Predicate for if the QuestEntry should be fullfilled
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      */
-    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, Consumer<T> onFullfill) {
+    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
         PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill);
     }
 
@@ -28,7 +29,7 @@ public class SimpleQuestAPI {
      * @param pred       Predicate for if the QuestEntry should be fullfilled
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      */
-    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, Consumer<T> onFullfill, @Nonnull String trigger) {
+    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @Nonnull String trigger) {
         PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill, trigger);
     }
 
