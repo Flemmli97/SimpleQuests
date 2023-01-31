@@ -105,7 +105,7 @@ public class QuestProgress {
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.CraftingEntry> createCraftingPredicate(ServerPlayer player, ItemStack stack, int amount) {
         return (name, entry, prog) -> {
             if (entry.check(player, stack)) {
-                int counter = prog.craftingCounter.compute(name, (res, i) -> i == null ? 1 : i + amount);
+                int counter = prog.craftingCounter.compute(name, (res, i) -> i == null ? amount : i + amount);
                 return counter >= entry.amount();
             }
             return false;

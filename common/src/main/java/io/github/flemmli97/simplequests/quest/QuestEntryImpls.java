@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.quest;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.mixin.EntityPredicateAccessor;
@@ -459,8 +460,12 @@ public class QuestEntryImpls {
         }
 
         public static BlockInteractEntry fromJson(JsonObject obj) {
-            return new BlockInteractEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null)),
-                    BlockPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "block")),
+            ItemPredicate pred = ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null));
+            BlockPredicate blockPred = BlockPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "block", null));
+            if (pred == ItemPredicate.ANY && blockPred == BlockPredicate.ANY)
+                throw new JsonSyntaxException("Either item or block has to be defined");
+            return new BlockInteractEntry(pred,
+                    blockPred,
                     GsonHelper.getAsInt(obj, "amount", 1),
                     GsonHelper.getAsBoolean(obj, "use"),
                     GsonHelper.getAsBoolean(obj, "consumeItem", false),
