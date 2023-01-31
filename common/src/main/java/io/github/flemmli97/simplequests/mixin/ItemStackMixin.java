@@ -8,12 +8,13 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
     @Inject(method = "onCraftedBy", at = @At("HEAD"))
-    private void onItemCrafted(Level level, Player player, int amount) {
+    private void onItemCrafted(Level level, Player player, int amount, CallbackInfo info) {
         if (player instanceof ServerPlayer serverPlayer)
             SimpleQuestAPI.itemCrafted(serverPlayer, (ItemStack) (Object) this, amount, "");
     }

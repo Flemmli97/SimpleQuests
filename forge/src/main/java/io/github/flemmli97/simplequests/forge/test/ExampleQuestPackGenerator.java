@@ -119,7 +119,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("1d")
                 .withIcon(new ItemStack(Items.STICK))
-                .addTaskEntry("sticks", new QuestEntryImpls.CraftingEntry(ItemPredicate.Builder.item().of(Items.STICK).build(), EntityPredicate.ANY, 3, "Craft sticks 3 times")));
+                .addTaskEntry("sticks", new QuestEntryImpls.CraftingEntry(ItemPredicate.Builder.item().of(Items.STICK).build(), EntityPredicate.ANY, 3, "Craft at 8 sticks")));
 
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "daily_quest_item"),
                 "Example for an daily item quest",
