@@ -130,15 +130,15 @@ public class QuestProgress {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends QuestEntry> Set<T> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred) {
-        Set<T> fullfilled = new HashSet<>();
+    public <T extends QuestEntry> Set<Pair<String, T>> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred) {
+        Set<Pair<String, T>> fullfilled = new HashSet<>();
         for (Map.Entry<String, QuestEntry> e : this.quest.entries.entrySet()) {
             if (this.entries.contains(e.getKey()))
                 continue;
             if (clss.isInstance(e.getValue())) {
                 T entry = (T) e.getValue();
                 if (pred.matches(e.getKey(), entry, this)) {
-                    fullfilled.add(entry);
+                    fullfilled.add(Pair.of(e.getKey(), entry));
                     this.entries.add(e.getKey());
                 }
             }

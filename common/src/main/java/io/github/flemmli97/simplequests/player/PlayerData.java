@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class PlayerData {
 
@@ -114,17 +114,17 @@ public class PlayerData {
         return any;
     }
 
-    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, Consumer<T> onFullfill) {
+    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
         this.tryFullFill(clss, pred, onFullfill, "");
     }
 
-    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, Consumer<T> onFullfill, String trigger) {
+    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
-            Set<T> fulfilled = prog.tryFullFill(clss, pred);
+            Set<Pair<String, T>> fulfilled = prog.tryFullFill(clss, pred);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.forEach(onFullfill);
+                fulfilled.forEach(p -> onFullfill.accept(prog, p));
             }
             if (prog.isCompleted(trigger)) {
                 this.completeQuest(prog);
@@ -136,7 +136,7 @@ public class PlayerData {
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
-                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onInteractWith(Entity entity) {
@@ -144,12 +144,12 @@ public class PlayerData {
             return;
         this.interactionCooldown = 2;
         this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
-                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onBlockInteract(BlockPos pos, boolean use) {
         this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
-                e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     private void completeQuest(QuestProgress prog) {
@@ -349,7 +349,8 @@ public class PlayerData {
                     QuestProgress prog = new QuestProgress((CompoundTag) q, this);
                     if (prog.getQuest() != null)
                         this.currentQuests.add(prog);
-                } catch (IllegalStateException ignored) {}
+                } catch (IllegalStateException ignored) {
+                }
             });
         }
         CompoundTag done = tag.getCompound("FinishedQuests");
