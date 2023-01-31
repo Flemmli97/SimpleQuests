@@ -80,17 +80,17 @@ public class LangManager {
 
         defaultTranslation.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".single", "Give %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".single.keep", "Have %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".multi", "Provide any of the following x%2$s: %1$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".multi.keep", "Have any of the following x%2$s: %1$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.id + ".empty", "<Empty tag/items>");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id.toString(), "Kill entity %s");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.id + ".tag", "Kill entities in the tag %s");
-        defaultTranslation.put(QuestEntryImpls.XPEntry.id.toString(), "Submit Experience: %s lvl");
-        defaultTranslation.put(QuestEntryImpls.AdvancementEntry.id.toString(), "Advancement %s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".single", "Give %1$s x%2$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
+        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
+        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID.toString(), "Kill entity %s");
+        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID + ".tag", "Kill entities in the tag %s");
+        defaultTranslation.put(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
+        defaultTranslation.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.PositionEntry.id.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
     }
 
     private Map<String, String> translation = new HashMap<>();

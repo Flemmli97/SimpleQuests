@@ -152,6 +152,11 @@ public class PlayerData {
                 (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
+    public void onItemCrafted(ItemStack stack, int amount, String trigger) {
+        this.tryFullFill(QuestEntryImpls.CraftingEntry.class, QuestProgress.createCraftingPredicate(this.player, stack, amount),
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+    }
+
     private void completeQuest(QuestProgress prog) {
         LootTable lootTable = this.player.getServer().getLootTables().get(prog.getQuest().loot);
         CriteriaTriggers.GENERATE_LOOT.trigger(this.player, prog.getQuest().loot);

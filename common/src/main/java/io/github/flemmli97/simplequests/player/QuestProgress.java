@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ public class QuestProgress {
     private final Map<String, Integer> killCounter = new HashMap<>();
     private final Map<String, Set<UUID>> interactionCounter = new HashMap<>();
     private final Map<String, Set<BlockPos>> blockInteractionCounter = new HashMap<>();
+    private final Map<String, Integer> craftingCounter = new HashMap<>();
 
     private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
 
@@ -95,6 +97,16 @@ public class QuestProgress {
                 interacted.add(pos);
                 int amount = interacted.size();
                 return amount >= entry.amount();
+            }
+            return false;
+        };
+    }
+
+    public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.CraftingEntry> createCraftingPredicate(ServerPlayer player, ItemStack stack, int amount) {
+        return (name, entry, prog) -> {
+            if (entry.check(player, stack)) {
+                int counter = prog.craftingCounter.compute(name, (res, i) -> i == null ? 1 : i + amount);
+                return counter >= entry.amount();
             }
             return false;
         };
