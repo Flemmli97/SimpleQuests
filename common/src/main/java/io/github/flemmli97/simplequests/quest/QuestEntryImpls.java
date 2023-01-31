@@ -36,7 +36,7 @@ public class QuestEntryImpls {
 
     public static class ItemEntry implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "item");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "item");
 
         public final ItemPredicate predicate;
         public final int amount;
@@ -111,7 +111,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -152,7 +152,7 @@ public class QuestEntryImpls {
 
     public record KillEntry(EntityPredicate predicate, int amount, String description) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "entity");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -171,7 +171,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -191,7 +191,7 @@ public class QuestEntryImpls {
 
     public record XPEntry(int amount) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "xp");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "xp");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -211,7 +211,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -226,7 +226,7 @@ public class QuestEntryImpls {
 
     public record AdvancementEntry(ResourceLocation advancement, boolean reset) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "advancement");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "advancement");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -249,7 +249,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -270,7 +270,7 @@ public class QuestEntryImpls {
 
     public record PositionEntry(BlockPos pos, int minDist, String description) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "position");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "position");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -291,7 +291,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -321,7 +321,7 @@ public class QuestEntryImpls {
      */
     public record LocationEntry(LocationPredicate location, String description) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "location");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "location");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -338,7 +338,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -368,7 +368,7 @@ public class QuestEntryImpls {
                                       boolean consume,
                                       String description) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -388,7 +388,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -413,7 +413,6 @@ public class QuestEntryImpls {
         }
     }
 
-
     /**
      * Quest entry to check when a player interacts with a block
      *
@@ -422,7 +421,7 @@ public class QuestEntryImpls {
     public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
                                      boolean consumeItem, String description) implements QuestEntry {
 
-        public static final ResourceLocation id = new ResourceLocation(SimpleQuests.MODID, "block_interact");
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "block_interact");
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -443,7 +442,7 @@ public class QuestEntryImpls {
 
         @Override
         public ResourceLocation getId() {
-            return id;
+            return ID;
         }
 
         @Override
@@ -467,6 +466,51 @@ public class QuestEntryImpls {
                     GsonHelper.getAsInt(obj, "amount", 1),
                     GsonHelper.getAsBoolean(obj, "use"),
                     GsonHelper.getAsBoolean(obj, "consumeItem", false),
+                    GsonHelper.getAsString(obj, "description"));
+        }
+    }
+
+    /**
+     * Quest entry to check for when a player crafts something
+     */
+    public record CraftingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount,
+                                String description) implements QuestEntry {
+
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "crafting");
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public JsonObject serialize() {
+            JsonObject obj = new JsonObject();
+            obj.add("item", this.item.serializeToJson());
+            obj.add("playerPredicate", this.playerPredicate.serializeToJson());
+            obj.addProperty("amount", this.amount);
+            obj.addProperty("description", this.description);
+            return obj;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public MutableComponent translation(MinecraftServer server) {
+            return new TranslatableComponent(this.description);
+        }
+
+        public boolean check(ServerPlayer player, ItemStack stack) {
+            return this.item.matches(stack) && this.playerPredicate.matches(player, player);
+        }
+
+        public static CraftingEntry fromJson(JsonObject obj) {
+            return new CraftingEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item")),
+                    EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "playerPredicate", null)),
+                    GsonHelper.getAsInt(obj, "amount", 1),
                     GsonHelper.getAsString(obj, "description"));
         }
     }

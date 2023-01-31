@@ -1,3 +1,7 @@
+Simple Quests 1.3.2
+================
+- Add crafting task. Triggered when the player crafts an item
+
 Simple Quests 1.3.1
 ================
 - Add some more context to some stuff (API)

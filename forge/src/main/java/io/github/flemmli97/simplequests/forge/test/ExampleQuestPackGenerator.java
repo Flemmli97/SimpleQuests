@@ -114,6 +114,12 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .setRepeatDelay("1w:5d:3h:2m")
                 .withIcon(new ItemStack(Items.EMERALD_BLOCK))
                 .addTaskEntry("place", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), BlockPredicate.ANY, 3, true, false, "Place 3 emerald blocks")));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "crafting_task"),
+                "Example of use of a crafting task",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay("1d")
+                .withIcon(new ItemStack(Items.STICK))
+                .addTaskEntry("sticks", new QuestEntryImpls.CraftingEntry(ItemPredicate.Builder.item().of(Items.STICK).build(), EntityPredicate.ANY, 3, "Craft sticks 3 times")));
 
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "daily_quest_item"),
                 "Example for an daily item quest",

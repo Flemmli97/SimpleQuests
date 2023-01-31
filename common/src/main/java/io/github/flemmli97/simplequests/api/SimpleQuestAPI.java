@@ -5,6 +5,7 @@ import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.QuestEntry;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.function.BiConsumer;
@@ -42,6 +43,16 @@ public class SimpleQuestAPI {
      */
     public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @Nonnull String trigger, boolean sendFailMessage) {
         return PlayerData.get(serverPlayer).submit(trigger, sendFailMessage);
+    }
+
+    /**
+     * Triggers a item crafting event
+     *
+     * @param trigger String representing a trigger for what quests should be completed.
+     *                Quests without a trigger specified check for empty strings
+     */
+    public static void itemCrafted(ServerPlayer serverPlayer, ItemStack stack, int amount, @Nonnull String trigger) {
+        PlayerData.get(serverPlayer).onItemCrafted(stack, amount, trigger);
     }
 
     public interface QuestEntryPredicate<T extends QuestEntry> {

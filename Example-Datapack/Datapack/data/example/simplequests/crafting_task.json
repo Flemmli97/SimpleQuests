@@ -1,0 +1,26 @@
+{
+  "task": "Example of use of a crafting task",
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:stick",
+  "repeat_delay": "1d",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "sticks": {
+      "item": {
+        "items": [
+          "minecraft:stick"
+        ]
+      },
+      "amount": 3,
+      "description": "Craft sticks 3 times",
+      "id": "simplequests:crafting"
+    }
+  }
+}

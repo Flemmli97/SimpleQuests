@@ -13,14 +13,15 @@ public class QuestEntryRegistry {
     private static final Map<ResourceLocation, Deserializer<?>> MAP = new HashMap<>();
 
     public static void register() {
-        registerSerializer(QuestEntryImpls.ItemEntry.id, QuestEntryImpls.ItemEntry::fromJson);
-        registerSerializer(QuestEntryImpls.XPEntry.id, QuestEntryImpls.XPEntry::fromJson);
-        registerSerializer(QuestEntryImpls.AdvancementEntry.id, QuestEntryImpls.AdvancementEntry::fromJson);
-        registerSerializer(QuestEntryImpls.KillEntry.id, QuestEntryImpls.KillEntry::fromJson);
-        registerSerializer(QuestEntryImpls.PositionEntry.id, QuestEntryImpls.PositionEntry::fromJson);
-        registerSerializer(QuestEntryImpls.LocationEntry.id, QuestEntryImpls.LocationEntry::fromJson);
-        registerSerializer(QuestEntryImpls.EntityInteractEntry.id, QuestEntryImpls.EntityInteractEntry::fromJson);
-        registerSerializer(QuestEntryImpls.BlockInteractEntry.id, QuestEntryImpls.BlockInteractEntry::fromJson);
+        registerSerializer(QuestEntryImpls.ItemEntry.ID, QuestEntryImpls.ItemEntry::fromJson);
+        registerSerializer(QuestEntryImpls.XPEntry.ID, QuestEntryImpls.XPEntry::fromJson);
+        registerSerializer(QuestEntryImpls.AdvancementEntry.ID, QuestEntryImpls.AdvancementEntry::fromJson);
+        registerSerializer(QuestEntryImpls.KillEntry.ID, QuestEntryImpls.KillEntry::fromJson);
+        registerSerializer(QuestEntryImpls.PositionEntry.ID, QuestEntryImpls.PositionEntry::fromJson);
+        registerSerializer(QuestEntryImpls.LocationEntry.ID, QuestEntryImpls.LocationEntry::fromJson);
+        registerSerializer(QuestEntryImpls.EntityInteractEntry.ID, QuestEntryImpls.EntityInteractEntry::fromJson);
+        registerSerializer(QuestEntryImpls.BlockInteractEntry.ID, QuestEntryImpls.BlockInteractEntry::fromJson);
+        registerSerializer(QuestEntryImpls.CraftingEntry.ID, QuestEntryImpls.CraftingEntry::fromJson);
     }
 
     /**
