@@ -18,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -162,7 +161,7 @@ public class PlayerData {
         CriteriaTriggers.GENERATE_LOOT.trigger(this.player, prog.getQuest().loot);
         LootContext.Builder builder = new LootContext.Builder(this.player.getLevel())
                 .withParameter(LootContextParams.ORIGIN, this.player.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.MAGIC)
+                .withParameter(LootContextParams.DAMAGE_SOURCE, this.player.damageSources().magic())
                 .withParameter(LootContextParams.THIS_ENTITY, this.player)
                 .withLuck(this.player.getLuck());
         List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
@@ -172,7 +171,7 @@ public class PlayerData {
                 ItemEntity itemEntity = this.player.drop(stack, false);
                 if (itemEntity != null) {
                     itemEntity.setNoPickUpDelay();
-                    itemEntity.setOwner(this.player.getUUID());
+                    itemEntity.setThrower(this.player.getUUID());
                 }
             }
         });

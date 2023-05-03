@@ -9,7 +9,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -29,7 +29,7 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public ResourceLocation fromEntity(Entity entity) {
-        return Registry.ENTITY_TYPE.getKey(entity.getType());
+        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
     }
 
     @Override

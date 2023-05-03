@@ -9,7 +9,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class ParseHelper {
 
     private static final Codec<ItemStack> STACK_CODEC = RecordCodecBuilder.create((instance) ->
-            instance.group(Registry.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
+            instance.group(BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
                             Codec.INT.optionalFieldOf("count").forGetter((itemStack) -> Optional.of(itemStack.getCount())),
                             Codec.STRING.optionalFieldOf("tag").forGetter((itemStack) -> Optional.ofNullable(itemStack.getTag()).map(CompoundTag::toString)))
                     .apply(instance, (item, count, tag) -> {
@@ -84,7 +84,7 @@ public class ParseHelper {
         if (element == null)
             return new ItemStack(fallback);
         if (element.isJsonPrimitive()) {
-            ItemStack stack = new ItemStack(Registry.ITEM.get(new ResourceLocation(element.getAsString())));
+            ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(element.getAsString())));
             if (stack.isEmpty())
                 return new ItemStack(fallback);
             return stack;
@@ -98,7 +98,7 @@ public class ParseHelper {
 
     public static Optional<JsonElement> writeItemStackToJson(ItemStack stack, Item defaultValue) {
         if (stack.getCount() == 1 && !stack.hasTag())
-            return defaultValue != null && stack.getItem() == defaultValue ? Optional.empty() : Optional.of(new JsonPrimitive(Registry.ITEM.getKey(stack.getItem()).toString()));
+            return defaultValue != null && stack.getItem() == defaultValue ? Optional.empty() : Optional.of(new JsonPrimitive(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()));
         return STACK_CODEC.encodeStart(JsonOps.INSTANCE, stack).resultOrPartial(SimpleQuests.logger::error);
     }
 }

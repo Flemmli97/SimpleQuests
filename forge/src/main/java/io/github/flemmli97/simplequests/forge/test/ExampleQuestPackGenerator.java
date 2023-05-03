@@ -17,10 +17,11 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -33,22 +34,22 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = SimpleQuests.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ExampleQuestPackGenerator extends QuestProvider {
 
     private static final String PACK_META = "{\"pack\": {\"pack_format\": 9,\"description\": [{\"text\":\"Example Quests\",\"color\":\"gold\"}]}}";
 
-    public ExampleQuestPackGenerator(DataGenerator gen, boolean full) {
-        super(gen, full);
+    public ExampleQuestPackGenerator(PackOutput output, boolean full) {
+        super(output, full);
     }
 
     @SubscribeEvent
     public static void data(GatherDataEvent event) {
         DataGenerator data = event.getGenerator();
-        data.addProvider(event.includeServer(), new ExampleQuestPackGenerator(data, true));
+        data.addProvider(event.includeServer(), new ExampleQuestPackGenerator(data.getPackOutput(), true));
     }
 
     @Override
@@ -81,8 +82,8 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withSortingNum(1)
                 .withIcon(new ItemStack(Items.MAP))
-                .addTaskEntry("structure", new QuestEntryImpls.LocationEntry(LocationPredicate.inStructure(ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))), "Find a warm ocean ruin"))
-                .addTaskEntry("structure2", new QuestEntryImpls.LocationEntry(LocationPredicate.inStructure(ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))), "Find a cold ocean ruin")));
+                .addTaskEntry("structure", new QuestEntryImpls.LocationEntry(LocationPredicate.inStructure(ResourceKey.create(Registries.STRUCTURE, new ResourceLocation("ocean_ruin_warm"))), "Find a warm ocean ruin"))
+                .addTaskEntry("structure2", new QuestEntryImpls.LocationEntry(LocationPredicate.inStructure(ResourceKey.create(Registries.STRUCTURE, new ResourceLocation("ocean_ruin_cold"))), "Find a cold ocean ruin")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "position_example"),
                 "Example for a simple position quest",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -195,12 +196,11 @@ public class ExampleQuestPackGenerator extends QuestProvider {
     }
 
     @Override
-    public void run(CachedOutput cache) {
-        super.run(cache);
-        Path path = this.gen.getOutputFolder().resolve("pack.mcmeta");
-        try {
-            DataProvider.saveStable(cache, JsonParser.parseString(PACK_META), path);
-        } catch (IOException ignored) {
-        }
+    public CompletableFuture<?> run(CachedOutput cache) {
+        return CompletableFuture.allOf(super.run(cache),
+                CompletableFuture.runAsync(() -> {
+                    Path path = this.output.getOutputFolder().resolve("pack.mcmeta");
+                    DataProvider.saveStable(cache, JsonParser.parseString(PACK_META), path);
+                }));
     }
 }

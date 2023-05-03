@@ -9,6 +9,8 @@ import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -108,9 +110,14 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         return stack;
     }
 
-    private static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
+    private static void playSongToPlayer(ServerPlayer player, Holder<SoundEvent> event, float vol, float pitch) {
         player.connection.send(
                 new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
+    }
+
+    private static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
+        player.connection.send(
+                new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(event), SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
     }
 
     @Override

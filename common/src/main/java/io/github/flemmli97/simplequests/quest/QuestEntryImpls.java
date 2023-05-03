@@ -16,7 +16,7 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -144,7 +144,7 @@ public class QuestEntryImpls {
             if (acc.getItems() != null)
                 acc.getItems().forEach(i -> formattedItems.add(Component.translatable(i.getDescriptionId())));
             if (acc.getTag() != null)
-                Registry.ITEM.getTag(acc.getTag()).ifPresent(n -> n.forEach(h -> formattedItems.add(Component.translatable(h.value().getDescriptionId()))));
+                BuiltInRegistries.ITEM.getTag(acc.getTag()).ifPresent(n -> n.forEach(h -> formattedItems.add(Component.translatable(h.value().getDescriptionId()))));
             return formattedItems;
         }
     }

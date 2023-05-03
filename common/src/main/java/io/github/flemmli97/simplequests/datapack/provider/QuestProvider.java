@@ -7,16 +7,16 @@ import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class QuestProvider implements DataProvider {
 
@@ -27,7 +27,7 @@ public abstract class QuestProvider implements DataProvider {
     private final Map<ResourceLocation, QuestCategory> categories = new HashMap<>();
     private final Map<ResourceLocation, Quest> quests = new HashMap<>();
 
-    protected final DataGenerator gen;
+    protected final PackOutput output;
     protected final boolean full;
 
     /**
@@ -36,34 +36,28 @@ public abstract class QuestProvider implements DataProvider {
      * @param full If true will output all values for category and quests.
      *             Some values are optional and can be left out in the final json.
      */
-    public QuestProvider(DataGenerator gen, boolean full) {
-        this.gen = gen;
+    public QuestProvider(PackOutput output, boolean full) {
+        this.output = output;
         this.full = full;
     }
 
     protected abstract void add();
 
     @Override
-    public void run(CachedOutput cache) {
+    public CompletableFuture<?> run(CachedOutput cache) {
         this.add();
-        this.categories.forEach((res, builder) -> {
-            Path path = this.gen.getOutputFolder().resolve("data/" + res.getNamespace() + "/" + QuestsManager.CATEGORY_LOCATION + "/" + res.getPath() + ".json");
-            try {
-                JsonElement obj = builder.serialize(this.full);
-                DataProvider.saveStable(cache, obj, path);
-            } catch (IOException e) {
-                LOGGER.error("Couldn't save quest category {}", path, e);
-            }
-        });
-        this.quests.forEach((res, builder) -> {
-            Path path = this.gen.getOutputFolder().resolve("data/" + res.getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + res.getPath() + ".json");
-            try {
-                JsonElement obj = builder.serialize(false, this.full);
-                DataProvider.saveStable(cache, obj, path);
-            } catch (IOException e) {
-                LOGGER.error("Couldn't save quest {}", path, e);
-            }
-        });
+        return CompletableFuture.allOf(
+                CompletableFuture.runAsync(() -> this.categories.forEach((res, builder) -> {
+                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(res.getNamespace() + "/" + QuestsManager.CATEGORY_LOCATION + "/" + res.getPath() + ".json");
+                    JsonElement obj = builder.serialize(this.full);
+                    DataProvider.saveStable(cache, obj, path);
+                })),
+                CompletableFuture.runAsync(() -> this.quests.forEach((res, builder) -> {
+                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(res.getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + res.getPath() + ".json");
+                    JsonElement obj = builder.serialize(false, this.full);
+                    DataProvider.saveStable(cache, obj, path);
+                }))
+        );
     }
 
     @Override
