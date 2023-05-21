@@ -8,7 +8,7 @@
     "Flemmli97"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-quests",
+    "homepage": "${homepage}",
     "issues": "https://github.com/Flemmli97/SimpleQuests/issues",
     "sources": "https://github.com/Flemmli97/SimpleQuests"
   },
@@ -25,7 +25,7 @@
     "simplequests.fabric.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
-    "minecraft": ">=1.18"
+    "fabric": ">=${fabric_version}",
+    "minecraft": ">=${mcversion}"
   }
 }
