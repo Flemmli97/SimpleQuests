@@ -1,5 +1,6 @@
 {
   "task": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": true,

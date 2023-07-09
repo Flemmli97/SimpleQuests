@@ -1,5 +1,6 @@
 {
   "task": "Example of use of a crafting task",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,

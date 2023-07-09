@@ -71,6 +71,8 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay(36000)
                 .withIcon(new ItemStack(Items.DIRT))
+                .addDescription("This is an example description")
+                .addDescription("This is another example description")
                 .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.COD).build(), 15, "Give 15 cods", true)));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "kill_example"),
                 "Example for a kill quest",
