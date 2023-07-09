@@ -94,6 +94,7 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
+            ctx.getSource().sendSuccess(Component.literal("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
                 ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
                 List<String> finished = prog.finishedTasks();
