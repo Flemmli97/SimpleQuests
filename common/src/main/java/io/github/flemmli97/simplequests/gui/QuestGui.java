@@ -89,6 +89,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
         stack.setHoverName(quest.getTask().setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
+        quest.getDescription().forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(c.getStyle().withItalic(false))))));
         if (data.isActive(quest)) {
             stack.enchant(Enchantments.UNBREAKING, 1);
             stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);

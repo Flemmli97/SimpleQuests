@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Quest implements Comparable<Quest> {
 
@@ -37,6 +38,8 @@ public class Quest implements Comparable<Quest> {
     public final int repeatDelay, repeatDaily;
 
     private final String questTaskString;
+    private final List<String> questTaskDesc;
+
     public final String questSubmissionTrigger;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
@@ -49,12 +52,13 @@ public class Quest implements Comparable<Quest> {
 
     public final EntityPredicate unlockCondition;
 
-    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
+    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                   ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
                   boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
+        this.questTaskDesc = questTaskDesc;
         this.neededParentQuests = parents;
         this.redoParent = redoParent;
         this.needsUnlock = needsUnlock;
@@ -92,9 +96,23 @@ public class Quest implements Comparable<Quest> {
                 });
             }
         }
+        ImmutableList.Builder<String> desc = new ImmutableList.Builder<>();
+        JsonElement descEl = obj.get("description");
+        if (descEl != null) {
+            if (descEl.isJsonPrimitive() && !descEl.getAsString().isEmpty())
+                desc.add(descEl.getAsString());
+            else if (descEl.isJsonArray()) {
+                descEl.getAsJsonArray().forEach(ea -> {
+                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
+                        desc.add(ea.getAsString());
+                    }
+                });
+            }
+        }
         return new Quest(id,
                 category,
                 GsonHelper.getAsString(obj, "task"),
+                desc.build(),
                 parents.build(),
                 GsonHelper.getAsBoolean(obj, "redo_parent", false),
                 GsonHelper.getAsBoolean(obj, "need_unlock", false),
@@ -117,6 +135,15 @@ public class Quest implements Comparable<Quest> {
         if (this.category != QuestCategory.DEFAULT_CATEGORY)
             obj.addProperty("category", this.category.id.toString());
         obj.addProperty("task", this.questTaskString);
+        if (!this.questTaskDesc.isEmpty() || full) {
+            if (this.questTaskDesc.size() == 1)
+                obj.addProperty("description", this.questTaskDesc.get(0));
+            else {
+                JsonArray arr = new JsonArray();
+                this.questTaskDesc.forEach(arr::add);
+                obj.add("description", arr);
+            }
+        }
         if (!this.neededParentQuests.isEmpty() || full) {
             if (this.neededParentQuests.size() == 1)
                 obj.addProperty("parent_id", this.neededParentQuests.get(0).toString());
@@ -161,6 +188,10 @@ public class Quest implements Comparable<Quest> {
 
     public MutableComponent getTask() {
         return Component.translatable(this.questTaskString);
+    }
+
+    public List<MutableComponent> getDescription() {
+        return this.questTaskDesc.stream().map(s -> Component.translatable(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
     }
 
     public MutableComponent getFormatted(ServerPlayer player, ChatFormatting... subFormatting) {
@@ -244,6 +275,7 @@ public class Quest implements Comparable<Quest> {
         private String submissionTrigger = "";
 
         private final String questTaskString;
+        private final List<String> questDesc = new ArrayList<>();
 
         private boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -258,6 +290,11 @@ public class Quest implements Comparable<Quest> {
             this.id = id;
             this.questTaskString = task;
             this.loot = loot;
+        }
+
+        public Builder addDescription(String desc) {
+            this.questDesc.add(desc);
+            return this;
         }
 
         public Builder withCategory(QuestCategory category) {
@@ -332,7 +369,7 @@ public class Quest implements Comparable<Quest> {
         }
 
         public Quest build() {
-            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.neededParentQuests, this.redoParent, this.needsUnlock,
+            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest,
                     this.submissionTrigger, this.unlockCondition, this.command);
             quest.setDelayString(this.repeatDelayString);

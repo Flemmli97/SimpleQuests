@@ -34,7 +34,6 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = SimpleQuests.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -70,6 +69,8 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay(36000)
                 .withIcon(new ItemStack(Items.DIRT))
+                .addDescription("This is an example description")
+                .addDescription("This is another example description")
                 .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.COD).build(), 15, "Give 15 cods", true)));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "kill_example"),
                 "Example for a kill quest",
@@ -198,9 +199,6 @@ public class ExampleQuestPackGenerator extends QuestProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(super.run(cache),
-                CompletableFuture.runAsync(() -> {
-                    Path path = this.output.getOutputFolder().resolve("pack.mcmeta");
-                    DataProvider.saveStable(cache, JsonParser.parseString(PACK_META), path);
-                }));
+                DataProvider.saveStable(cache, JsonParser.parseString(PACK_META), this.output.getOutputFolder().resolve("pack.mcmeta")));
     }
 }

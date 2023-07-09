@@ -1,5 +1,6 @@
 {
   "task": "Example for a location quest using a location predicate",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
@@ -14,14 +15,14 @@
   "entries": {
     "structure": {
       "predicate": {
-        "feature": "minecraft:ocean_ruin_warm"
+        "structure": "minecraft:ocean_ruin_warm"
       },
       "description": "Find a warm ocean ruin",
       "id": "simplequests:location"
     },
     "structure2": {
       "predicate": {
-        "feature": "minecraft:ocean_ruin_cold"
+        "structure": "minecraft:ocean_ruin_cold"
       },
       "description": "Find a cold ocean ruin",
       "id": "simplequests:location"

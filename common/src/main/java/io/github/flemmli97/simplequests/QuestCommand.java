@@ -97,6 +97,7 @@ public class QuestCommand {
             ctx.getSource().sendSuccess(Component.literal("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
                 ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
+                prog.getQuest().getDescription().forEach(c -> ctx.getSource().sendSuccess(c, false));
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))

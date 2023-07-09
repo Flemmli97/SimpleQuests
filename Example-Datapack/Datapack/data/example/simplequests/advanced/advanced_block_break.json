@@ -1,5 +1,6 @@
 {
   "task": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,

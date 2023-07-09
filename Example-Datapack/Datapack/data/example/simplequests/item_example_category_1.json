@@ -1,6 +1,7 @@
 {
   "category": "example:category_1",
   "task": "Example for an item quest with category 1",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,

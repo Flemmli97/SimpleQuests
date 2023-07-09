@@ -1,5 +1,6 @@
 {
   "task": "Example for block interaction task",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,

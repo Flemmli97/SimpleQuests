@@ -1,5 +1,6 @@
 {
   "task": "Example for a kill quest",
+  "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,

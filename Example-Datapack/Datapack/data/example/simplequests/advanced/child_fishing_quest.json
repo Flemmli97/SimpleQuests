@@ -1,5 +1,6 @@
 {
   "task": "Catch lots of fishes! Needs parent quest completed before doing this quest",
+  "description": [],
   "parent_id": "example:item_example",
   "redo_parent": false,
   "need_unlock": false,
