@@ -222,7 +222,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return Component.translatable(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
+            return Component.translatable(ConfigHandler.lang.get(this.getId().toString()), this.amount);
         }
 
         public static XPEntry fromJson(JsonObject obj) {
@@ -263,7 +263,7 @@ public class QuestEntryImpls {
             Advancement advancement = player.getServer().getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = Component.translatable(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
+                adv = Component.translatable(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement());
             else
                 adv = advancement.getChatComponent();
             return Component.translatable(ConfigHandler.lang.get(this.getId().toString()), adv);
@@ -368,7 +368,7 @@ public class QuestEntryImpls {
     /**
      * Quest entry to check if a player matches a given location.
      *
-     * @param description Parsing a the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
+     * @param description Parsing the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
      */
     public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount,
                                       boolean consume,
