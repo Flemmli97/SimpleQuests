@@ -1,3 +1,11 @@
+Simple Quests 1.3.2
+================
+- Rewrite quest trackers. Now the current progress will also be displayed for e.g. kill quests
+- Fix various lang stuff
+- Fix daily quests counting towards concurrent quest limit
+- Add support for longer quest description:
+  `description` in the json file. See `item_example.json` in the Example Datapack
+
 Simple Quests 1.3.1
 ================
 - Update to 1.19.4
