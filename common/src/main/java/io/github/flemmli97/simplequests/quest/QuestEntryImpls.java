@@ -7,6 +7,7 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.mixin.EntityPredicateAccessor;
 import io.github.flemmli97.simplequests.mixin.ItemPredicateAccessor;
 import io.github.flemmli97.simplequests.player.PlayerData;
+import io.github.flemmli97.simplequests.player.QuestProgress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
@@ -23,11 +24,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             Function<String, String> key = s -> !this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString() + s);
             List<MutableComponent> formattedItems = itemComponents(this.predicate);
             if (formattedItems.isEmpty())
@@ -176,13 +177,19 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             EntityPredicateAccessor acc = (EntityPredicateAccessor) this.predicate;
             String s = acc.getEntityType().serializeToJson().getAsString();
             if (s.startsWith("#")) {
                 return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString() + ".tag"), new TextComponent(s).withStyle(ChatFormatting.AQUA), this.amount);
             }
             return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString()), new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
+        }
+
+        @Nullable
+        @Override
+        public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+            return progress.killProgress(player, id);
         }
 
         public static KillEntry fromJson(JsonObject obj) {
@@ -216,7 +223,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
         }
 
@@ -254,8 +261,8 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
-            Advancement advancement = server.getAdvancements().getAdvancement(this.advancement());
+        public MutableComponent translation(ServerPlayer player) {
+            Advancement advancement = player.getServer().getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
                 adv = new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
@@ -296,7 +303,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(!this.description.isEmpty() ? this.description : ConfigHandler.lang.get(this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
         }
 
@@ -343,7 +350,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(this.description);
         }
 
@@ -393,8 +400,14 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(this.description);
+        }
+
+        @Nullable
+        @Override
+        public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+            return progress.interactProgress(player, id);
         }
 
         public boolean check(ServerPlayer player, Entity entity) {
@@ -447,8 +460,14 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(this.description);
+        }
+
+        @Nullable
+        @Override
+        public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+            return progress.blockInteractProgress(player, id);
         }
 
         public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
@@ -504,8 +523,14 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public MutableComponent translation(MinecraftServer server) {
+        public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(this.description);
+        }
+
+        @Nullable
+        @Override
+        public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+            return progress.craftingProgress(player, id);
         }
 
         public boolean check(ServerPlayer player, ItemStack stack) {

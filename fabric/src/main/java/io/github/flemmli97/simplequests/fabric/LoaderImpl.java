@@ -64,7 +64,7 @@ public class LoaderImpl implements LoaderHandler {
             return List.of(new TranslatableComponent(entry.description));
         List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
         if (all.size() < warpAmount)
-            return List.of(entry.translation(player.getServer()));
+            return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
         MutableComponent items = null;
         int i = 0;

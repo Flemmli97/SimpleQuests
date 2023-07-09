@@ -21,6 +21,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -98,7 +99,13 @@ public class QuestCommand {
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
-                        .forEach(e -> ctx.getSource().sendSuccess(e.getValue().translation(ctx.getSource().getServer()).withStyle(ChatFormatting.RED), false));
+                        .forEach(e -> {
+                            MutableComponent progress = e.getValue().progress(player, prog, e.getKey());
+                            if (progress == null)
+                                ctx.getSource().sendSuccess(e.getValue().translation(player).withStyle(ChatFormatting.RED), false);
+                            else
+                                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
+                        });
             });
             return Command.SINGLE_SUCCESS;
         } else {

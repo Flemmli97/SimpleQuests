@@ -85,7 +85,7 @@ public class PlayerData {
             return false;
         }
         this.currentQuests.add(new QuestProgress(quest, this));
-        this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+        this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
         return true;
     }
 
@@ -137,7 +137,7 @@ public class PlayerData {
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
-                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
     }
 
     public void onInteractWith(Entity entity) {
@@ -145,17 +145,17 @@ public class PlayerData {
             return;
         this.interactionCooldown = 2;
         this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
-                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
     }
 
     public void onBlockInteract(BlockPos pos, boolean use) {
         this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
-                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
     }
 
     public void onItemCrafted(ItemStack stack, int amount, String trigger) {
         this.tryFullFill(QuestEntryImpls.CraftingEntry.class, QuestProgress.createCraftingPredicate(this.player, stack, amount),
-                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID), trigger);
+                (prog, p) -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
     }
 
     private void completeQuest(QuestProgress prog) {
@@ -282,7 +282,7 @@ public class PlayerData {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.getSecond().forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
+                fulfilled.getSecond().forEach(e -> this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID));
             }
             if (prog.isCompleted("")) {
                 this.completeQuest(prog);
