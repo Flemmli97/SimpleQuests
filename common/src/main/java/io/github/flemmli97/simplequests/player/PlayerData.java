@@ -83,7 +83,7 @@ public class PlayerData {
             return false;
         }
         this.currentQuests.add(new QuestProgress(quest, this));
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN));
+        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player)).withStyle(ChatFormatting.DARK_GREEN));
         return true;
     }
 
@@ -135,7 +135,7 @@ public class PlayerData {
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onInteractWith(Entity entity) {
@@ -143,17 +143,17 @@ public class PlayerData {
             return;
         this.interactionCooldown = 2;
         this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onBlockInteract(BlockPos pos, boolean use) {
         this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onItemCrafted(ItemStack stack, int amount, String trigger) {
         this.tryFullFill(QuestEntryImpls.CraftingEntry.class, QuestProgress.createCraftingPredicate(this.player, stack, amount),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     private void completeQuest(QuestProgress prog) {
@@ -280,7 +280,7 @@ public class PlayerData {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player.getServer())).withStyle(ChatFormatting.DARK_GREEN)));
+                fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
             }
             if (prog.isCompleted("")) {
                 this.completeQuest(prog);

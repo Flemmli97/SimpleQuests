@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.player.PlayerData;
+import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 
 import java.io.File;
@@ -91,6 +92,14 @@ public class LangManager {
         defaultTranslation.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
         defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+
+        defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+
+        defaultTranslation.put("quest.progress", "%1$s - %2$s");
+        defaultTranslation.put(ProgressionTrackerImpl.KILL_PROGRESS, "Killed: %1$s/%2$s");
+        defaultTranslation.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
+        defaultTranslation.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
+        defaultTranslation.put(ProgressionTrackerImpl.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

@@ -13,11 +13,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -37,10 +36,10 @@ public class QuestProgress {
 
     private final List<String> entries = new ArrayList<>();
 
-    private final Map<String, Integer> killCounter = new HashMap<>();
-    private final Map<String, Set<UUID>> interactionCounter = new HashMap<>();
-    private final Map<String, Set<BlockPos>> blockInteractionCounter = new HashMap<>();
-    private final Map<String, Integer> craftingCounter = new HashMap<>();
+    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.KillEntry>> killCounter = new HashMap<>();
+    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry>> craftingCounter = new HashMap<>();
+    private final Map<String, ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry>> interactionCounter = new HashMap<>();
+    private final Map<String, ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry>> blockInteractionCounter = new HashMap<>();
 
     private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
 
@@ -63,8 +62,7 @@ public class QuestProgress {
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.KillEntry> createKillPredicate(ServerPlayer player, LivingEntity entity) {
         return (name, entry, prog) -> {
             if (entry.predicate().matches(player, entity)) {
-                int killed = prog.killCounter.compute(name, (res, i) -> i == null ? 1 : ++i);
-                return killed >= entry.amount();
+                return prog.killCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createKillTracker(entry)).apply(1);
             }
             return false;
         };
@@ -72,15 +70,13 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.EntityInteractEntry> createInteractionPredicate(ServerPlayer player, Entity entity) {
         return (name, entry, prog) -> {
-            Set<UUID> interacted = prog.interactionCounter.computeIfAbsent(name, s -> new HashSet<>());
-            if (interacted.contains(entity.getUUID())) {
+            ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.interactionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createEntityInteractTracker(entry));
+            if (!interacted.isApplicable(entity.getUUID())) {
                 player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, entity)) {
-                interacted.add(entity.getUUID());
-                int amount = interacted.size();
-                return amount >= entry.amount();
+                return interacted.apply(entity.getUUID());
             }
             return false;
         };
@@ -88,15 +84,13 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.BlockInteractEntry> createBlockInteractionPredicate(ServerPlayer player, BlockPos pos, boolean use) {
         return (name, entry, prog) -> {
-            Set<BlockPos> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> new HashSet<>());
-            if (interacted.contains(pos)) {
+            ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry));
+            if (!interacted.isApplicable(pos)) {
                 player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, pos, use)) {
-                interacted.add(pos);
-                int amount = interacted.size();
-                return amount >= entry.amount();
+                return interacted.apply(pos);
             }
             return false;
         };
@@ -105,8 +99,7 @@ public class QuestProgress {
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.CraftingEntry> createCraftingPredicate(ServerPlayer player, ItemStack stack, int amount) {
         return (name, entry, prog) -> {
             if (entry.check(player, stack)) {
-                int counter = prog.craftingCounter.compute(name, (res, i) -> i == null ? amount : i + amount);
-                return counter >= entry.amount();
+                return prog.craftingCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createCraftingTracker(entry)).apply(amount);
             }
             return false;
         };
@@ -166,6 +159,34 @@ public class QuestProgress {
         return ImmutableList.copyOf(this.entries);
     }
 
+    public MutableComponent killProgress(ServerPlayer player, String entry) {
+        ProgressionTracker<Integer, QuestEntryImpls.KillEntry> tracker = this.killCounter.get(entry);
+        if (tracker == null)
+            return null;
+        return tracker.formattedProgress(player, this);
+    }
+
+    public MutableComponent craftingProgress(ServerPlayer player, String entry) {
+        ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry> tracker = this.craftingCounter.get(entry);
+        if (tracker == null)
+            return null;
+        return tracker.formattedProgress(player, this);
+    }
+
+    public MutableComponent interactProgress(ServerPlayer player, String entry) {
+        ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> tracker = this.interactionCounter.get(entry);
+        if (tracker == null)
+            return null;
+        return tracker.formattedProgress(player, this);
+    }
+
+    public MutableComponent blockInteractProgress(ServerPlayer player, String entry) {
+        ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> tracker = this.blockInteractionCounter.get(entry);
+        if (tracker == null)
+            return null;
+        return tracker.formattedProgress(player, this);
+    }
+
     public Pair<Boolean, Set<QuestEntry>> tickProgress(PlayerData data) {
         Set<QuestEntry> fullfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
@@ -185,22 +206,21 @@ public class QuestProgress {
         ListTag list = new ListTag();
         this.entries.forEach(res -> list.add(StringTag.valueOf(res)));
         tag.put("FinishedEntries", list);
+
         CompoundTag kills = new CompoundTag();
-        this.killCounter.forEach(kills::putInt);
+        this.killCounter.forEach((k, v) -> kills.put(k, v.save()));
         tag.put("KillCounter", kills);
+        CompoundTag crafting = new CompoundTag();
+        this.craftingCounter.forEach((k, v) -> crafting.put(k, v.save()));
+        tag.put("CraftingCounter", crafting);
         CompoundTag interactions = new CompoundTag();
         this.interactionCounter.forEach((res, i) -> {
-            ListTag l = new ListTag();
-            i.forEach(uuid -> l.add(NbtUtils.createUUID(uuid)));
-            interactions.put(res, l);
+            interactions.put(res, i.save());
         });
         tag.put("Interactions", interactions);
         CompoundTag blockInteractions = new CompoundTag();
         this.blockInteractionCounter.forEach((res, i) -> {
-            ListTag l = new ListTag();
-            i.forEach(pos -> l.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
-                    .getOrThrow(false, SimpleQuests.logger::error)));
-            blockInteractions.put(res, l);
+            blockInteractions.put(res, i.save());
         });
         tag.put("BlockInteractions", blockInteractions);
         return tag;
@@ -214,20 +234,30 @@ public class QuestProgress {
         }
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));
+
         CompoundTag kills = tag.getCompound("KillCounter");
-        kills.getAllKeys().forEach(key -> this.killCounter.put(key, kills.getInt(key)));
+        kills.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createKillTracker, this.killCounter, key, kills));
+        CompoundTag crafting = tag.getCompound("CraftingCounter");
+        crafting.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createCraftingTracker, this.craftingCounter, key, crafting));
         CompoundTag interactions = tag.getCompound("Interactions");
-        interactions.getAllKeys().forEach(key -> {
-            ListTag l = interactions.getList(key, Tag.TAG_INT_ARRAY);
-            l.forEach(t -> this.interactionCounter.computeIfAbsent(key, k -> new HashSet<>())
-                    .add(NbtUtils.loadUUID(t)));
-        });
+        interactions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createEntityInteractTracker, this.interactionCounter, key, interactions));
         CompoundTag blockInteractions = tag.getCompound("BlockInteractions");
-        blockInteractions.getAllKeys().forEach(key -> {
-            ListTag l = blockInteractions.getList(key, Tag.TAG_INT_ARRAY);
-            l.forEach(t -> this.blockInteractionCounter.computeIfAbsent(key, k -> new HashSet<>())
-                    .add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.logger::error)));
-        });
+        blockInteractions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createBlockInteractTracker, this.blockInteractionCounter, key, blockInteractions));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E, F extends QuestEntry, T extends ProgressionTracker<E, F>> void loadTracker(Function<F, T> func, Map<String, T> map, String name, CompoundTag tag) {
+        if (this.quest == null) {
+            SimpleQuests.logger.error("Quest not set. This shouldn't be!");
+            throw new IllegalStateException();
+        }
+        try {
+            T entry = func.apply((F) this.quest.entries.get(name));
+            entry.load(tag.get(name));
+            map.putIfAbsent(name, entry);
+        } catch (ClassCastException e) {
+            SimpleQuests.logger.error("Couldn't find quest entry for tracker {}", name);
+        }
     }
 
     enum SubmitType {

@@ -57,7 +57,7 @@ public class LoaderImpl implements LoaderHandler {
         //Forge clients do it already
         List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
         if (all.size() < warpAmount || !NetworkHooks.isVanillaConnection(player.connection.connection))
-            return List.of(entry.translation(player.getServer()));
+            return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
         MutableComponent items = null;
         int i = 0;
