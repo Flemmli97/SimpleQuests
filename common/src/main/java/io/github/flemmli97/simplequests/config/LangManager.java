@@ -48,6 +48,7 @@ public class LangManager {
         defaultTranslation.put("simplequests.current.no", "No active quest");
         defaultTranslation.put("simplequests.reset", "Reset current quest [%s]");
         defaultTranslation.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
+        defaultTranslation.put("simplequests.reset.notfound", "No active quest with id %s");
         defaultTranslation.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
         defaultTranslation.put("simplequests.reset.all", "Reset all progress for %s");
         defaultTranslation.put("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
@@ -86,13 +87,10 @@ public class LangManager {
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID.toString(), "Kill entity %s");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID + ".tag", "Kill entities in the tag %s");
+        defaultTranslation.put(QuestEntryImpls.KillEntry.ID.toString(), "Kill %s x%2$s");
+        defaultTranslation.put(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
         defaultTranslation.put(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
         defaultTranslation.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
-        defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
-
         defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
 
         defaultTranslation.put("quest.progress", "%1$s - %2$s");

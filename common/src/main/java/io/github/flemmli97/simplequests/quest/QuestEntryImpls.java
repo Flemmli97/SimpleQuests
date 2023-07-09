@@ -224,7 +224,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(String.format(ConfigHandler.lang.get(this.getId().toString()), this.amount));
+            return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.amount);
         }
 
         public static XPEntry fromJson(JsonObject obj) {
@@ -265,7 +265,7 @@ public class QuestEntryImpls {
             Advancement advancement = player.getServer().getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement()));
+                adv = new TranslatableComponent(ConfigHandler.lang.get("simplequests.missing.advancement"), this.advancement());
             else
                 adv = advancement.getChatComponent();
             return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), adv);

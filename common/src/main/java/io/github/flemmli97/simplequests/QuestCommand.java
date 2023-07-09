@@ -70,7 +70,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "category");
         QuestCategory category = QuestsManager.instance().getQuestCategory(id);
         if (category == null) {
-            ctx.getSource().sendFailure(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id)));
+            ctx.getSource().sendFailure(new TranslatableComponent(ConfigHandler.lang.get("simplequests.quest.category.noexist"), id));
             return 0;
         }
         QuestGui.openGui(player, category, false);
@@ -82,7 +82,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         Quest quest = QuestsManager.instance().getAllQuests().get(id);
         if (quest == null) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.quest.noexist"), id)), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(quest))
@@ -95,7 +95,7 @@ public class QuestCommand {
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(new TranslatableComponent(String.format(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask())).withStyle(ChatFormatting.GOLD), false);
+                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
