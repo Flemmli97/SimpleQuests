@@ -22,6 +22,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -94,6 +95,7 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
+            ctx.getSource().sendSuccess(new TextComponent("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
                 ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
                 List<String> finished = prog.finishedTasks();
