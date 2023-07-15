@@ -1,18 +1,7 @@
-plugins {
-    id "com.github.johnrengelman.shadow" version "8.0.0+"
-    id "com.modrinth.minotaur" version "2.+"
-}
-
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
+apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-1.2/forge.gradle"
 
 loom {
     runs {
-        client {
-            vmArgs "-Dmixin.debug.export=true"
-        }
         data {
             data()
             programArgs "--all", "--mod", "simplequests"
@@ -24,14 +13,6 @@ loom {
     }
 }
 
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -41,102 +22,9 @@ repositories {
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
-
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    def loader_version = (forge_version =~ /([0-9]+)\.([0-9]+)\.([0-9]+)/)[0][1]
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version, "loader_version": loader_version, "homepage": curse_page_forge, 
-                "mcversion": minecraft_version, "forge_version": forge_version
-    }
 }
 
 shadowJar {
     exclude "**/forge/test/**"
-    exclude "fabric.mod.json"
-
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier.set("forge")
-}
-
-jar {
-    archiveClassifier.set("dev")
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-    archiveClassifier.set("forge-sources")
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
-}
-
-modrinth {
-    token = findProperty('modrinthApiToken') ?: 0
-    projectId = "${modrinth_id}"
-    versionNumber = version
-    versionName = remapJar.archiveFileName
-    changelog = rootProject.changelog(1) + "\n\n" + "For past versions see: ${project.full_changelog}"
-    versionType = "release"
-    uploadFile = remapJar
-    gameVersions = "${project.modrinth_versions}".split(', ').toList()
-    loaders = ["forge"]
-    dependencies {
-        if (!"${project.modrinth_dep_forge}".isEmpty()) {
-            "${project.modrinth_dep_forge}".split(', ').each {
-                required.project "${it}"
-            }
-        }
-    }
-}
-
-tasks.getByName("modrinth").mustRunAfter build
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                classifier null
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                classifier "sources"
-                builtBy remapSourcesJar
-            }
-            artifactId project.archives_base_name
-            version project.version + "-forge"
-        }
-    }
-
-    repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
-            //url "https://maven.pkg.github.com/flemmli97/<>"
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
-                //password = project.findProperty("gpr.github.token") ?: System.getenv("GPR_TOKEN")
-            }
-        }
-    }
 }
