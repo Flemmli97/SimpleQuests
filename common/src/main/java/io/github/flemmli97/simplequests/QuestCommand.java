@@ -82,7 +82,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         Quest quest = QuestsManager.instance().getAllQuests().get(id);
         if (quest == null) {
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(quest))
@@ -94,24 +94,24 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
         if (!quests.isEmpty()) {
-            ctx.getSource().sendSuccess(Component.literal("====================").withStyle(ChatFormatting.GREEN), false);
+            ctx.getSource().sendSuccess(() -> Component.literal("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
-                prog.getQuest().getDescription().forEach(c -> ctx.getSource().sendSuccess(c, false));
+                ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
+                prog.getQuest().getDescription().forEach(c -> ctx.getSource().sendSuccess(() -> c, false));
                 List<String> finished = prog.finishedTasks();
                 prog.getQuest().entries.entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
                         .forEach(e -> {
                             MutableComponent progress = e.getValue().progress(player, prog, e.getKey());
                             if (progress == null)
-                                ctx.getSource().sendSuccess(e.getValue().translation(player).withStyle(ChatFormatting.RED), false);
+                                ctx.getSource().sendSuccess(() -> e.getValue().translation(player).withStyle(ChatFormatting.RED), false);
                             else
-                                ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
+                                ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
                         });
             });
             return Command.SINGLE_SUCCESS;
         } else {
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
         }
         return 0;
     }
@@ -133,7 +133,7 @@ public class QuestCommand {
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
         ConfigHandler.reloadConfigs();
-        ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reload")), true);
+        ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.reload")), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -148,7 +148,7 @@ public class QuestCommand {
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
             i++;
         }
         return i;
@@ -158,7 +158,7 @@ public class QuestCommand {
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
             i++;
         }
         return i;
@@ -167,14 +167,14 @@ public class QuestCommand {
     private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
         if (!QuestsManager.instance().getAllQuests().containsKey(res)) {
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.unlock.fail"), res), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.unlock.fail"), res), true);
             return 0;
         }
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player)
                     .unlockQuest(res);
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.unlock"), player.getName(), res), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.unlock"), player.getName(), res), true);
             i++;
         }
         return i;

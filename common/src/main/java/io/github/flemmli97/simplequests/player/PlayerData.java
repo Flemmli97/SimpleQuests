@@ -22,7 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -102,10 +102,10 @@ public class PlayerData {
                     completed.add(prog);
                     any = true;
                 }
-                case PARTIAL -> this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                case PARTIAL -> this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 case NOTHING -> {
                     if (sendFailMessage)
-                        this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                        this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 }
             }
         }
@@ -122,7 +122,7 @@ public class PlayerData {
         this.currentQuests.forEach(prog -> {
             Set<Pair<String, T>> fulfilled = prog.tryFullFill(clss, pred);
             if (!fulfilled.isEmpty()) {
-                this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(p -> onFullfill.accept(prog, p));
             }
             if (prog.isCompleted(trigger)) {
@@ -157,14 +157,15 @@ public class PlayerData {
     }
 
     private void completeQuest(QuestProgress prog) {
-        LootTable lootTable = this.player.getServer().getLootTables().get(prog.getQuest().loot);
+        LootTable lootTable = this.player.getServer().getLootData().getLootTable(prog.getQuest().loot);
         CriteriaTriggers.GENERATE_LOOT.trigger(this.player, prog.getQuest().loot);
-        LootContext.Builder builder = new LootContext.Builder(this.player.getLevel())
+        LootParams params = new LootParams.Builder(this.player.serverLevel())
                 .withParameter(LootContextParams.ORIGIN, this.player.position())
                 .withParameter(LootContextParams.DAMAGE_SOURCE, this.player.damageSources().magic())
                 .withParameter(LootContextParams.THIS_ENTITY, this.player)
-                .withLuck(this.player.getLuck());
-        List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
+                .withLuck(this.player.getLuck())
+                .create(LootContextParamSets.ENTITY);
+        List<ItemStack> loot = lootTable.getRandomItems(params);
         loot.forEach(stack -> {
             boolean bl = this.player.getInventory().add(stack);
             if (!bl || !stack.isEmpty()) {
@@ -177,9 +178,9 @@ public class PlayerData {
         });
         if (!prog.getQuest().command.isEmpty())
             this.player.getServer().getCommands().performPrefixedCommand(this.player.createCommandSourceStack(), prog.getQuest().command);
-        this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
+        this.cooldownTracker.put(prog.getQuest().id, this.player.level().getGameTime());
         this.unlockTracker.add(prog.getQuest().id);
-        this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+        this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
@@ -213,11 +214,11 @@ public class PlayerData {
             return;
         }
         if (!forced && this.resetTick == -1) {
-            this.resetTick = this.player.level.getGameTime();
+            this.resetTick = this.player.level().getGameTime();
             if (sendMsg)
                 this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED));
             return;
-        } else if (forced || this.player.level.getGameTime() - this.resetTick < 600) {
+        } else if (forced || this.player.level().getGameTime() - this.resetTick < 600) {
             if (sendMsg)
                 this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().getTask()).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
@@ -247,7 +248,7 @@ public class PlayerData {
         if (quest.repeatDelay < 0 && this.cooldownTracker.containsKey(quest.id))
             return AcceptType.ONETIME;
         if (this.cooldownTracker.containsKey(quest.id)) {
-            return (quest.repeatDelay == 0 || Math.abs(this.player.level.getGameTime() - this.cooldownTracker.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
+            return (quest.repeatDelay == 0 || Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
         }
         return AcceptType.ACCEPT;
     }
@@ -279,7 +280,7 @@ public class PlayerData {
         this.tickables.removeIf(prog -> {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
-                this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
             }
             if (prog.isCompleted("")) {
@@ -308,7 +309,7 @@ public class PlayerData {
     }
 
     public String formattedCooldown(Quest quest) {
-        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.cooldownTracker.get(quest.id))) / 20;
+        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id))) / 20;
         if (sec > 86400) {
             long days = sec / 86400;
             long hours = (sec % 86400) / 3600;

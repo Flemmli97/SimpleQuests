@@ -6,7 +6,7 @@ buildscript {
 
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.2-SNAPSHOT" apply false
     id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
@@ -170,10 +170,14 @@ def discordNotif(fabric, forge) {
         if(fabric) {
             def fileIDFabric = tasks.getByName("curseforge${project.curse_id_fabric}").property('mainArtifact').fileID
             embed.addField('Get the fabric version here (When it is accepted)', "${project.findProperty('curse_page_fabric')}/files/${fileIDFabric}", false)
+            fileIDFabric = project("fabric").tasks.getByName("modrinth").property('uploadInfo').id
+            embed.addField('Modrinth version', "${project.findProperty('modrinth_page')}/version/${fileIDFabric}", false)
         }
         if(forge) {
             def fileIDForge = tasks.getByName("curseforge${project.curse_id_forge}").property('mainArtifact').fileID
             embed.addField('Get the forge version here (When it is accepted)', "${project.findProperty('curse_page_forge')}/files/${fileIDForge}", false)
+            fileIDForge = project("forge").tasks.getByName("modrinth").property('uploadInfo').id
+            embed.addField('Modrinth version', "${project.findProperty('modrinth_page')}/version/${fileIDForge}", false)
         }
         def changelog = discordChangelog()
         if (changelog.size() == 1)
@@ -193,18 +197,23 @@ def discordNotif(fabric, forge) {
     }
 }
 
-tasks.getByName("curseforge").doLast {
+task upload(group: "publishing") {
+    dependsOn tasks.getByName("curseforge"), "fabric:modrinth", "forge:modrinth"
+}
+
+tasks.upload.doLast {
     discordNotif(true, true)
 }
 
 task buildUploadAll(group: "publishing") {
-    dependsOn cleanAll, buildAll, publishAll, tasks.getByName("curseforge")
+    dependsOn cleanAll, buildAll, publishAll, upload
     buildAll.mustRunAfter cleanAll
-    tasks.findByName("curseforge").mustRunAfter publishAll
+    upload.mustRunAfter publishAll
 }
+
 afterEvaluate {
     task buildUploadFabric(group: "publishing") {
-        dependsOn cleanAll, ":fabric:build", ":fabric:publish", "curseforge${curse_id_fabric}"
+        dependsOn cleanAll, ":fabric:build", ":fabric:publish", "curseforge${curse_id_fabric}", "fabric:modrinth"
         project("fabric").build.mustRunAfter cleanAll
         project("fabric").publish.mustRunAfter ":fabric:build"
         tasks.findByName("curseforge${curse_id_fabric}").mustRunAfter ":fabric:publish"
@@ -214,7 +223,7 @@ afterEvaluate {
     }
 
     task buildUploadForge(group: "publishing") {
-        dependsOn cleanAll, ":forge:build", ":forge:publish", "curseforge${curse_id_forge}"
+        dependsOn cleanAll, ":forge:build", ":forge:publish", "curseforge${curse_id_forge}", "forge:modrinth"
         project("forge").build.mustRunAfter cleanAll
         project("forge").publish.mustRunAfter ":forge:build"
         tasks.findByName("curseforge${curse_id_forge}").mustRunAfter ":forge:publish"

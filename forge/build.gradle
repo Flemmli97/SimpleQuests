@@ -1,5 +1,6 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.0"
+    id "com.github.johnrengelman.shadow" version "8.0.0+"
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 architectury {
@@ -8,20 +9,19 @@ architectury {
 }
 
 loom {
-    forge {
-        dataGen {
-            mod "simplequests"
+    runs {
+        client {
+            vmArgs "-Dmixin.debug.export=true"
         }
+        data {
+            data()
+            programArgs "--all", "--mod", "simplequests"
+            programArgs "--output", project.file("Example-Datapack/Datapack").absolutePath
+        }
+    }
+    forge {
         mixinConfigs = ["simplequests.mixins.json"]
     }
-}
-
-configureLaunch.doLast {
-    def file = file(".gradle/loom-cache/launch.cfg");
-    def cfg = file.getText('UTF-8')
-    cfg = cfg.replaceAll(project(":forge").file("src/generated/resources").absolutePath,
-            rootProject.file("Example-Datapack/Datapack").absolutePath)
-    file.write(cfg, 'UTF-8')
 }
 
 configurations {
@@ -64,24 +64,24 @@ shadowJar {
     exclude "fabric.mod.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier.set("dev-shadow")
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "forge"
+    archiveClassifier.set("forge")
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier.set("dev")
 }
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
-    classifier "forge-sources"
+    archiveClassifier.set("forge-sources")
 }
 
 components.java {
@@ -89,6 +89,27 @@ components.java {
         skip()
     }
 }
+
+modrinth {
+    token = findProperty('modrinthApiToken') ?: 0
+    projectId = "${modrinth_id}"
+    versionNumber = version
+    versionName = remapJar.archiveFileName
+    changelog = rootProject.changelog(1) + "\n\n" + "For past versions see: ${project.full_changelog}"
+    versionType = "release"
+    uploadFile = remapJar
+    gameVersions = "${project.modrinth_versions}".split(', ').toList()
+    loaders = ["forge"]
+    dependencies {
+        if (!"${project.modrinth_dep_forge}".isEmpty()) {
+            "${project.modrinth_dep_forge}".split(', ').each {
+                required.project "${it}"
+            }
+        }
+    }
+}
+
+tasks.getByName("modrinth").mustRunAfter build
 
 publishing {
     publications {

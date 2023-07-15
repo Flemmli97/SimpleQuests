@@ -6,8 +6,8 @@ import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.QuestEntry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.function.BiConsumer;
 
 public class SimpleQuestAPI {
@@ -30,7 +30,7 @@ public class SimpleQuestAPI {
      * @param pred       Predicate for if the QuestEntry should be fullfilled
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      */
-    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @Nonnull String trigger) {
+    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @NotNull String trigger) {
         PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill, trigger);
     }
 
@@ -41,7 +41,7 @@ public class SimpleQuestAPI {
      *                        Quests without a trigger specified check for empty strings
      * @param sendFailMessage If true and player has no active quests notifies the player
      */
-    public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @Nonnull String trigger, boolean sendFailMessage) {
+    public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @NotNull String trigger, boolean sendFailMessage) {
         return PlayerData.get(serverPlayer).submit(trigger, sendFailMessage);
     }
 
@@ -51,7 +51,7 @@ public class SimpleQuestAPI {
      * @param trigger String representing a trigger for what quests should be completed.
      *                Quests without a trigger specified check for empty strings
      */
-    public static void itemCrafted(ServerPlayer serverPlayer, ItemStack stack, int amount, @Nonnull String trigger) {
+    public static void itemCrafted(ServerPlayer serverPlayer, ItemStack stack, int amount, @NotNull String trigger) {
         PlayerData.get(serverPlayer).onItemCrafted(stack, amount, trigger);
     }
 

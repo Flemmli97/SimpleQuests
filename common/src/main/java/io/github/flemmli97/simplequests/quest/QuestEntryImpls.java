@@ -356,7 +356,7 @@ public class QuestEntryImpls {
         public Function<PlayerData, Boolean> tickable() {
             return d -> {
                 ServerPlayer p = d.getPlayer();
-                return p.tickCount % 20 == 0 && this.location.matches(p.getLevel(), p.getX(), p.getY(), p.getZ());
+                return p.tickCount % 20 == 0 && this.location.matches(p.serverLevel(), p.getX(), p.getY(), p.getZ());
             };
         }
 
@@ -471,7 +471,7 @@ public class QuestEntryImpls {
         public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
             if (use != this.use)
                 return false;
-            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.blockPredicate.matches(player.getLevel(), pos);
+            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.blockPredicate.matches(player.serverLevel(), pos);
             if (b && this.consumeItem && !player.isCreative()) {
                 player.getMainHandItem().shrink(1);
             }
