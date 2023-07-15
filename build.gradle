@@ -63,6 +63,7 @@ task buildAll {
 }
 
 task cleanAll {
+    dependsOn clean
     dependsOn(":common:clean")
     dependsOn(":fabric:clean")
     dependsOn(":forge:clean")
@@ -147,11 +148,13 @@ curseforge {
             changelogType = "markdown"
             releaseType = 'release'
         }
-        /*relations {
-            "${project.curse_dep_forge}".split(', ').each {
-                requiredDependency "${it}"
+        relations {
+            if (!"${project.curse_dep_forge}".isEmpty()) {
+                "${project.curse_dep_forge}".split(', ').each {
+                    requiredDependency "${it}"
+                }
             }
-        }*/
+        }
     }
 }
 
