@@ -1,6 +1,6 @@
 Simple Quests 1.3.2
 ================
-- Port to 1.20.1
+- Port to 1.20.1  
 ~~- Rewrite quest trackers. Now the current progress will also be displayed for e.g. kill quests~~
 ~~- Fix various lang stuff~~
 ~~- Fix daily quests counting towards concurrent quest limit~~
