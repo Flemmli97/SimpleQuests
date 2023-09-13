@@ -1,8 +1,12 @@
 package io.github.flemmli97.simplequests.datapack;
 
 import com.google.gson.JsonObject;
-import io.github.flemmli97.simplequests.quest.QuestEntry;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.QuestEntryMultiImpl;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -10,37 +14,46 @@ import java.util.Map;
 
 public class QuestEntryRegistry {
 
-    private static final Map<ResourceLocation, Deserializer<?>> MAP = new HashMap<>();
+    private static final Map<ResourceLocation, Codec<QuestEntry>> MAP = new HashMap<>();
+    public static final Codec<QuestEntry> CODEC = ResourceLocation.CODEC
+            .dispatch("id", QuestEntry::getId, MAP::get);
 
     public static void register() {
-        registerSerializer(QuestEntryImpls.ItemEntry.ID, QuestEntryImpls.ItemEntry::fromJson);
-        registerSerializer(QuestEntryImpls.XPEntry.ID, QuestEntryImpls.XPEntry::fromJson);
-        registerSerializer(QuestEntryImpls.AdvancementEntry.ID, QuestEntryImpls.AdvancementEntry::fromJson);
-        registerSerializer(QuestEntryImpls.KillEntry.ID, QuestEntryImpls.KillEntry::fromJson);
-        registerSerializer(QuestEntryImpls.PositionEntry.ID, QuestEntryImpls.PositionEntry::fromJson);
-        registerSerializer(QuestEntryImpls.LocationEntry.ID, QuestEntryImpls.LocationEntry::fromJson);
-        registerSerializer(QuestEntryImpls.EntityInteractEntry.ID, QuestEntryImpls.EntityInteractEntry::fromJson);
-        registerSerializer(QuestEntryImpls.BlockInteractEntry.ID, QuestEntryImpls.BlockInteractEntry::fromJson);
-        registerSerializer(QuestEntryImpls.CraftingEntry.ID, QuestEntryImpls.CraftingEntry::fromJson);
+        registerSerializer(QuestEntryImpls.ItemEntry.ID, QuestEntryImpls.ItemEntry.CODEC);
+        registerSerializer(QuestEntryImpls.KillEntry.ID, QuestEntryImpls.KillEntry.CODEC);
+        registerSerializer(QuestEntryImpls.XPEntry.ID, QuestEntryImpls.XPEntry.CODEC);
+        registerSerializer(QuestEntryImpls.AdvancementEntry.ID, QuestEntryImpls.AdvancementEntry.CODEC);
+        registerSerializer(QuestEntryImpls.PositionEntry.ID, QuestEntryImpls.PositionEntry.CODEC);
+        registerSerializer(QuestEntryImpls.LocationEntry.ID, QuestEntryImpls.LocationEntry.CODEC);
+        registerSerializer(QuestEntryImpls.EntityInteractEntry.ID, QuestEntryImpls.EntityInteractEntry.CODEC);
+        registerSerializer(QuestEntryImpls.BlockInteractEntry.ID, QuestEntryImpls.BlockInteractEntry.CODEC);
+        registerSerializer(QuestEntryImpls.CraftingEntry.ID, QuestEntryImpls.CraftingEntry.CODEC);
+
+        registerSerializer(QuestEntryMultiImpl.MultiItemEntry.ID, QuestEntryMultiImpl.MultiItemEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiKillEntry.ID, QuestEntryMultiImpl.MultiKillEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.XPRangeEntry.ID, QuestEntryMultiImpl.XPRangeEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiAdvancementEntry.ID, QuestEntryMultiImpl.MultiAdvancementEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiPositionEntry.ID, QuestEntryMultiImpl.MultiPositionEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiLocationEntry.ID, QuestEntryMultiImpl.MultiLocationEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiEntityInteractEntry.ID, QuestEntryMultiImpl.MultiEntityInteractEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiBlockInteractEntry.ID, QuestEntryMultiImpl.MultiBlockInteractEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiCraftingEntry.ID, QuestEntryMultiImpl.MultiCraftingEntry.CODEC);
     }
 
     /**
      * Register a deserializer for a {@link QuestEntry}
      */
-    public static synchronized void registerSerializer(ResourceLocation id, Deserializer<?> deserializer) {
+    @SuppressWarnings("unchecked")
+    public static synchronized void registerSerializer(ResourceLocation id, Codec<? extends QuestEntry> deserializer) {
         if (MAP.containsKey(id))
             throw new IllegalStateException("Deserializer for " + id + " already registered");
-        MAP.put(id, deserializer);
+        MAP.put(id, (Codec<QuestEntry>) deserializer);
     }
 
     public static QuestEntry deserialize(ResourceLocation res, JsonObject obj) {
-        Deserializer<?> d = MAP.get(res);
+        Codec<QuestEntry> d = MAP.get(res);
         if (d != null)
-            return d.deserialize(obj);
+            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't deserialize QuestEntry from json " + e));
         throw new IllegalStateException("Missing entry for key " + res);
-    }
-
-    public interface Deserializer<T extends QuestEntry> {
-        T deserialize(JsonObject obj);
     }
 }
