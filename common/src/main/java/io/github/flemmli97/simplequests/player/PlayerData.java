@@ -1,11 +1,11 @@
 package io.github.flemmli97.simplequests.player;
 
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestEntry;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -39,12 +39,12 @@ import java.util.function.BiConsumer;
 
 public class PlayerData {
 
-    public static final DateTimeFormatter time = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    public static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final ServerPlayer player;
     private List<QuestProgress> currentQuests = new ArrayList<>();
     private Map<ResourceLocation, Long> cooldownTracker = new HashMap<>();
-    private List<QuestProgress> tickables = new ArrayList<>();
+    private final List<QuestProgress> tickables = new ArrayList<>();
 
     private Set<ResourceLocation> unlockTracker = new HashSet<>();
 
@@ -82,8 +82,9 @@ public class PlayerData {
                 this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
-        this.currentQuests.add(new QuestProgress(quest, this));
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+        QuestProgress prog = new QuestProgress(quest, this);
+        this.currentQuests.add(prog);
+        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), quest.getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
         return true;
     }
 
@@ -274,8 +275,7 @@ public class PlayerData {
         this.unlockTracker.remove(quest);
     }
 
-    public void tick() {
-        --this.interactionCooldown;
+    public void tickTickableQuests(String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
         this.tickables.removeIf(prog -> {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
@@ -283,7 +283,7 @@ public class PlayerData {
                 this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
             }
-            if (prog.isCompleted("")) {
+            if (prog.isCompleted(trigger)) {
                 this.completeQuest(prog);
                 completed.add(prog);
                 return true;
@@ -291,6 +291,11 @@ public class PlayerData {
             return fulfilled.getFirst();
         });
         this.currentQuests.removeAll(completed);
+    }
+
+    public void tick() {
+        --this.interactionCooldown;
+        this.tickTickableQuests("");
 
         LocalDateTime now = LocalDateTime.now();
         if (this.questTrackerTime == null || this.questTrackerTime.getDayOfYear() != now.getDayOfYear()) {
@@ -336,7 +341,7 @@ public class PlayerData {
         this.cooldownTracker.forEach((res, time) -> list.putLong(res.toString(), time));
         tag.put("FinishedQuests", list);
         if (this.questTrackerTime != null)
-            tag.putString("TimeTracker", this.questTrackerTime.format(time));
+            tag.putString("TimeTracker", this.questTrackerTime.format(TIME));
         CompoundTag daily = new CompoundTag();
         this.dailyQuestsTracker.forEach((res, amount) -> daily.putInt(res.toString(), amount));
         tag.put("DailyQuestTracker", daily);
@@ -361,7 +366,7 @@ public class PlayerData {
         CompoundTag done = tag.getCompound("FinishedQuests");
         done.getAllKeys().forEach(key -> this.cooldownTracker.put(new ResourceLocation(key), done.getLong(key)));
         if (tag.contains("TimeTracker"))
-            this.questTrackerTime = LocalDateTime.parse(tag.getString("TimeTracker"), time);
+            this.questTrackerTime = LocalDateTime.parse(tag.getString("TimeTracker"), TIME);
         CompoundTag daily = tag.getCompound("DailyQuestTracker");
         daily.getAllKeys().forEach(key -> this.dailyQuestsTracker.put(new ResourceLocation(key), done.getInt(key)));
         ListTag unlocked = tag.getList("UnlockedQuests", Tag.TAG_STRING);

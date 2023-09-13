@@ -1,9 +1,13 @@
 package io.github.flemmli97.simplequests.api;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.QuestEntry;
+import io.github.flemmli97.simplequests.quest.Quest;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -55,9 +59,36 @@ public class SimpleQuestAPI {
         PlayerData.get(serverPlayer).onItemCrafted(stack, amount, trigger);
     }
 
+    /**
+     * Register a handler for when a quest gets completed
+     */
+    public static void registerQuestCompleteHandler(OnQuestComplete handler) {
+        SimpleQuests.getHandler().registerQuestCompleteHandler(handler);
+    }
+
+    /**
+     * Register a new QuestEntry with the given id
+     */
+    public static <T extends QuestEntry> void registerQuestEntry(ResourceLocation id, Codec<T> deserializer) {
+        QuestEntryRegistry.registerSerializer(id, deserializer);
+    }
+
     public interface QuestEntryPredicate<T extends QuestEntry> {
 
         boolean matches(String entryName, T entry, QuestProgress progress);
+
+    }
+
+    public interface OnQuestComplete {
+
+        /**
+         * @param serverPlayer The player completing the quest
+         * @param trigger      The trigger that was used for the completion
+         * @param quest        The given quest
+         * @param progress     The current progress
+         * @return false to prevent the completion of the quest
+         */
+        boolean onComplete(ServerPlayer serverPlayer, String trigger, Quest quest, QuestProgress progress);
 
     }
 }

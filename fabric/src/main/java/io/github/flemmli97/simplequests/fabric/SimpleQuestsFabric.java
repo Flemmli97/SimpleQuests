@@ -2,11 +2,14 @@ package io.github.flemmli97.simplequests.fabric;
 
 import io.github.flemmli97.simplequests.QuestCommand;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -19,6 +22,15 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
 public class SimpleQuestsFabric implements ModInitializer {
+
+    public static Event<SimpleQuestAPI.OnQuestComplete> QUEST_COMPLETE = EventFactory.createArrayBacked(SimpleQuestAPI.OnQuestComplete.class,
+            listener -> (serverPlayer, trigger, quest, progress) -> {
+                for (SimpleQuestAPI.OnQuestComplete event : listener) {
+                    if (!event.onComplete(serverPlayer, trigger, quest, progress))
+                        return false;
+                }
+                return true;
+            });
 
     @Override
     public void onInitialize() {

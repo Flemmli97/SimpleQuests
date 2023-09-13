@@ -99,7 +99,7 @@ public class QuestCommand {
                 ctx.getSource().sendSuccess(() -> Component.translatable(ConfigHandler.lang.get("simplequests.current"), prog.getQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
                 prog.getQuest().getDescription().forEach(c -> ctx.getSource().sendSuccess(() -> c, false));
                 List<String> finished = prog.finishedTasks();
-                prog.getQuest().entries.entrySet().stream()
+                prog.getQuestEntries().entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))
                         .forEach(e -> {
                             MutableComponent progress = e.getValue().progress(player, prog, e.getKey());

@@ -3,7 +3,10 @@ package io.github.flemmli97.simplequests.fabric;
 import dev.ftb.mods.ftbranks.api.FTBRanksAPI;
 import io.github.flemmli97.simplequests.LoaderHandler;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.player.QuestProgress;
+import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
@@ -59,9 +62,9 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
-        if (!entry.description.isEmpty())
-            return List.of(Component.translatable(entry.description));
-        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
+        if (!entry.description().isEmpty())
+            return List.of(Component.translatable(entry.description()));
+        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate());
         if (all.size() < warpAmount)
             return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
@@ -78,7 +81,7 @@ public class LoaderImpl implements LoaderHandler {
             i++;
             if ((list.size() == 0 && i >= warpAmount - 1) || i >= warpAmount) {
                 if (list.size() == 0) {
-                    list.add(Component.translatable(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount));
+                    list.add(Component.translatable(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;
@@ -87,5 +90,15 @@ public class LoaderImpl implements LoaderHandler {
         }
         list.get(list.size() - 1).append(Component.literal("]"));
         return list;
+    }
+
+    @Override
+    public void registerQuestCompleteHandler(SimpleQuestAPI.OnQuestComplete handler) {
+        SimpleQuestsFabric.QUEST_COMPLETE.register(handler);
+    }
+
+    @Override
+    public boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress) {
+        return SimpleQuestsFabric.QUEST_COMPLETE.invoker().onComplete(player, trigger, quest, progress);
     }
 }
