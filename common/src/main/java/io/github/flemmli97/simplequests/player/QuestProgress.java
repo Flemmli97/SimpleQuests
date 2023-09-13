@@ -3,11 +3,11 @@ package io.github.flemmli97.simplequests.player;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestEntry;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -124,7 +124,7 @@ public class QuestProgress {
     public SubmitType submit(ServerPlayer player, String trigger) {
         boolean any = false;
         for (Map.Entry<String, QuestEntry> entry : this.quest.entries.entrySet()) {
-            if (this.entries.contains(entry.getKey()))
+            if (this.entries.contains(entry.getKey()) && !this.quest.questSubmissionTrigger.equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
                 this.entries.add(entry.getKey());

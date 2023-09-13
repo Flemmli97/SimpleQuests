@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests.quest;
+package io.github.flemmli97.simplequests.api;
 
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -30,5 +30,9 @@ public interface QuestEntry {
 
     default Function<PlayerData, Boolean> tickable() {
         return null;
+    }
+
+    interface Deserializer<T extends QuestEntry> {
+        T deserialize(JsonObject obj);
     }
 }

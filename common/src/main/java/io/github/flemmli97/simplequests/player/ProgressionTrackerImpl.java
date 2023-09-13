@@ -1,8 +1,8 @@
 package io.github.flemmli97.simplequests.player;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.quest.QuestEntry;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;

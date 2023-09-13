@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.quest;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.mixin.EntityPredicateAccessor;
 import io.github.flemmli97.simplequests.mixin.ItemPredicateAccessor;
