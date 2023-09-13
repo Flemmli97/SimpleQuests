@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.player;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
@@ -14,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
@@ -45,16 +47,18 @@ public class QuestProgress {
     private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
 
     private Quest quest;
+    private Map<String, QuestEntry> questEntries;
 
     public QuestProgress(Quest quest, PlayerData data) {
         this.quest = quest;
+        this.questEntries = quest.resolveTasks(data.getPlayer());
         this.setup(data);
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
     }
 
     public QuestProgress(CompoundTag tag, PlayerData data) {
-        this.load(tag);
+        this.load(tag, data.getPlayer());
         this.setup(data);
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
@@ -107,7 +111,7 @@ public class QuestProgress {
     }
 
     private void setup(PlayerData data) {
-        this.quest.entries.forEach((s, e) -> {
+        this.questEntries.forEach((s, e) -> {
             e.onAccept(data);
             if (!this.entries.contains(s)) {
                 Function<PlayerData, Boolean> ticker = e.tickable();
@@ -121,9 +125,13 @@ public class QuestProgress {
         return this.quest;
     }
 
+    public Map<String, QuestEntry> getQuestEntries() {
+        return this.questEntries;
+    }
+
     public SubmitType submit(ServerPlayer player, String trigger) {
         boolean any = false;
-        for (Map.Entry<String, QuestEntry> entry : this.quest.entries.entrySet()) {
+        for (Map.Entry<String, QuestEntry> entry : this.questEntries.entrySet()) {
             if (this.entries.contains(entry.getKey()) && !this.quest.questSubmissionTrigger.equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
@@ -138,7 +146,7 @@ public class QuestProgress {
     @SuppressWarnings("unchecked")
     public <T extends QuestEntry> Set<Pair<String, T>> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred) {
         Set<Pair<String, T>> fullfilled = new HashSet<>();
-        for (Map.Entry<String, QuestEntry> e : this.quest.entries.entrySet()) {
+        for (Map.Entry<String, QuestEntry> e : this.questEntries.entrySet()) {
             if (this.entries.contains(e.getKey()))
                 continue;
             if (clss.isInstance(e.getValue())) {
@@ -153,7 +161,7 @@ public class QuestProgress {
     }
 
     public boolean isCompleted(String trigger) {
-        return this.quest.questSubmissionTrigger.equals(trigger) && this.entries.containsAll(this.quest.entries.keySet());
+        return this.quest.questSubmissionTrigger.equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
     }
 
     public List<String> finishedTasks() {
@@ -192,7 +200,7 @@ public class QuestProgress {
         Set<QuestEntry> fullfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
             if (e.getValue().apply(data)) {
-                fullfilled.add(this.quest.entries.get(e.getKey()));
+                fullfilled.add(this.questEntries.get(e.getKey()));
                 this.entries.add(e.getKey());
                 return true;
             }
@@ -204,6 +212,9 @@ public class QuestProgress {
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putString("Quest", this.quest.id.toString());
+        CompoundTag entries = new CompoundTag();
+        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
+        tag.put("QuestEntries", entries);
         ListTag list = new ListTag();
         this.entries.forEach(res -> list.add(StringTag.valueOf(res)));
         tag.put("FinishedEntries", list);
@@ -227,11 +238,19 @@ public class QuestProgress {
         return tag;
     }
 
-    public void load(CompoundTag tag) {
+    public void load(CompoundTag tag, ServerPlayer player) {
         this.quest = QuestsManager.instance().getAllQuests().get(new ResourceLocation(tag.getString("Quest")));
         if (this.quest == null) {
             SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest") + ". Skipping");
             throw new IllegalStateException();
+        }
+        if (tag.contains("QuestEntries")) {
+            ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
+            CompoundTag entries = tag.getCompound("QuestEntries");
+            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't read quest entry" + e))));
+            this.questEntries = builder.build();
+        } else {
+            this.questEntries = this.quest.resolveTasks(player);
         }
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));
@@ -253,7 +272,7 @@ public class QuestProgress {
             throw new IllegalStateException();
         }
         try {
-            T entry = func.apply((F) this.quest.entries.get(name));
+            T entry = func.apply((F) this.questEntries.get(name));
             entry.load(tag.get(name));
             map.putIfAbsent(name, entry);
         } catch (ClassCastException e) {

@@ -89,8 +89,9 @@ public class PlayerData {
                 this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return false;
         }
-        this.currentQuests.add(new QuestProgress(quest, this));
-        this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.accept"), quest.getFormatted(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+        QuestProgress prog = new QuestProgress(quest, this);
+        this.currentQuests.add(prog);
+        this.player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.accept"), quest.getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
         return true;
     }
 

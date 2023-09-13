@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class Quest implements Comparable<Quest> {
 
-    public final Map<String, QuestEntry> entries;
+    private final Map<String, QuestEntry> entries;
 
     public final ResourceLocation id;
     public final QuestCategory category;
@@ -130,6 +130,14 @@ public class Quest implements Comparable<Quest> {
                 GsonHelper.getAsString(obj, "command", ""));
     }
 
+    public static List<MutableComponent> getFormattedTasks(ServerPlayer player, Map<String, QuestEntry> resolvedTasks) {
+        List<MutableComponent> list = new ArrayList<>();
+        for (Map.Entry<String, QuestEntry> e : resolvedTasks.entrySet()) {
+            list.add(new TextComponent(" - ").append(e.getValue().translation(player)));
+        }
+        return list;
+    }
+
     public JsonObject serialize(boolean withId, boolean full) {
         JsonObject obj = new JsonObject();
         if (withId)
@@ -196,23 +204,15 @@ public class Quest implements Comparable<Quest> {
         return this.questTaskDesc.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
     }
 
-    public MutableComponent getFormatted(ServerPlayer player, ChatFormatting... subFormatting) {
+    public MutableComponent getFormattedWith(ServerPlayer player, Map<String, QuestEntry> resolvedTasks, ChatFormatting... subFormatting) {
         MutableComponent main = new TextComponent("").append(this.getTask().withStyle(ChatFormatting.LIGHT_PURPLE));
-        for (MutableComponent tasks : this.getFormattedTasks(player)) {
+        for (MutableComponent tasks : getFormattedTasks(player, resolvedTasks)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));
             else
                 main.append("\n").append(tasks);
         }
         return main;
-    }
-
-    public List<MutableComponent> getFormattedTasks(ServerPlayer player) {
-        List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
-            list.add(new TextComponent(" - ").append(e.getValue().translation(player)));
-        }
-        return list;
     }
 
     public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
@@ -233,6 +233,14 @@ public class Quest implements Comparable<Quest> {
             }
         }
         return list;
+    }
+
+    public Map<String, QuestEntry> resolveTasks(ServerPlayer player) {
+        ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
+        for (Map.Entry<String, QuestEntry> i : this.entries.entrySet()) {
+            builder.put(i.getKey(), i.getValue().resolve(player));
+        }
+        return builder.build();
     }
 
     public ItemStack getIcon() {

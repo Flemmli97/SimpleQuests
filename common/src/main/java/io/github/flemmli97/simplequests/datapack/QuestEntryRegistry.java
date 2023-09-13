@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests.datapack;
 
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.api.QuestEntry;
+import io.github.flemmli97.simplequests.quest.FuzzyQuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.resources.ResourceLocation;
 
@@ -22,6 +23,8 @@ public class QuestEntryRegistry {
         registerSerializer(QuestEntryImpls.EntityInteractEntry.ID, QuestEntryImpls.EntityInteractEntry::fromJson);
         registerSerializer(QuestEntryImpls.BlockInteractEntry.ID, QuestEntryImpls.BlockInteractEntry::fromJson);
         registerSerializer(QuestEntryImpls.CraftingEntry.ID, QuestEntryImpls.CraftingEntry::fromJson);
+
+        registerSerializer(FuzzyQuestEntryImpls.FuzzyItemEntry.ID, FuzzyQuestEntryImpls.FuzzyItemEntry::fromJson);
     }
 
     /**
