@@ -343,7 +343,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription));
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription), this.amount);
         }
 
         @Nullable
@@ -406,7 +406,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.blockDescription));
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.blockDescription), this.amount);
         }
 
         @Nullable
@@ -460,7 +460,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description);
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription), this.amount);
         }
 
         @Nullable

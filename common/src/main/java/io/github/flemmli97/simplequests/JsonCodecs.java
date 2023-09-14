@@ -34,11 +34,11 @@ public class JsonCodecs {
     public static Codec<NumberProvider> NUMER_PROVIDER_CODEC = JsonCodecs.jsonCodecBuilder(GSON::toJsonTree, e -> GSON.fromJson(e, NumberProvider.class), "NumberProvider");
 
     public static <E> Codec<List<Either<E, Pair<E, String>>>> optionalDescriptiveList(Codec<E> codec, String error) {
-        return nonEmptyList(Codec.either(codec, Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.STRING))), error);
+        return nonEmptyList(Codec.either(codec, Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e)))), error);
     }
 
     public static <E> Codec<List<Pair<E, String>>> descriptiveList(Codec<E> codec, String error) {
-        return nonEmptyList(Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.STRING)), error);
+        return nonEmptyList(Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e))), error);
     }
 
     public static <E> Codec<List<E>> nonEmptyList(Codec<E> codec, String error) {

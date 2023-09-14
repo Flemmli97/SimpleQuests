@@ -214,9 +214,9 @@ public class QuestEntryMultiImpl {
                         Codec.STRING.fieldOf("description").forGetter(d -> d.description),
                         Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
 
-                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ITEM_PREDICATE_CODEC, Codec.STRING)).listOf()
+                        JsonCodecs.descriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "empty item predicates")
                                 .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
-                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ENTITY_PREDICATE_CODEC, Codec.STRING)).listOf()
+                        JsonCodecs.descriptiveList(JsonCodecs.ENTITY_PREDICATE_CODEC, "empty entity predicates")
                                 .optionalFieldOf("entityPredicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
                         JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
                 ).apply(instance, (consume, desc, taskDescription, item, pred, amount) -> new MultiEntityInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, consume, desc, taskDescription)));
@@ -259,9 +259,9 @@ public class QuestEntryMultiImpl {
                         Codec.STRING.fieldOf("description").forGetter(d -> d.description),
                         Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
 
-                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ITEM_PREDICATE_CODEC, Codec.STRING)).listOf()
+                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ITEM_PREDICATE_CODEC, Codec.unit(e))).listOf()
                                 .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
-                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.BLOCK_PREDICATE_CODEC, Codec.STRING)).listOf()
+                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.BLOCK_PREDICATE_CODEC, Codec.unit(e))).listOf()
                                 .optionalFieldOf("blockPredicates").forGetter(d -> d.blockPredicates.isEmpty() ? Optional.empty() : Optional.of(d.blockPredicates)),
                         JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
                 ).apply(instance, (use, consume, desc, taskDescription, item, pred, amount) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, desc, taskDescription)));
