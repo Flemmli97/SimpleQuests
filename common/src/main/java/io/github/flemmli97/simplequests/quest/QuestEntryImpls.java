@@ -238,7 +238,7 @@ public class QuestEntryImpls {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "position");
         public static final Codec<PositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(d -> d.pos),
+                instance.group(JsonCodecs.BLOCK_POS_CODEC.fieldOf("pos").forGetter(d -> d.pos),
                         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
                         Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
                 ).apply(instance, (pred, amount, desc) -> new PositionEntry(pred, amount, desc.orElse(""))));
@@ -475,13 +475,13 @@ public class QuestEntryImpls {
     }
 
     public record FishingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount,
-                               String description, String heldDescription,
+                               String description, String itemDescription,
                                String entityDescription) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "fishing");
         public static final Codec<FishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("itemDescription").forGetter(d -> d.itemDescription.isEmpty() ? Optional.empty() : Optional.of(d.itemDescription)),
                         Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
 
                         JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
@@ -505,7 +505,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription), this.amount);
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.itemDescription), new TranslatableComponent(this.entityDescription), this.amount);
         }
 
         @Nullable

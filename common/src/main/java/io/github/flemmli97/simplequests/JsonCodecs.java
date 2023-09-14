@@ -11,10 +11,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
@@ -30,6 +32,12 @@ public class JsonCodecs {
     public static Codec<EntityPredicate> ENTITY_PREDICATE_CODEC = jsonCodecBuilder(EntityPredicate::serializeToJson, EntityPredicate::fromJson, "EntityPredicate");
     public static Codec<BlockPredicate> BLOCK_PREDICATE_CODEC = jsonCodecBuilder(BlockPredicate::serializeToJson, BlockPredicate::fromJson, "BlockPredicate");
     public static Codec<LocationPredicate> LOCATION_PREDICATE_CODEC = jsonCodecBuilder(LocationPredicate::serializeToJson, LocationPredicate::fromJson, "LocationPredicate");
+    // The default BlockPos Codec writes to an array, this writes to a map of x, y, z
+    public static Codec<BlockPos> BLOCK_POS_CODEC = RecordCodecBuilder.create((instance) ->
+            instance.group(Codec.INT.fieldOf("x").forGetter(d -> d.getX()),
+                    Codec.INT.fieldOf("y").forGetter(d -> d.getY()),
+                    Codec.INT.fieldOf("z").forGetter(d -> d.getZ())
+            ).apply(instance, BlockPos::new));
 
     public static Codec<NumberProvider> NUMER_PROVIDER_CODEC = JsonCodecs.jsonCodecBuilder(GSON::toJsonTree, e -> GSON.fromJson(e, NumberProvider.class), "NumberProvider");
 

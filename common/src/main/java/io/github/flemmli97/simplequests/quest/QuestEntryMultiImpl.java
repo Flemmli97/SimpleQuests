@@ -151,7 +151,7 @@ public class QuestEntryMultiImpl {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "multi_position");
         public static final Codec<MultiPositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(JsonCodecs.optionalDescriptiveList(BlockPos.CODEC, "positions can't be empty").fieldOf("positions").forGetter(d -> d.positions),
+                instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.BLOCK_POS_CODEC, "positions can't be empty").fieldOf("positions").forGetter(d -> d.positions),
                         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
                         Codec.STRING.fieldOf("description").forGetter(d -> d.description)
                 ).apply(instance, MultiPositionEntry::new));
