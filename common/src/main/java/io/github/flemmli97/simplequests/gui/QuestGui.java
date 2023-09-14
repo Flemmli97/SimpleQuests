@@ -1,6 +1,5 @@
 package io.github.flemmli97.simplequests.gui;
 
-import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
@@ -26,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolean>> {
+public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
 
     public static int QUEST_PER_PAGE = 12;
 
@@ -55,10 +55,11 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
     private Map<Integer, QuestBase> updateList;
     private final List<Integer> toremove = new ArrayList<>();
 
-    protected QuestGui(int syncId, Inventory playerInventory, Pair<QuestCategory, Boolean> data) {
+    protected QuestGui(int syncId, Inventory playerInventory, QuestGui.QuestGuiData data) {
         super(syncId, playerInventory, 6, data);
-        this.category = data.getFirst();
-        this.canGoBack = data.getSecond();
+        this.category = data.category;
+        this.page = data.page;
+        this.canGoBack = data.canGoBack;
         if (playerInventory.player instanceof ServerPlayer)
             this.player = (ServerPlayer) playerInventory.player;
         else
@@ -66,14 +67,14 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
     }
 
     public static void openGui(Player player, QuestCategory category) {
-        openGui(player, category, true);
+        openGui(player, category, true, 0);
     }
 
-    public static void openGui(Player player, QuestCategory category, boolean canGoBack) {
+    public static void openGui(Player player, QuestCategory category, boolean canGoBack, int page) {
         MenuProvider fac = new MenuProvider() {
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-                return new QuestGui(syncId, inv, Pair.of(category, canGoBack));
+                return new QuestGui(syncId, inv, new QuestGuiData(category, page, canGoBack));
             }
 
             @Override
@@ -119,11 +120,11 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
     }
 
     @Override
-    protected void fillInventoryWith(Player player, SeparateInv inv, Pair<QuestCategory, Boolean> data) {
+    protected void fillInventoryWith(Player player, SeparateInv inv, QuestGui.QuestGuiData data) {
         this.updateList = new HashMap<>();
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(data.getFirst());
+        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(data.category());
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
@@ -131,13 +132,21 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
                     || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
         });
         this.maxPages = (this.quests.size() - 1) / QUEST_PER_PAGE;
-        int id = 0;
+        int page = Mth.clamp(data.page, 0, this.maxPages);
+        int id = page * QUEST_PER_PAGE;
         for (int i = 0; i < 54; i++) {
-            if (i == 8 && this.quests.size() > QUEST_PER_PAGE) {
+            if (i == 0) {
+                ItemStack stack = emptyFiller();
+                if (page > 0) {
+                    stack = new ItemStack(Items.ARROW);
+                    stack.setHoverName(new TranslatableComponent(ConfigHandler.lang.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                }
+                inv.updateStack(i, stack);
+            } else if (i == 8 && page < this.maxPages) {
                 ItemStack close = new ItemStack(Items.ARROW);
                 close.setHoverName(new TranslatableComponent(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
-            } else if (data.getSecond() && i == 45) {
+            } else if (data.canGoBack() && i == 45) {
                 ItemStack stack = new ItemStack(Items.TNT);
                 stack.setHoverName(new TranslatableComponent(ConfigHandler.lang.get("simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, stack);
@@ -241,12 +250,12 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
                         player.closeContainer();
-                        player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
+                        player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack, this.page));
                         playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                     }
                 }, "simplequests.gui.reset");
             } else
-                CompositeQuestScreenHandler.openScreen(player, composite, this.category, this.canGoBack);
+                CompositeQuestScreenHandler.openScreen(player, composite, this.category, this.canGoBack, this.page);
         } else if (quest instanceof Quest actual) {
             ConfirmScreenHandler.openConfirmScreen(player, b -> {
                 if (b) {
@@ -262,7 +271,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
                     }
                 } else {
                     player.closeContainer();
-                    player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
+                    player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack, this.page));
                     playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                 }
             }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
@@ -290,5 +299,8 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
             if (delay.equals("0s"))
                 this.toremove.add(i);
         });
+    }
+
+    record QuestGuiData(QuestCategory category, int page, boolean canGoBack) {
     }
 }
