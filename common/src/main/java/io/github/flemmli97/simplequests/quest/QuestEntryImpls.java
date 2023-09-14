@@ -473,4 +473,49 @@ public class QuestEntryImpls {
             return this.item.matches(stack) && this.playerPredicate.matches(player, player);
         }
     }
+
+    public record FishingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount,
+                               String description, String heldDescription,
+                               String entityDescription) implements QuestEntry {
+
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "fishing");
+        public static final Codec<FishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
+
+                        JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.playerPredicate)),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount) -> new FishingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
+
+        public FishingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount, String description) {
+            this(item, playerPredicate, amount, description, "", "");
+        }
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            return false;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public MutableComponent translation(ServerPlayer player) {
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription), this.amount);
+        }
+
+        @Nullable
+        @Override
+        public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+            return progress.fishingProgress(player, id);
+        }
+
+        public boolean check(ServerPlayer player, ItemStack stack) {
+            return this.item.matches(stack) && this.playerPredicate.matches(player, player);
+        }
+    }
 }
