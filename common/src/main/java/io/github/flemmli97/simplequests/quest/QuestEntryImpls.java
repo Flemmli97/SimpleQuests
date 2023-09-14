@@ -239,7 +239,7 @@ public class QuestEntryImpls {
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "position");
         public static final Codec<PositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(d -> d.pos),
-                        Codec.INT.fieldOf("minDist").forGetter(d -> d.minDist),
+                        ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
                         Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
                 ).apply(instance, (pred, amount, desc) -> new PositionEntry(pred, amount, desc.orElse(""))));
 
@@ -312,18 +312,24 @@ public class QuestEntryImpls {
      * @param description Parsing the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
      */
     public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount,
-                                      boolean consume,
-                                      String description) implements QuestEntry {
+                                      boolean consume, String description, String heldDescription,
+                                      String entityDescription) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
         public static final Codec<EntityInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
 
                         JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
                         JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("predicate").forGetter(d -> d.entityPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.entityPredicate)),
-                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
-                ).apply(instance, (consume, desc, item, pred, amount) -> new EntityInteractEntry(item.orElse(ItemPredicate.ANY), pred.orElse(EntityPredicate.ANY), amount, consume, desc)));
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume)
+                ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount, consume) -> new EntityInteractEntry(item.orElse(ItemPredicate.ANY), pred.orElse(EntityPredicate.ANY), amount, consume, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
+
+        public EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount, boolean consume, String description) {
+            this(heldItem, entityPredicate, amount, consume, description, "", "");
+        }
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -337,7 +343,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description);
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.entityDescription));
         }
 
         @Nullable
@@ -361,24 +367,32 @@ public class QuestEntryImpls {
      * @param use If the player should use (right click) or break the block
      */
     public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
-                                     boolean consumeItem, String description) implements QuestEntry {
+                                     boolean consumeItem, String description, String heldDescription,
+                                     String blockDescription) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "block_interact");
         public static final Codec<BlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
-                        Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
+                instance.group(Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
                         Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("blockDescription").forGetter(d -> d.blockDescription.isEmpty() ? Optional.empty() : Optional.of(d.blockDescription)),
 
                         JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
                         JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.of(d.blockPredicate)),
-                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
-                ).apply(instance, (use, consume, desc, item, block, amount) -> {
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        Codec.BOOL.fieldOf("use").forGetter(d -> d.use)
+                ).apply(instance, (consume, desc, heldDesc, blockDescription, item, block, amount, use) -> {
                     ItemPredicate itemPredicate = item.orElse(ItemPredicate.ANY);
                     BlockPredicate blockPredicate = block.orElse(BlockPredicate.ANY);
                     if (itemPredicate == ItemPredicate.ANY && blockPredicate == BlockPredicate.ANY)
                         throw new IllegalStateException("Either item or block has to be defined");
-                    return new BlockInteractEntry(itemPredicate, blockPredicate, amount, use, consume, desc);
+                    return new BlockInteractEntry(itemPredicate, blockPredicate, amount, use, consume, desc, heldDesc.orElse(""), blockDescription.orElse(""));
                 }));
+
+        public BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
+                                  boolean consumeItem, String description) {
+            this(heldItem, blockPredicate, amount, use, consumeItem, description, "", "");
+        }
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -392,7 +406,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return new TranslatableComponent(this.description);
+            return new TranslatableComponent(this.description, new TranslatableComponent(this.heldDescription), new TranslatableComponent(this.blockDescription));
         }
 
         @Nullable
@@ -416,15 +430,23 @@ public class QuestEntryImpls {
      * Quest entry to check for when a player crafts something
      */
     public record CraftingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount,
-                                String description) implements QuestEntry {
+                                String description, String heldDescription,
+                                String entityDescription) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "crafting");
         public static final Codec<CraftingEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
+                instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
+
+                        JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
                         JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.playerPredicate)),
-                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
-                ).apply(instance, (item, pred, amount, desc) -> new CraftingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc)));
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount) -> new CraftingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
+
+        public CraftingEntry(ItemPredicate item, EntityPredicate playerPredicate, int amount, String description) {
+            this(item, playerPredicate, amount, description, "", "");
+        }
 
         @Override
         public boolean submit(ServerPlayer player) {

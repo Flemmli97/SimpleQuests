@@ -5,8 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
-import io.github.flemmli97.simplequests.quest.FuzzyQuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.QuestEntryMultiImpl;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -29,7 +29,15 @@ public class QuestEntryRegistry {
         registerSerializer(QuestEntryImpls.BlockInteractEntry.ID, QuestEntryImpls.BlockInteractEntry.CODEC);
         registerSerializer(QuestEntryImpls.CraftingEntry.ID, QuestEntryImpls.CraftingEntry.CODEC);
 
-        registerSerializer(FuzzyQuestEntryImpls.FuzzyItemEntry.ID, FuzzyQuestEntryImpls.FuzzyItemEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiItemEntry.ID, QuestEntryMultiImpl.MultiItemEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiKillEntry.ID, QuestEntryMultiImpl.MultiKillEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.XPRangeEntry.ID, QuestEntryMultiImpl.XPRangeEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiAdvancementEntry.ID, QuestEntryMultiImpl.MultiAdvancementEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiPositionEntry.ID, QuestEntryMultiImpl.MultiPositionEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiLocationEntry.ID, QuestEntryMultiImpl.MultiLocationEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiEntityInteractEntry.ID, QuestEntryMultiImpl.MultiEntityInteractEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiBlockInteractEntry.ID, QuestEntryMultiImpl.MultiBlockInteractEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiCraftingEntry.ID, QuestEntryMultiImpl.MultiCraftingEntry.CODEC);
     }
 
     /**
