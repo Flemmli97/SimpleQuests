@@ -7,11 +7,13 @@ import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.function.BiConsumer;
 
 public class SimpleQuestAPI {
@@ -71,6 +73,13 @@ public class SimpleQuestAPI {
      */
     public static <T extends QuestEntry> void registerQuestEntry(ResourceLocation id, Codec<T> deserializer) {
         QuestEntryRegistry.registerSerializer(id, deserializer);
+    }
+
+    /**
+     * Gets active quests for the given category
+     */
+    public static Collection<QuestProgress> activeQuest(ServerPlayer serverPlayer, QuestCategory category) {
+        return PlayerData.get(serverPlayer).getCurrentQuests(category);
     }
 
     public interface QuestEntryPredicate<T extends QuestEntry> {
