@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
@@ -187,11 +188,8 @@ public class Quest implements Comparable<Quest> {
         if (!this.questSubmissionTrigger.isEmpty() || full)
             obj.addProperty("submission_trigger", this.questSubmissionTrigger);
         JsonObject entries = new JsonObject();
-        this.entries.forEach((res, entry) -> {
-            JsonObject val = entry.serialize();
-            val.addProperty("id", entry.getId().toString());
-            entries.add(res, val);
-        });
+        SimpleQuests.logger.debug("Serializing " + this.id);
+        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
         obj.add("entries", entries);
         return obj;
     }

@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.api;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -68,7 +69,7 @@ public class SimpleQuestAPI {
     /**
      * Register a new QuestEntry with the given id
      */
-    public static <T extends QuestEntry> void registerQuestEntry(ResourceLocation id, QuestEntry.Deserializer<T> deserializer) {
+    public static <T extends QuestEntry> void registerQuestEntry(ResourceLocation id, Codec<T> deserializer) {
         QuestEntryRegistry.registerSerializer(id, deserializer);
     }
 

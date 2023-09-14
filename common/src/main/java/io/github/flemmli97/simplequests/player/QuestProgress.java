@@ -7,6 +7,7 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
@@ -213,7 +214,7 @@ public class QuestProgress {
         CompoundTag tag = new CompoundTag();
         tag.putString("Quest", this.quest.id.toString());
         CompoundTag entries = new CompoundTag();
-        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
+        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
         tag.put("QuestEntries", entries);
         ListTag list = new ListTag();
         this.entries.forEach(res -> list.add(StringTag.valueOf(res)));
@@ -247,7 +248,7 @@ public class QuestProgress {
         if (tag.contains("QuestEntries")) {
             ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
-            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't read quest entry" + e))));
+            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't read quest entry" + e))));
             this.questEntries = builder.build();
         } else {
             this.questEntries = this.quest.resolveTasks(player);

@@ -63,9 +63,9 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
-        if (!entry.description.isEmpty())
-            return List.of(new TranslatableComponent(entry.description));
-        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate);
+        if (!entry.description().isEmpty())
+            return List.of(new TranslatableComponent(entry.description()));
+        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate());
         if (all.size() < warpAmount)
             return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
@@ -82,7 +82,7 @@ public class LoaderImpl implements LoaderHandler {
             i++;
             if ((list.size() == 0 && i >= warpAmount - 1) || i >= warpAmount) {
                 if (list.size() == 0) {
-                    list.add(new TranslatableComponent(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount));
+                    list.add(new TranslatableComponent(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;

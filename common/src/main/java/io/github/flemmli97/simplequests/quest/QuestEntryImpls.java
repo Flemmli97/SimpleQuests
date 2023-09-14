@@ -1,7 +1,8 @@
 package io.github.flemmli97.simplequests.quest;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.flemmli97.simplequests.JsonCodecs;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
@@ -26,32 +27,29 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class QuestEntryImpls {
 
-    public static class ItemEntry implements QuestEntry {
+    public record ItemEntry(ItemPredicate predicate, int amount,
+                            String description, boolean consumeItems) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "item");
 
-        public final ItemPredicate predicate;
-        public final int amount;
-        public final String description;
-        public final boolean consumeItems;
-
-        public ItemEntry(ItemPredicate predicate, int amount, String description, boolean consumeItems) {
-            this.predicate = predicate;
-            this.amount = amount;
-            this.description = description;
-            this.consumeItems = consumeItems;
-        }
+        public static final Codec<ItemEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
+                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems)
+                ).apply(instance, (pred, desc, amount, consume) -> new ItemEntry(pred, amount, desc.orElse(""), consume)));
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -102,17 +100,6 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("predicate", this.predicate.serializeToJson());
-            if (!this.description.isEmpty())
-                obj.addProperty("description", this.description);
-            obj.addProperty("amount", this.amount);
-            obj.addProperty("consumeItems", this.consumeItems);
-            return obj;
-        }
-
-        @Override
         public ResourceLocation getId() {
             return ID;
         }
@@ -137,11 +124,6 @@ public class QuestEntryImpls {
             return new TranslatableComponent(key.apply(".multi" + (this.consumeItems ? "" : ".keep")), items.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
-        public static ItemEntry fromJson(JsonObject obj) {
-            return new ItemEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), obj.get("amount").getAsInt(),
-                    GsonHelper.getAsString(obj, "description", ""), GsonHelper.getAsBoolean(obj, "consumeItems", true));
-        }
-
         public static List<MutableComponent> itemComponents(ItemPredicate predicate) {
             ItemPredicateAccessor acc = (ItemPredicateAccessor) predicate;
             List<MutableComponent> formattedItems = new ArrayList<>();
@@ -155,21 +137,17 @@ public class QuestEntryImpls {
 
     public record KillEntry(EntityPredicate predicate, int amount, String description) implements QuestEntry {
 
+        public static final Codec<KillEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(JsonCodecs.ENTITY_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
+                ).apply(instance, (pred, amount, desc) -> new KillEntry(pred, amount, desc.orElse(""))));
+
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity");
 
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("predicate", this.predicate.serializeToJson());
-            obj.addProperty("amount", this.amount);
-            if (!this.description.isEmpty())
-                obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -192,15 +170,13 @@ public class QuestEntryImpls {
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
             return progress.killProgress(player, id);
         }
-
-        public static KillEntry fromJson(JsonObject obj) {
-            return new KillEntry(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsInt(obj, "amount", 1), GsonHelper.getAsString(obj, "description", ""));
-        }
     }
 
     public record XPEntry(int amount) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "xp");
+        public static final Codec<XPEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)).apply(instance, XPEntry::new));
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -212,13 +188,6 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("amount", this.amount);
-            return obj;
-        }
-
-        @Override
         public ResourceLocation getId() {
             return ID;
         }
@@ -227,15 +196,15 @@ public class QuestEntryImpls {
         public MutableComponent translation(ServerPlayer player) {
             return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), this.amount);
         }
-
-        public static XPEntry fromJson(JsonObject obj) {
-            return new XPEntry(GsonHelper.getAsInt(obj, "amount", 1));
-        }
     }
 
     public record AdvancementEntry(ResourceLocation advancement, boolean reset) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "advancement");
+        public static final Codec<AdvancementEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(ResourceLocation.CODEC.fieldOf("advancement").forGetter(d -> d.advancement),
+                        Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset)
+                ).apply(instance, AdvancementEntry::new));
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -246,14 +215,6 @@ public class QuestEntryImpls {
                 prog.getCompletedCriteria().forEach(s -> player.getAdvancements().revoke(adv, s));
             }
             return ret;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("advancement", this.advancement.toString());
-            obj.addProperty("reset", this.reset);
-            return obj;
         }
 
         @Override
@@ -271,31 +232,20 @@ public class QuestEntryImpls {
                 adv = advancement.getChatComponent();
             return new TranslatableComponent(ConfigHandler.lang.get(this.getId().toString()), adv);
         }
-
-        public static AdvancementEntry fromJson(JsonObject obj) {
-            return new AdvancementEntry(new ResourceLocation(GsonHelper.getAsString(obj, "advancement")), GsonHelper.getAsBoolean(obj, "reset", false));
-        }
     }
 
     public record PositionEntry(BlockPos pos, int minDist, String description) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "position");
+        public static final Codec<PositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(d -> d.pos),
+                        Codec.INT.fieldOf("minDist").forGetter(d -> d.minDist),
+                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
+                ).apply(instance, (pred, amount, desc) -> new PositionEntry(pred, amount, desc.orElse(""))));
 
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("x", this.pos.getX());
-            obj.addProperty("y", this.pos.getY());
-            obj.addProperty("z", this.pos.getZ());
-            obj.addProperty("minDist", this.minDist);
-            if (!this.description.isEmpty())
-                obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -315,11 +265,6 @@ public class QuestEntryImpls {
                 return p.tickCount % 20 == 0 && p.blockPosition().distSqr(this.pos) < this.minDist * this.minDist;
             };
         }
-
-        public static PositionEntry fromJson(JsonObject obj) {
-            return new PositionEntry(new BlockPos(GsonHelper.getAsInt(obj, "x"), GsonHelper.getAsInt(obj, "y"), GsonHelper.getAsInt(obj, "z")),
-                    GsonHelper.getAsInt(obj, "minDist"), GsonHelper.getAsString(obj, "description", ""));
-        }
     }
 
     /**
@@ -332,17 +277,14 @@ public class QuestEntryImpls {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "location");
 
+        public static final Codec<LocationEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(JsonCodecs.LOCATION_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.location),
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                ).apply(instance, LocationEntry::new));
+
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("predicate", this.location.serializeToJson());
-            obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -362,37 +304,30 @@ public class QuestEntryImpls {
                 return p.tickCount % 20 == 0 && this.location.matches(p.getLevel(), p.getX(), p.getY(), p.getZ());
             };
         }
-
-        public static LocationEntry fromJson(JsonObject obj) {
-            return new LocationEntry(LocationPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")), GsonHelper.getAsString(obj, "description"));
-        }
     }
 
     /**
-     * Quest entry to check if a player matches a given location.
+     * Quest entry to check if a player interacts with an entity.
      *
-     * @param description Parsing a the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
+     * @param description Parsing the predicates is way too complicated. Its easier instead to have the datapack maker provide a description instead
      */
     public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount,
                                       boolean consume,
                                       String description) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
+        public static final Codec<EntityInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+
+                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("predicate").forGetter(d -> d.entityPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.entityPredicate)),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (consume, desc, item, pred, amount) -> new EntityInteractEntry(item.orElse(ItemPredicate.ANY), pred.orElse(EntityPredicate.ANY), amount, consume, desc)));
 
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("item", this.heldItem.serializeToJson());
-            obj.add("predicate", this.entityPredicate.serializeToJson());
-            obj.addProperty("amount", this.amount);
-            obj.addProperty("consume", this.consume);
-            obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -418,14 +353,6 @@ public class QuestEntryImpls {
             }
             return b;
         }
-
-        public static EntityInteractEntry fromJson(JsonObject obj) {
-            return new EntityInteractEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null)),
-                    EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "predicate")),
-                    GsonHelper.getAsInt(obj, "amount", 1),
-                    GsonHelper.getAsBoolean(obj, "consume", false),
-                    GsonHelper.getAsString(obj, "description"));
-        }
     }
 
     /**
@@ -437,22 +364,25 @@ public class QuestEntryImpls {
                                      boolean consumeItem, String description) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "block_interact");
+        public static final Codec<BlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
+                        Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+
+                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
+                        JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.of(d.blockPredicate)),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (use, consume, desc, item, block, amount) -> {
+                    ItemPredicate itemPredicate = item.orElse(ItemPredicate.ANY);
+                    BlockPredicate blockPredicate = block.orElse(BlockPredicate.ANY);
+                    if (itemPredicate == ItemPredicate.ANY && blockPredicate == BlockPredicate.ANY)
+                        throw new IllegalStateException("Either item or block has to be defined");
+                    return new BlockInteractEntry(itemPredicate, blockPredicate, amount, use, consume, desc);
+                }));
 
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("item", this.heldItem.serializeToJson());
-            obj.add("block", this.blockPredicate.serializeToJson());
-            obj.addProperty("amount", this.amount);
-            obj.addProperty("use", this.use);
-            obj.addProperty("consumeItem", this.consumeItem);
-            obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -480,19 +410,6 @@ public class QuestEntryImpls {
             }
             return b;
         }
-
-        public static BlockInteractEntry fromJson(JsonObject obj) {
-            ItemPredicate pred = ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item", null));
-            BlockPredicate blockPred = BlockPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "block", null));
-            if (pred == ItemPredicate.ANY && blockPred == BlockPredicate.ANY)
-                throw new JsonSyntaxException("Either item or block has to be defined");
-            return new BlockInteractEntry(pred,
-                    blockPred,
-                    GsonHelper.getAsInt(obj, "amount", 1),
-                    GsonHelper.getAsBoolean(obj, "use"),
-                    GsonHelper.getAsBoolean(obj, "consumeItem", false),
-                    GsonHelper.getAsString(obj, "description"));
-        }
     }
 
     /**
@@ -502,20 +419,16 @@ public class QuestEntryImpls {
                                 String description) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "crafting");
+        public static final Codec<CraftingEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.playerPredicate)),
+                        ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                ).apply(instance, (item, pred, amount, desc) -> new CraftingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc)));
 
         @Override
         public boolean submit(ServerPlayer player) {
             return false;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject obj = new JsonObject();
-            obj.add("item", this.item.serializeToJson());
-            obj.add("playerPredicate", this.playerPredicate.serializeToJson());
-            obj.addProperty("amount", this.amount);
-            obj.addProperty("description", this.description);
-            return obj;
         }
 
         @Override
@@ -536,13 +449,6 @@ public class QuestEntryImpls {
 
         public boolean check(ServerPlayer player, ItemStack stack) {
             return this.item.matches(stack) && this.playerPredicate.matches(player, player);
-        }
-
-        public static CraftingEntry fromJson(JsonObject obj) {
-            return new CraftingEntry(ItemPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "item")),
-                    EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "playerPredicate", null)),
-                    GsonHelper.getAsInt(obj, "amount", 1),
-                    GsonHelper.getAsString(obj, "description"));
         }
     }
 }

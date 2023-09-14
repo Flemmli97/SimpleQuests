@@ -14,9 +14,11 @@
   "submission_trigger": "",
   "entries": {
     "place": {
-      "x": 0,
-      "y": 50,
-      "z": 0,
+      "pos": [
+        0,
+        50,
+        0
+      ],
       "minDist": 15,
       "id": "simplequests:position"
     }
