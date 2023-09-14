@@ -6,7 +6,9 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests.player.PlayerData;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -50,7 +52,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
 
     private final boolean canGoBack;
 
-    private Map<Integer, Quest> updateList;
+    private Map<Integer, QuestBase> updateList;
     private final List<Integer> toremove = new ArrayList<>();
 
     protected QuestGui(int syncId, Inventory playerInventory, Pair<QuestCategory, Boolean> data) {
@@ -83,7 +85,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         player.openMenu(fac);
     }
 
-    private ItemStack ofQuest(int i, Quest quest, ServerPlayer player) {
+    private ItemStack ofQuest(int i, QuestBase quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
@@ -111,7 +113,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         return stack;
     }
 
-    private static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
+    public static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
         player.connection.send(
                 new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch));
     }
@@ -121,7 +123,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
         this.updateList = new HashMap<>();
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuestsForCategory(data.getFirst());
+        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(data.getFirst());
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
@@ -155,7 +157,7 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
 
     private void flipPage() {
         this.updateList.clear();
-        Map<ResourceLocation, Quest> questMap = QuestsManager.instance().getQuestsForCategory(this.category);
+        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(this.category);
         int id = this.page * QUEST_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -220,30 +222,51 @@ public class QuestGui extends ServerOnlyScreenHandler<Pair<QuestCategory, Boolea
             return false;
         }
         ResourceLocation id = new ResourceLocation(tag.getString("Quest"));
-        Quest quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
+        QuestBase quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
         if (quest == null) {
             SimpleQuests.logger.error("No such quest " + id);
             return false;
         }
         boolean remove = stack.isEnchanted();
-        ConfirmScreenHandler.openConfirmScreen(player, b -> {
-            if (b) {
-                player.closeContainer();
-                if (remove) {
-                    PlayerData.get(player).reset(quest.id, true);
-                    playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
-                } else {
-                    if (PlayerData.get(player).acceptQuest(quest))
-                        playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
-                    else
+        if (quest instanceof CompositeQuest composite) {
+            if (remove) {
+                ConfirmScreenHandler.openConfirmScreen(player, b -> {
+                    if (b) {
+                        player.closeContainer();
+                        PlayerData data = PlayerData.get(player);
+                        composite.getCompositeQuests().forEach(r -> {
+                            if (data.isActive(r))
+                                data.reset(r, true);
+                        });
+                        playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
+                    } else {
+                        player.closeContainer();
+                        player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
                         playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                    }
+                }, "simplequests.gui.reset");
+            } else
+                CompositeQuestScreenHandler.openScreen(player, composite, this.category, this.canGoBack);
+        } else if (quest instanceof Quest actual) {
+            ConfirmScreenHandler.openConfirmScreen(player, b -> {
+                if (b) {
+                    player.closeContainer();
+                    if (remove) {
+                        PlayerData.get(player).reset(quest.id, true);
+                        playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
+                    } else {
+                        if (PlayerData.get(player).acceptQuest(actual, null))
+                            playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
+                        else
+                            playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                    }
+                } else {
+                    player.closeContainer();
+                    player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
+                    playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
                 }
-            } else {
-                player.closeContainer();
-                player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
-                playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
-            }
-        }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
+            }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
+        }
         return true;
     }
 

@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -13,7 +14,9 @@ import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -40,7 +43,9 @@ public class QuestCommand {
                                 .requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.showCategory, true)).suggests(QuestCommand::questCategories).executes(QuestCommand::showCategory)))
                 .then(Commands.literal("accept").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.accept))
                         .then(Commands.argument("quest", ResourceLocationArgument.id())
-                                .suggests(QuestCommand::quests).executes(QuestCommand::accept)))
+                                .suggests(QuestCommand::quests).executes(QuestCommand::accept))
+                        .then(Commands.literal("select").then(Commands.argument("quest", ResourceLocationArgument.id())
+                                .suggests(QuestCommand::questsComposite).then(Commands.argument("number", IntegerArgumentType.integer())).executes(QuestCommand::acceptComposite))))
                 .then(Commands.literal("submit").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submit)).executes(QuestCommand::submit)
                         .then(Commands.argument("type", StringArgumentType.string()).requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.submitType, true))
                                 .executes(QuestCommand::submitType)))
@@ -81,12 +86,30 @@ public class QuestCommand {
     private static int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        Quest quest = QuestsManager.instance().getAllQuests().get(id);
-        if (quest == null) {
+        QuestBase base = QuestsManager.instance().getAllQuests().get(id);
+        if (!(base instanceof Quest quest)) {
             ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
             return 0;
         }
-        if (PlayerData.get(player).acceptQuest(quest))
+        if (PlayerData.get(player).acceptQuest(quest, null))
+            return Command.SINGLE_SUCCESS;
+        return 0;
+    }
+
+    private static int acceptComposite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
+        QuestBase base = QuestsManager.instance().getAllQuests().get(id);
+        if (!(base instanceof CompositeQuest quest)) {
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.quest.composite.noexist"), id), false);
+            return 0;
+        }
+        Quest q = quest.resolveToQuest(player, IntegerArgumentType.getInteger(ctx, "number"));
+        if (q == null) {
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
+            return 0;
+        }
+        if (PlayerData.get(player).acceptQuest(q, quest))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
@@ -182,7 +205,11 @@ public class QuestCommand {
     }
 
     public static CompletableFuture<Suggestions> quests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
-        return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException()), build);
+        return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), false), build);
+    }
+
+    public static CompletableFuture<Suggestions> questsComposite(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), true), build);
     }
 
     public static CompletableFuture<Suggestions> activequests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
@@ -191,21 +218,21 @@ public class QuestCommand {
                 .toList(), build);
     }
 
-    private static List<String> acceptableQuests(ServerPlayer player) {
+    private static List<String> acceptableQuests(ServerPlayer player, boolean composite) {
         return QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
+                .filter(e -> (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 
-    public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+    public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
         return SharedSuggestionProvider.suggest(QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
                 .filter(e -> e.getValue().needsUnlock)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList()), build);
     }
 
-    public static CompletableFuture<Suggestions> questCategories(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+    public static CompletableFuture<Suggestions> questCategories(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
         return SharedSuggestionProvider.suggest(QuestsManager.instance().getCategories()
                 .keySet().stream()
                 .map(ResourceLocation::toString).collect(Collectors.toList()), build);

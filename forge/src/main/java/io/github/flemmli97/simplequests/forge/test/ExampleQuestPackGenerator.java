@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.provider.QuestProvider;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
@@ -294,6 +295,9 @@ public class ExampleQuestPackGenerator extends QuestProvider {
         QuestCategory category2 = new QuestCategory.Builder(new ResourceLocation("example", "category_2"), "Example category 2")
                 .withIcon(new ItemStack(Items.BEACON))
                 .unselectable().build();
+        QuestCategory hidden = new QuestCategory.Builder(new ResourceLocation("example", "hidden"), "For selection quests")
+                .withIcon(new ItemStack(Items.BEACON))
+                .unselectable().build();
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "item_example_category_1"),
                 "Example for an item quest with category 1",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -307,7 +311,27 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .setRepeatDelay(36000)
                 .withCategory(category2)
                 .withIcon(new ItemStack(Items.ANDESITE))
-                .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.ANDESITE).build(), 15, "Give 15 andesite", true)));
+                .addTaskEntry("andesite", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.ANDESITE).build(), 15, "Give 15 andesite", true)));
+
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "hidden/selection_a"),
+                "Selection Quest Example a",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay(36000)
+                .withCategory(hidden)
+                .withIcon(new ItemStack(Items.ANDESITE))
+                .addTaskEntry("andesite", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.ANDESITE).build(), 15, "Give 15 andesite", true)));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "hidden/selection_b"),
+                "Selection Quest Example b",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .withCategory(hidden)
+                .withIcon(new ItemStack(Items.GRANITE))
+                .addTaskEntry("granite", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.GRANITE).build(), 15, "Give 15 granite", true)));
+        this.addQuest(new CompositeQuest.Builder(new ResourceLocation("example", "selection_quest_example"),
+                "Example for a selection quest")
+                .setRepeatDelay(36000)
+                .withIcon(new ItemStack(Items.COBBLED_DEEPSLATE))
+                .addQuest(new ResourceLocation("example", "hidden/selection_a"))
+                .addQuest(new ResourceLocation("example", "hidden/selection_b")));
     }
 
     @Override
