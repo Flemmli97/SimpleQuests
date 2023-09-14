@@ -1,0 +1,35 @@
+{
+  "task": "Example for a multi location quest using a location predicate",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:compass",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 1,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "structure": {
+      "locations": [
+        {
+          "description": "Go to warm ocean ruin",
+          "value": {
+            "feature": "minecraft:ocean_ruin_warm"
+          }
+        },
+        {
+          "description": "Go to cold ocean ruin",
+          "value": {
+            "feature": "minecraft:ocean_ruin_cold"
+          }
+        }
+      ],
+      "description": "Find a warm or cold ocean ruin",
+      "id": "simplequests:multi_location"
+    }
+  }
+}

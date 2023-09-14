@@ -1,0 +1,37 @@
+{
+  "task": "Example for a multi position quest",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:purpur_block",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "place": {
+      "positions": [
+        {
+          "x": 0,
+          "y": 50,
+          "z": 0
+        },
+        {
+          "description": "Position description. Go to 100, 50, 100",
+          "value": {
+            "x": 100,
+            "y": 50,
+            "z": 100
+          }
+        }
+      ],
+      "minDist": 15,
+      "description": "Go to the position from this quest",
+      "id": "simplequests:multi_position"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "task": "Example for a multi kill quest",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:purpur_block",
+  "repeat_delay": "3d:5h",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "cows": {
+      "predicates": [
+        {
+          "type": "minecraft:cow"
+        },
+        {
+          "description": "Kill %2$s plains cow",
+          "value": {
+            "type": "minecraft:cow",
+            "location": {
+              "biome": "minecraft:plains"
+            }
+          }
+        }
+      ],
+      "amount": {
+        "type": "minecraft:uniform",
+        "min": 5,
+        "max": 8
+      },
+      "description": "Task: 5-8 cows or cows in a plains biome",
+      "id": "simplequests:multi_kill"
+    }
+  }
+}

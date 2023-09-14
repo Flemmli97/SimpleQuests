@@ -1,5 +1,5 @@
 {
-  "task": "Example for a simple position quest",
+  "task": "Example for an xp with range quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -7,20 +7,20 @@
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "icon": "minecraft:purpur_block",
-  "repeat_delay": 0,
+  "repeat_delay": "1w:5d:3h:2m",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
   "submission_trigger": "",
   "entries": {
-    "place": {
-      "pos": {
-        "x": 0,
-        "y": 50,
-        "z": 0
+    "xp": {
+      "amount": {
+        "type": "minecraft:uniform",
+        "min": 5,
+        "max": 10
       },
-      "minDist": 15,
-      "id": "simplequests:position"
+      "description": "Submit xp to this quest",
+      "id": "simplequests:multi_xp"
     }
   }
 }

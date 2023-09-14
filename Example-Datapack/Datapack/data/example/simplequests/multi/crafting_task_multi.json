@@ -1,0 +1,45 @@
+{
+  "task": "Example of use of a multi crafting task",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:crafting_table",
+  "repeat_delay": "1d",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "crafting": {
+      "itemPredicates": [
+        {
+          "description": "sticks",
+          "value": {
+            "items": [
+              "minecraft:stick"
+            ]
+          }
+        },
+        {
+          "description": "furnace",
+          "value": {
+            "items": [
+              "minecraft:furnace"
+            ]
+          }
+        }
+      ],
+      "amount": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 5
+      },
+      "description": "Craft some items",
+      "taskDescription": "Craft %1$s %3$sx",
+      "id": "simplequests:multi_fishing"
+    }
+  }
+}

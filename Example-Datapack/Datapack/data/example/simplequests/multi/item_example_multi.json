@@ -1,0 +1,45 @@
+{
+  "task": "Example for a multi item quest",
+  "description": [
+    "This is an example description",
+    "This is another example description"
+  ],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "icon": "minecraft:cobblestone",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "submission_trigger": "",
+  "entries": {
+    "fish": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:salmon"
+          ]
+        },
+        {
+          "description": "cod",
+          "value": {
+            "items": [
+              "minecraft:cod"
+            ]
+          }
+        }
+      ],
+      "amount": {
+        "type": "minecraft:uniform",
+        "min": 10,
+        "max": 15
+      },
+      "consumeItems": true,
+      "description": "Give 10-15 cods or salmon",
+      "id": "simplequests:multi_item"
+    }
+  }
+}
