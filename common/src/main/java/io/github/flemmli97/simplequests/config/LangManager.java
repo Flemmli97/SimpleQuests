@@ -98,6 +98,7 @@ public class LangManager {
         defaultTranslation.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
         defaultTranslation.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
         defaultTranslation.put(ProgressionTrackerImpl.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
+        defaultTranslation.put(ProgressionTrackerImpl.FISHING_PROGRESS, "%1$s/%2$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

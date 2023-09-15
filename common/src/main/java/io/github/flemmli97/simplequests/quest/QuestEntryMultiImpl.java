@@ -343,4 +343,44 @@ public class QuestEntryMultiImpl {
             return new QuestEntryImpls.CraftingEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.taskDescription, val.getSecond(), entity.getSecond());
         }
     }
+
+    public static class MultiFishingEntry extends MultiQuestEntryBase {
+
+        public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "multi_fishing");
+        public static final Codec<MultiFishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
+
+                        JsonCodecs.descriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "item predicates can't be empty").fieldOf("itemPredicates").forGetter(d -> d.heldItems),
+                        Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ENTITY_PREDICATE_CODEC, Codec.STRING)).listOf()
+                                .optionalFieldOf("entityPredicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
+                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (desc, taskDescription, item, pred, amount) -> new MultiFishingEntry(item, pred.orElse(List.of()), amount, desc, taskDescription)));
+
+        private final List<Pair<ItemPredicate, String>> heldItems;
+        private final List<Pair<EntityPredicate, String>> entityPredicates;
+        private final NumberProvider amount;
+        private final String taskDescription;
+
+        public MultiFishingEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<EntityPredicate, String>> entityPredicates, NumberProvider amount, String description, String taskDescription) {
+            super(description);
+            this.heldItems = heldItems;
+            this.entityPredicates = entityPredicates;
+            this.amount = amount;
+            this.taskDescription = taskDescription;
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public QuestEntry resolve(ServerPlayer player) {
+            LootContext ctx = EntityPredicate.createContext(player, player);
+            Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
+            Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(EntityPredicate.ANY, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
+            return new QuestEntryImpls.FishingEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.taskDescription, val.getSecond(), entity.getSecond());
+        }
+    }
 }
