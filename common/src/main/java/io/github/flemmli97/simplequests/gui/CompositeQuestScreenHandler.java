@@ -40,19 +40,21 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     private final CompositeQuest quest;
     private final QuestCategory category;
     private final boolean canGoBack;
+    private int page;
 
-    private CompositeQuestScreenHandler(int syncId, Inventory playerInventory, CompositeQuest quest, QuestCategory category, boolean canGoBack) {
-        super(syncId, playerInventory, (quest.getCompositeQuests().size() / 7) + 1, new GuiData(quest, category, (quest.getCompositeQuests().size() / 7) + 1, canGoBack));
+    private CompositeQuestScreenHandler(int syncId, Inventory playerInventory, CompositeQuest quest, QuestCategory category, boolean canGoBack, int page) {
+        super(syncId, playerInventory, (quest.getCompositeQuests().size() / 7) + 1, new GuiData(quest, category, (quest.getCompositeQuests().size() / 7) + 1, page, canGoBack));
         this.quest = quest;
         this.category = category;
         this.canGoBack = canGoBack;
+        this.page = page;
     }
 
-    public static void openScreen(ServerPlayer player, CompositeQuest quest, QuestCategory category, boolean canGoBack) {
+    public static void openScreen(ServerPlayer player, CompositeQuest quest, QuestCategory category, boolean canGoBack, int page) {
         MenuProvider fac = new MenuProvider() {
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-                return new CompositeQuestScreenHandler(syncId, inv, quest, category, canGoBack);
+                return new CompositeQuestScreenHandler(syncId, inv, quest, category, canGoBack, page);
             }
 
             @Override
@@ -143,13 +145,13 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
                     QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             } else {
                 player.closeContainer();
-                player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack));
+                player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack, this.page));
                 QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
         }, "simplequests.gui.confirm");
         return true;
     }
 
-    record GuiData(CompositeQuest quest, QuestCategory category, int rows, boolean canGoBack) {
+    record GuiData(CompositeQuest quest, QuestCategory category, int rows, int page, boolean canGoBack) {
     }
 }

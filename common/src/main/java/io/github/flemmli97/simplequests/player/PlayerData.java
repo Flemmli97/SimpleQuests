@@ -8,6 +8,7 @@ import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestBase;
+import io.github.flemmli97.simplequests.quest.QuestCategory;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -250,6 +251,10 @@ public class PlayerData {
 
     public boolean isActive(ResourceLocation quest) {
         return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest));
+    }
+
+    public List<QuestProgress> getCurrentQuests(QuestCategory category) {
+        return this.currentQuests.stream().filter(p -> p.getQuest().category.id.equals(category.id)).toList();
     }
 
     public AcceptType canAcceptQuest(QuestBase quest) {
