@@ -4,13 +4,13 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": "minecraft:purpur_block",
   "repeat_delay": 0,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "place": {
@@ -22,5 +22,6 @@
       "minDist": 15,
       "id": "simplequests:position"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

@@ -4,13 +4,13 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": "minecraft:stick",
   "repeat_delay": "1d",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "sticks": {
@@ -23,5 +23,6 @@
       "description": "Craft at 8 sticks",
       "id": "simplequests:crafting"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

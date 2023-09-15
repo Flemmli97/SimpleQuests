@@ -4,13 +4,13 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": "minecraft:dirt",
   "repeat_delay": 0,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "interact": {
@@ -48,5 +48,6 @@
       "taskDescription": "Use %1$s on %2$s %3$sx",
       "id": "simplequests:multi_entity_interaction"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

@@ -7,13 +7,13 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": "minecraft:cobblestone",
   "repeat_delay": 36000,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "fish": {
@@ -41,5 +41,6 @@
       "description": "Give 10-15 cods or salmon",
       "id": "simplequests:multi_item"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

@@ -4,8 +4,6 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": {
     "item": "minecraft:map",
     "count": 5
@@ -14,6 +12,8 @@
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "trade": {
@@ -26,5 +26,6 @@
       "description": "Task Description. Will select one of the following advancements: adventure/trade, adventure/bullseye, adventure/ol_betsy",
       "id": "simplequests:multi_advancements"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

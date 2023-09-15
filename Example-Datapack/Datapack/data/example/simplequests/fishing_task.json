@@ -4,8 +4,6 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": {
     "item": "minecraft:fishing_rod",
     "count": 1,
@@ -15,6 +13,8 @@
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "cod": {
@@ -27,5 +27,6 @@
       "description": "Fish 5 cods",
       "id": "simplequests:fishing"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }
