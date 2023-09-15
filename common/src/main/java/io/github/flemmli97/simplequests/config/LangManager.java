@@ -57,6 +57,9 @@ public class LangManager {
         DEFAULT_TRANSLATION.put("simplequests.missing.advancement", "Advancement with id %s missing");
         DEFAULT_TRANSLATION.put("simplequests.kill", "Finished kill task %s");
         DEFAULT_TRANSLATION.put("simplequests.quest.noexist", "No quest exists with id %s");
+        DEFAULT_TRANSLATION.put("simplequests.quest.is_selection", "Quest with id %s is a selection quest!");
+        DEFAULT_TRANSLATION.put("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
+        DEFAULT_TRANSLATION.put("simplequests.quest.composite.resolve.none", "Selectionquest with id %1$s has no selectable quest with %2$s!");
         DEFAULT_TRANSLATION.put("simplequests.quest.category.noexist", "No quest category exists with id %s");
         DEFAULT_TRANSLATION.put("simplequests.task", "Finished task %s");
         DEFAULT_TRANSLATION.put("simplequests.interaction.dupe", "You already interacted with this predicate");
@@ -78,7 +81,7 @@ public class LangManager {
         DEFAULT_TRANSLATION.put("simplequests.gui.no", "No");
 
         DEFAULT_TRANSLATION.put("simplequests.gui.next", "Next Page");
-        DEFAULT_TRANSLATION.put("simplequests.gui.prev", "Previous Page");
+        DEFAULT_TRANSLATION.put("simplequests.gui.previous", "Previous Page");
         DEFAULT_TRANSLATION.put("simplequests.gui.button.main", "Back");
 
         DEFAULT_TRANSLATION.put("simplequests.reload", "Reloading configs");
