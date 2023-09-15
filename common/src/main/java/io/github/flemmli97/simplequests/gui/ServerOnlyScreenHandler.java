@@ -17,12 +17,14 @@ import net.minecraft.world.item.ItemStack;
 
 public abstract class ServerOnlyScreenHandler<T> extends AbstractContainerMenu {
 
+    protected final int size;
     private final SeparateInvImpl inventory;
 
     protected ServerOnlyScreenHandler(int syncId, Inventory playerInventory, int rows, T additionalData) {
         super(fromRows(rows), syncId);
         int i = (rows - 4) * 18;
         this.inventory = new SeparateInvImpl(rows * 9);
+        this.size = this.inventory.getContainerSize();
         this.fillInventoryWith(playerInventory.player, this.inventory, additionalData);
         int n;
         int m;

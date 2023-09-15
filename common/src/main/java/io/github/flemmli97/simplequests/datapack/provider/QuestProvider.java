@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
-import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
@@ -33,7 +33,7 @@ public abstract class QuestProvider implements DataProvider {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final Map<ResourceLocation, QuestCategory> categories = new HashMap<>();
-    private final Map<ResourceLocation, Quest> quests = new HashMap<>();
+    private final Map<ResourceLocation, QuestBase> quests = new HashMap<>();
 
     protected final PackOutput output;
     protected final boolean full;
@@ -73,15 +73,15 @@ public abstract class QuestProvider implements DataProvider {
         return "Quests";
     }
 
-    public void addQuest(Quest.Builder builder) {
-        Quest quest = builder.build();
+    public void addQuest(QuestBase.BuilderBase<?> builder) {
+        QuestBase quest = builder.build();
         if (quest.category != QuestCategory.DEFAULT_CATEGORY) {
             QuestCategory prev = this.categories.get(quest.category.id);
             if (prev != null && prev != quest.category)
                 throw new IllegalStateException("Category with " + quest.category.id + " already registered. Try reusing the category instead of creating a new one.");
             this.categories.put(quest.category.id, quest.category);
         }
-        Quest prev = this.quests.get(quest.id);
+        QuestBase prev = this.quests.get(quest.id);
         if (prev != null)
             throw new IllegalStateException("Quest with " + quest.id + " already registered");
         this.quests.put(quest.id, quest);

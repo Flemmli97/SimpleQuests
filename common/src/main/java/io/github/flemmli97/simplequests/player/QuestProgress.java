@@ -9,6 +9,7 @@ import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
@@ -25,6 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,12 +51,14 @@ public class QuestProgress {
     private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
 
     private Quest quest;
+    private ResourceLocation compositeParent;
     private Map<String, QuestEntry> questEntries;
 
-    public QuestProgress(Quest quest, PlayerData data) {
+    public QuestProgress(Quest quest, PlayerData data, @Nullable CompositeQuest compositeParent) {
         this.quest = quest;
         this.questEntries = quest.resolveTasks(data.getPlayer());
         this.setup(data);
+        this.compositeParent = compositeParent != null ? compositeParent.id : null;
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
     }
@@ -136,6 +140,10 @@ public class QuestProgress {
 
     public Quest getQuest() {
         return this.quest;
+    }
+
+    public ResourceLocation getCompletionID() {
+        return this.compositeParent != null ? this.compositeParent : this.getQuest().id;
     }
 
     public Map<String, QuestEntry> getQuestEntries() {
@@ -232,6 +240,8 @@ public class QuestProgress {
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putString("Quest", this.quest.id.toString());
+        if (this.compositeParent != null)
+            tag.putString("CompositeParent", this.compositeParent.toString());
         CompoundTag entries = new CompoundTag();
         this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
         tag.put("QuestEntries", entries);
@@ -252,19 +262,19 @@ public class QuestProgress {
         this.blockInteractionCounter.forEach((res, i) -> blockInteractions.put(res, i.save()));
         tag.put("BlockInteractions", blockInteractions);
         CompoundTag fishingCounter = new CompoundTag();
-        this.fishingCounter.forEach((res, i) -> {
-            fishingCounter.put(res, i.save());
-        });
+        this.fishingCounter.forEach((res, i) -> fishingCounter.put(res, i.save()));
         tag.put("FishingCounter", fishingCounter);
         return tag;
     }
 
     public void load(CompoundTag tag, ServerPlayer player) {
-        this.quest = QuestsManager.instance().getAllQuests().get(new ResourceLocation(tag.getString("Quest")));
+        this.quest = QuestsManager.instance().getActualQuests(new ResourceLocation(tag.getString("Quest")));
         if (this.quest == null) {
             SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest") + ". Skipping");
             throw new IllegalStateException();
         }
+        if (tag.contains("CompositeParent"))
+            this.compositeParent = new ResourceLocation(tag.getString("CompositeParent"));
         if (tag.contains("QuestEntries")) {
             ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
