@@ -1,26 +1,27 @@
 {
-  "task": "Example for an daily item quest",
+  "category": "example:hidden",
+  "task": "Selection Quest Example b",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "icon": "minecraft:dirt",
+  "icon": "minecraft:granite",
   "repeat_delay": 0,
   "repeat_daily": 0,
   "sorting_id": 0,
-  "daily_quest": true,
-  "loot_table": "minecraft:chests/buried_treasure",
+  "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "entries": {
-    "interact": {
+    "granite": {
       "predicate": {
         "items": [
-          "minecraft:cod"
+          "minecraft:granite"
         ]
       },
-      "description": "Give 5 cods",
-      "amount": 5,
+      "description": "Give 15 granite",
+      "amount": 15,
       "consumeItems": true,
       "id": "simplequests:item"
     }

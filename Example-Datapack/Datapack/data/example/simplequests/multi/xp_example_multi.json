@@ -1,5 +1,5 @@
 {
-  "task": "Example for block interaction task",
+  "task": "Example for an xp with range quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -13,17 +13,14 @@
   "command": "",
   "submission_trigger": "",
   "entries": {
-    "task": {
-      "block": {
-        "blocks": [
-          "minecraft:chest"
-        ]
+    "xp": {
+      "amount": {
+        "type": "minecraft:uniform",
+        "min": 5,
+        "max": 10
       },
-      "amount": 3,
-      "use": true,
-      "consumeItem": false,
-      "description": "Interact with chest x3",
-      "id": "simplequests:block_interact"
+      "description": "Submit xp to this quest",
+      "id": "simplequests:multi_xp"
     }
   },
   "type": "simplequests:quest"

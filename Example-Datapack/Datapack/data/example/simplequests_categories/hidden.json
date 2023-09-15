@@ -1,10 +1,10 @@
 {
-  "name": "Example category 1",
+  "name": "For selection quests",
   "description": [],
-  "icon": "minecraft:diamond_block",
+  "icon": "minecraft:beacon",
   "only_same_category": false,
   "max_concurrent_quests": -1,
   "sorting_id": 0,
-  "selectable": true,
+  "selectable": false,
   "is_visible": true
 }

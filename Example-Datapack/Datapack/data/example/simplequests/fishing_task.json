@@ -1,12 +1,15 @@
 {
-  "category": "example:category_2",
-  "task": "Example for an item quest with category 2",
+  "task": "Example of use of a fishing task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "icon": "minecraft:andesite",
-  "repeat_delay": 36000,
+  "icon": {
+    "item": "minecraft:fishing_rod",
+    "count": 1,
+    "tag": "{Damage:0}"
+  },
+  "repeat_delay": "1d",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
@@ -14,16 +17,15 @@
   "command": "",
   "submission_trigger": "",
   "entries": {
-    "andesite": {
-      "predicate": {
+    "cod": {
+      "item": {
         "items": [
-          "minecraft:andesite"
+          "minecraft:cod"
         ]
       },
-      "description": "Give 15 andesite",
-      "amount": 15,
-      "consumeItems": true,
-      "id": "simplequests:item"
+      "amount": 5,
+      "description": "Fish 5 cods",
+      "id": "simplequests:fishing"
     }
   },
   "type": "simplequests:quest"

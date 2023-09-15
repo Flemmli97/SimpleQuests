@@ -1,0 +1,17 @@
+{
+  "task": "Example for a selection quest",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:cobbled_deepslate",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "quests": [
+    "example:hidden/selection_a",
+    "example:hidden/selection_b"
+  ],
+  "type": "simplequests:composite_quest"
+}
