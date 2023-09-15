@@ -114,7 +114,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         return stack;
     }
 
-    private static void playSongToPlayer(ServerPlayer player, Holder<SoundEvent> event, float vol, float pitch) {
+    public static void playSongToPlayer(ServerPlayer player, Holder<SoundEvent> event, float vol, float pitch) {
         player.connection.send(
                 new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
     }

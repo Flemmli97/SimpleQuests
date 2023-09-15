@@ -1,5 +1,6 @@
 package io.github.flemmli97.simplequests.player;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
@@ -242,7 +243,7 @@ public class PlayerData {
     }
 
     public List<QuestProgress> getCurrentQuest() {
-        return this.currentQuests;
+        return ImmutableList.copyOf(this.currentQuests);
     }
 
     public boolean isActive(QuestBase quest) {

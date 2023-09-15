@@ -140,7 +140,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             if (b) {
                 player.closeContainer();
                 if (PlayerData.get(player).acceptQuest(actual, this.quest))
-                    QuestGui.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING.value(), 1, 1.2f);
+                    QuestGui.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
                 else
                     QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             } else {
