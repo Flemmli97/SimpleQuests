@@ -1,0 +1,32 @@
+{
+  "task": "Example of use of a fishing task",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": {
+    "item": "minecraft:fishing_rod",
+    "count": 1,
+    "tag": "{Damage:0}"
+  },
+  "repeat_delay": "1d",
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "entries": {
+    "cod": {
+      "item": {
+        "items": [
+          "minecraft:cod"
+        ]
+      },
+      "amount": 5,
+      "description": "Fish 5 cods",
+      "id": "simplequests:fishing"
+    }
+  },
+  "type": "simplequests:quest"
+}

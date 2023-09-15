@@ -5,7 +5,7 @@ loom {
         data {
             data()
             programArgs "--all", "--mod", "simplequests"
-            programArgs "--output", project.file("Example-Datapack/Datapack").absolutePath
+            programArgs "--output", project.file("../Example-Datapack/Datapack").absolutePath
         }
     }
     forge {
