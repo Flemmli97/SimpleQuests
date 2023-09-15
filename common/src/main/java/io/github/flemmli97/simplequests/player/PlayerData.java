@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -30,10 +31,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -51,6 +54,8 @@ public class PlayerData {
     private long resetTick = -1;
 
     private LocalDateTime questTrackerTime = LocalDateTime.now();
+    private int dailySeed;
+    private final Random questRandom = new Random();
     private final Map<ResourceLocation, Integer> dailyQuestsTracker = new HashMap<>();
 
     private int interactionCooldown;
@@ -299,6 +304,7 @@ public class PlayerData {
 
         LocalDateTime now = LocalDateTime.now();
         if (this.questTrackerTime == null || this.questTrackerTime.getDayOfYear() != now.getDayOfYear()) {
+            this.dailySeed = this.player.getRandom().nextInt();
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
                 Quest quest = QuestsManager.instance().getAllQuests().get(r);
@@ -306,10 +312,15 @@ public class PlayerData {
                     this.reset(r, true, false);
             });
             this.dailyQuestsTracker.clear();
-            QuestsManager.instance().getDailyQuests().forEach(quest -> {
+            List<Quest> daily = QuestsManager.instance().getDailyQuests().stream().toList();
+            this.questRandom.setSeed(this.dailySeed);
+            Collections.shuffle(daily, this.questRandom);
+            int amount = ConfigHandler.config.dailyQuestAmount == -1 ? daily.size() : Mth.clamp(ConfigHandler.config.dailyQuestAmount, 0, daily.size());
+            for (int i = 0; i < amount; i++) {
+                Quest quest = daily.get(i);
                 this.currentQuests.add(new QuestProgress(quest, this));
                 this.dailyQuestsTracker.put(quest.id, 1);
-            });
+            }
         }
     }
 

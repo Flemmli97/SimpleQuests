@@ -18,6 +18,8 @@ public class Config {
     public int mainPermLevel = 0;
     public int maxConcurrentQuest = 1;
 
+    public int dailyQuestAmount = -1;
+
     public Config() {
         File configDir = SimpleQuests.getHandler().getConfigPath().resolve("simplequests").toFile();
         try {
@@ -43,6 +45,7 @@ public class Config {
             this.opPermLevel = obj.opPermLevel;
             this.mainPermLevel = obj.mainPermLevel;
             this.maxConcurrentQuest = obj.maxConcurrentQuest;
+            this.dailyQuestAmount = obj.dailyQuestAmount;
         } catch (IOException e) {
             e.printStackTrace();
         }
