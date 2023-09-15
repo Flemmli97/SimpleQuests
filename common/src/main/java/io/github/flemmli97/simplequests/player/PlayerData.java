@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -141,6 +142,11 @@ public class PlayerData {
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+    }
+
+    public void onFished(Collection<ItemStack> loot) {
+        this.tryFullFill(QuestEntryImpls.FishingEntry.class, QuestProgress.createFishingPredicate(this.player, loot),
                 (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 

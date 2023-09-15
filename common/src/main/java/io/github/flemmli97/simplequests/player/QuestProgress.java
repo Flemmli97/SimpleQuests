@@ -27,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,7 @@ public class QuestProgress {
     private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry>> craftingCounter = new HashMap<>();
     private final Map<String, ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry>> interactionCounter = new HashMap<>();
     private final Map<String, ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry>> blockInteractionCounter = new HashMap<>();
+    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.FishingEntry>> fishingCounter = new HashMap<>();
 
     private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
 
@@ -105,6 +107,17 @@ public class QuestProgress {
         return (name, entry, prog) -> {
             if (entry.check(player, stack)) {
                 return prog.craftingCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createCraftingTracker(entry)).apply(amount);
+            }
+            return false;
+        };
+    }
+
+    public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.FishingEntry> createFishingPredicate(ServerPlayer player, Collection<ItemStack> stacks) {
+        return (name, entry, prog) -> {
+            for (ItemStack stack : stacks) {
+                if (entry.check(player, stack)) {
+                    return prog.fishingCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createFishingTracker(entry)).apply(1);
+                }
             }
             return false;
         };
@@ -196,6 +209,13 @@ public class QuestProgress {
         return tracker.formattedProgress(player, this);
     }
 
+    public MutableComponent fishingProgress(ServerPlayer player, String entry) {
+        ProgressionTracker<Integer, QuestEntryImpls.FishingEntry> tracker = this.fishingCounter.get(entry);
+        if (tracker == null)
+            return null;
+        return tracker.formattedProgress(player, this);
+    }
+
     public Pair<Boolean, Set<QuestEntry>> tickProgress(PlayerData data) {
         Set<QuestEntry> fullfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
@@ -226,15 +246,16 @@ public class QuestProgress {
         this.craftingCounter.forEach((k, v) -> crafting.put(k, v.save()));
         tag.put("CraftingCounter", crafting);
         CompoundTag interactions = new CompoundTag();
-        this.interactionCounter.forEach((res, i) -> {
-            interactions.put(res, i.save());
-        });
+        this.interactionCounter.forEach((res, i) -> interactions.put(res, i.save()));
         tag.put("Interactions", interactions);
         CompoundTag blockInteractions = new CompoundTag();
-        this.blockInteractionCounter.forEach((res, i) -> {
-            blockInteractions.put(res, i.save());
-        });
+        this.blockInteractionCounter.forEach((res, i) -> blockInteractions.put(res, i.save()));
         tag.put("BlockInteractions", blockInteractions);
+        CompoundTag fishingCounter = new CompoundTag();
+        this.fishingCounter.forEach((res, i) -> {
+            fishingCounter.put(res, i.save());
+        });
+        tag.put("FishingCounter", fishingCounter);
         return tag;
     }
 
@@ -263,6 +284,8 @@ public class QuestProgress {
         interactions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createEntityInteractTracker, this.interactionCounter, key, interactions));
         CompoundTag blockInteractions = tag.getCompound("BlockInteractions");
         blockInteractions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createBlockInteractTracker, this.blockInteractionCounter, key, blockInteractions));
+        CompoundTag fishingCounter = tag.getCompound("FishingCounter");
+        fishingCounter.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createFishingTracker, this.fishingCounter, key, fishingCounter));
     }
 
     @SuppressWarnings("unchecked")

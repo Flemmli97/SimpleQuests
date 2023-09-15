@@ -24,6 +24,50 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
 
     private final E questEntry;
 
+    public static final String FISHING_PROGRESS = QuestEntryImpls.FishingEntry.ID + ".progress";
+
+    public static ProgressionTracker<Integer, QuestEntryImpls.FishingEntry> createFishingTracker(QuestEntryImpls.FishingEntry entry) {
+        return new ProgressionTrackerImpl<>(entry) {
+            private int value = 0;
+
+            @Override
+            public boolean isApplicable(Integer value) {
+                return true;
+            }
+
+            @Override
+            public boolean apply(Integer value) {
+                this.value += value;
+                return this.value >= this.questEntry().amount();
+            }
+
+            @Override
+            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+                float perc = this.value / (float) this.questEntry().amount();
+                ChatFormatting form = ChatFormatting.DARK_GREEN;
+                if (perc <= 0.35) {
+                    form = ChatFormatting.DARK_RED;
+                } else if (perc <= 0.7) {
+                    form = ChatFormatting.GOLD;
+                }
+                return Component.translatable(ConfigHandler.lang.get(FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+            }
+
+            @Override
+            public Tag save() {
+                return IntTag.valueOf(this.value);
+            }
+
+            @Override
+            public void load(Tag tag) {
+                try {
+                    this.value = ((NumericTag) tag).getAsInt();
+                } catch (ClassCastException ignored) {
+                }
+            }
+        };
+    }
+
     public static final String KILL_PROGRESS = QuestEntryImpls.KillEntry.ID + ".progress";
 
     public static ProgressionTracker<Integer, QuestEntryImpls.KillEntry> createKillTracker(QuestEntryImpls.KillEntry entry) {
