@@ -99,7 +99,11 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         int id = 0;
         for (int i = 0; i < additionalData.rows * 9; i++) {
             int mod = i % 9;
-            if ((additionalData.rows > 2 && (i < 9 || i > this.size - 1)) || mod == 0 || mod == 8)
+            if (i == 0) {
+                ItemStack stack = new ItemStack(Items.ARROW);
+                stack.setHoverName(new TranslatableComponent(ConfigHandler.lang.get("simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                inv.updateStack(i, stack);
+            } else if ((additionalData.rows > 2 && (i < 9 || i > this.size - 1)) || mod == 0 || mod == 8)
                 inv.updateStack(i, QuestGui.emptyFiller());
             else {
                 if (id < this.quests.size()) {
@@ -116,11 +120,17 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     @Override
     protected boolean isRightSlot(int slot) {
         int mod = slot % 9;
-        return mod >= 1 && mod <= 7;
+        return slot == 0 || (mod >= 1 && mod <= 7);
     }
 
     @Override
     protected boolean handleSlotClicked(ServerPlayer player, int index, Slot slot, int clickType) {
+        if (index == 0) {
+            player.closeContainer();
+            player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack, this.page));
+            QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
+            return true;
+        }
         ItemStack stack = slot.getItem();
         if (!stack.hasTag())
             return false;

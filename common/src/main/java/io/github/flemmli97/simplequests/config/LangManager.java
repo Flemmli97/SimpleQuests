@@ -81,7 +81,7 @@ public class LangManager {
         DEFAULT_TRANSLATION.put("simplequests.gui.no", "No");
 
         DEFAULT_TRANSLATION.put("simplequests.gui.next", "Next Page");
-        DEFAULT_TRANSLATION.put("simplequests.gui.prev", "Previous Page");
+        DEFAULT_TRANSLATION.put("simplequests.gui.previous", "Previous Page");
         DEFAULT_TRANSLATION.put("simplequests.gui.button.main", "Back");
 
         DEFAULT_TRANSLATION.put("simplequests.reload", "Reloading configs");
