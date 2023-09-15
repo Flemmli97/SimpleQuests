@@ -256,7 +256,7 @@ public class PlayerData {
     }
 
     public List<QuestProgress> getCurrentQuests(QuestCategory category) {
-        return this.currentQuests.stream().filter(p->p.getQuest().category.id.equals(category.id)).toList();
+        return this.currentQuests.stream().filter(p -> p.getQuest().category.id.equals(category.id)).toList();
     }
 
     public AcceptType canAcceptQuest(QuestBase quest) {
