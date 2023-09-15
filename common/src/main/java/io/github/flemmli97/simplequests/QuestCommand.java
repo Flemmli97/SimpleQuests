@@ -132,7 +132,8 @@ public class QuestCommand {
 
     private static int current(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest();
+        List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest()
+                .stream().filter(p -> p.getQuest().category.isVisible).toList();
         if (!quests.isEmpty()) {
             ctx.getSource().sendSuccess(new TextComponent("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {

@@ -20,7 +20,7 @@ import java.util.List;
 public class QuestCategory implements Comparable<QuestCategory> {
 
     public static final QuestCategory DEFAULT_CATEGORY = new QuestCategory(new ResourceLocation(SimpleQuests.MODID, "default_category"),
-            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, true);
+            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, true, true);
 
     public final ResourceLocation id;
     private final String name;
@@ -29,9 +29,9 @@ public class QuestCategory implements Comparable<QuestCategory> {
     public final boolean sameCategoryOnly;
     private final int maxConcurrentQuests;
     public final int sortingId;
-    public boolean canBeSelected;
+    public final boolean canBeSelected, isVisible;
 
-    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, boolean sameCategoryOnly, int maxConcurrentQuests, int sortingID, boolean canBeSelected) {
+    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, boolean sameCategoryOnly, int maxConcurrentQuests, int sortingID, boolean canBeSelected, boolean isVisible) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -40,6 +40,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         this.maxConcurrentQuests = maxConcurrentQuests;
         this.sortingId = sortingID;
         this.canBeSelected = canBeSelected;
+        this.isVisible = isVisible;
     }
 
     public int getMaxConcurrentQuests() {
@@ -73,7 +74,8 @@ public class QuestCategory implements Comparable<QuestCategory> {
                 GsonHelper.getAsBoolean(obj, "only_same_category", false),
                 GsonHelper.getAsInt(obj, "max_concurrent_quests", -1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
-                GsonHelper.getAsBoolean(obj, "selectable", true));
+                GsonHelper.getAsBoolean(obj, "selectable", true),
+                GsonHelper.getAsBoolean(obj, "is_visible", true));
     }
 
     public JsonObject serialize(boolean full) {
@@ -98,6 +100,8 @@ public class QuestCategory implements Comparable<QuestCategory> {
             obj.addProperty("sorting_id", this.sortingId);
         if (!this.canBeSelected || full)
             obj.addProperty("selectable", this.canBeSelected);
+        if (!this.isVisible || full)
+            obj.addProperty("is_visible", this.isVisible);
         return obj;
     }
 
@@ -139,7 +143,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         private final List<String> description = new ArrayList<>();
         private ItemStack icon = new ItemStack(Items.WRITTEN_BOOK);
         private int sortingID;
-        private boolean canBeSelected = true;
+        private boolean canBeSelected = true, isVisible = true;
         private boolean sameCategoryOnly;
         private int maxConcurrentQuests = -1;
 
@@ -178,8 +182,13 @@ public class QuestCategory implements Comparable<QuestCategory> {
             return this;
         }
 
+        public Builder setHidden() {
+            this.isVisible = false;
+            return this;
+        }
+
         public QuestCategory build() {
-            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sameCategoryOnly, this.maxConcurrentQuests, this.sortingID, this.canBeSelected);
+            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sameCategoryOnly, this.maxConcurrentQuests, this.sortingID, this.canBeSelected, this.isVisible);
         }
     }
 }
