@@ -5,7 +5,9 @@ import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -28,6 +30,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -69,7 +72,7 @@ public class PlayerData {
         this.player = player;
     }
 
-    public boolean acceptQuest(Quest quest) {
+    public boolean acceptQuest(Quest quest, @Nullable CompositeQuest compositeParent) {
         int maxConcurrent = quest.category.getMaxConcurrentQuests();
         if (maxConcurrent > 0 && this.currentQuests.stream()
                 .filter(p -> !p.getQuest().isDailyQuest && (!quest.category.sameCategoryOnly || p.getQuest().category == quest.category)).toList().size() >= maxConcurrent) {
@@ -80,15 +83,15 @@ public class PlayerData {
             this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
-        AcceptType type = this.canAcceptQuest(quest);
+        AcceptType type = this.canAcceptQuest(compositeParent != null ? compositeParent : quest);
         if (type != AcceptType.ACCEPT) {
             if (type == AcceptType.DELAY)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(compositeParent != null ? compositeParent : quest)).withStyle(ChatFormatting.DARK_RED));
             else
                 this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
-        QuestProgress prog = new QuestProgress(quest, this);
+        QuestProgress prog = new QuestProgress(quest, this, compositeParent);
         this.currentQuests.add(prog);
         this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), quest.getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
         return true;
@@ -189,13 +192,13 @@ public class PlayerData {
         });
         if (!prog.getQuest().command.isEmpty())
             this.player.getServer().getCommands().performPrefixedCommand(this.player.createCommandSourceStack(), prog.getQuest().command);
-        this.cooldownTracker.put(prog.getQuest().id, this.player.level.getGameTime());
-        this.unlockTracker.add(prog.getQuest().id);
+        this.cooldownTracker.put(prog.getCompletionID(), this.player.level.getGameTime());
+        this.unlockTracker.add(prog.getCompletionID());
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
-                Quest quest = QuestsManager.instance().getAllQuests().get(res);
+                Quest quest = QuestsManager.instance().getActualQuests(res);
                 if (quest != null)
                     this.unlockTracker.remove(quest.id);
             });
@@ -241,11 +244,15 @@ public class PlayerData {
         return this.currentQuests;
     }
 
-    public boolean isActive(Quest quest) {
-        return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest.id));
+    public boolean isActive(QuestBase quest) {
+        return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest.id) || quest instanceof CompositeQuest comp && comp.getCompositeQuests().contains(prog.getQuest().id));
     }
 
-    public AcceptType canAcceptQuest(Quest quest) {
+    public boolean isActive(ResourceLocation quest) {
+        return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest));
+    }
+
+    public AcceptType canAcceptQuest(QuestBase quest) {
         if (quest.isDailyQuest || quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
             return AcceptType.LOCKED;
         }
@@ -312,7 +319,7 @@ public class PlayerData {
             this.dailySeed = this.player.getRandom().nextInt();
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
-                Quest quest = QuestsManager.instance().getAllQuests().get(r);
+                Quest quest = QuestsManager.instance().getActualQuests(r);
                 if (quest != null && quest.isDailyQuest)
                     this.reset(r, true, false);
             });
@@ -323,13 +330,13 @@ public class PlayerData {
             int amount = ConfigHandler.config.dailyQuestAmount == -1 ? daily.size() : Mth.clamp(ConfigHandler.config.dailyQuestAmount, 0, daily.size());
             for (int i = 0; i < amount; i++) {
                 Quest quest = daily.get(i);
-                this.currentQuests.add(new QuestProgress(quest, this));
+                this.currentQuests.add(new QuestProgress(quest, this, null));
                 this.dailyQuestsTracker.put(quest.id, 1);
             }
         }
     }
 
-    public String formattedCooldown(Quest quest) {
+    public String formattedCooldown(QuestBase quest) {
         long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level.getGameTime() - this.cooldownTracker.get(quest.id))) / 20;
         if (sec > 86400) {
             long days = sec / 86400;

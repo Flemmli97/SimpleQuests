@@ -9,7 +9,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
+import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -39,8 +41,8 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
     private Map<ResourceLocation, QuestCategory> selectableCategories;
     private List<QuestCategory> categoryView;
 
-    private Map<ResourceLocation, Quest> questMap;
-    private Map<QuestCategory, Map<ResourceLocation, Quest>> quests;
+    private Map<ResourceLocation, QuestBase> questMap;
+    private Map<QuestCategory, Map<ResourceLocation, QuestBase>> quests;
 
     private Map<QuestCategory, Set<Quest>> dailyQuests;
 
@@ -96,7 +98,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                 .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         this.categoryView = this.categories.values().stream().toList();
 
-        Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, Quest>> map = new HashMap<>();
+        Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, QuestBase>> map = new HashMap<>();
         result.quests.forEach((res, el) -> {
             if (el.isJsonObject()) {
                 try {
@@ -109,37 +111,49 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                             if (questCategory == null)
                                 throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
                         }
-                        Quest quest = Quest.of(res, questCategory, el.getAsJsonObject());
+                        QuestBase base;
+                        if (obj.get("type").getAsString().equals(CompositeQuest.ID.toString()))
+                            base = CompositeQuest.of(res, questCategory, obj);
+                        else
+                            base = Quest.of(res, questCategory, obj);
                         map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
-                                .put(res, quest);
+                                .put(res, base);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        map.forEach((category, builder) -> builder.orderEntriesByValue(Quest::compareTo));
+        map.forEach((category, builder) -> builder.orderEntriesByValue(QuestBase::compareTo));
         this.quests = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> e.getValue().build()));
         this.questMap = this.quests.values().stream().flatMap(m -> m.entrySet().stream())
                 .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<QuestCategory, Set<Quest>> daily = new HashMap<>();
-        this.quests.forEach((cat, q) -> daily.put(cat, q.values().stream().filter(quest -> quest.isDailyQuest)
+        this.quests.forEach((cat, q) -> daily.put(cat, q.values().stream().filter(quest -> quest.isDailyQuest && quest instanceof Quest)
+                .map(quest -> (Quest) quest)
                 .collect(Collectors.toSet())));
         this.dailyQuests = ImmutableMap.copyOf(daily);
     }
 
-    public Map<ResourceLocation, Quest> getAllQuests() {
+    public Map<ResourceLocation, QuestBase> getAllQuests() {
         return this.questMap;
     }
 
-    public Map<ResourceLocation, Quest> getQuestsForCategoryID(ResourceLocation res) {
+    public Quest getActualQuests(ResourceLocation id) {
+        QuestBase base = this.questMap.get(id);
+        if (base instanceof Quest quest)
+            return quest;
+        return null;
+    }
+
+    public Map<ResourceLocation, QuestBase> getQuestsForCategoryID(ResourceLocation res) {
         QuestCategory category = this.getQuestCategory(res);
         if (category == null)
             throw new IllegalArgumentException("No such category for " + res);
         return this.getQuestsForCategory(category);
     }
 
-    public Map<ResourceLocation, Quest> getQuestsForCategory(QuestCategory category) {
+    public Map<ResourceLocation, QuestBase> getQuestsForCategory(QuestCategory category) {
         return this.quests.getOrDefault(category, Map.of());
     }
 

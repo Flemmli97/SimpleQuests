@@ -36,69 +36,70 @@ public class LangManager {
     private static final Type mapType = new TypeToken<Map<String, String>>() {
     }.getType();
 
-    private static final Map<String, String> defaultTranslation = new LinkedHashMap<>();
+    private static final Map<String, String> DEFAULT_TRANSLATION = new LinkedHashMap<>();
 
     static {
-        defaultTranslation.put("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
-        defaultTranslation.put("simplequests.active", "This quest is already active");
-        defaultTranslation.put("simplequests.active.full", "You already have the max amount of active quests");
-        defaultTranslation.put("simplequests.accept", "Accepted quest %s");
-        defaultTranslation.put("simplequests.finish", "Finished quest [%s]");
-        defaultTranslation.put("simplequests.current", "Current quest [%s]");
-        defaultTranslation.put("simplequests.current.no", "No active quest");
-        defaultTranslation.put("simplequests.reset", "Reset current quest [%s]");
-        defaultTranslation.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
-        defaultTranslation.put("simplequests.reset.notfound", "No active quest with id %s");
-        defaultTranslation.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
-        defaultTranslation.put("simplequests.reset.all", "Reset all progress for %s");
-        defaultTranslation.put("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
-        defaultTranslation.put("simplequests.unlock.fail", "No such quest %s");
+        DEFAULT_TRANSLATION.put("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
+        DEFAULT_TRANSLATION.put("simplequests.active", "This quest is already active");
+        DEFAULT_TRANSLATION.put("simplequests.active.full", "You already have the max amount of active quests");
+        DEFAULT_TRANSLATION.put("simplequests.accept", "Accepted quest %s");
+        DEFAULT_TRANSLATION.put("simplequests.finish", "Finished quest [%s]");
+        DEFAULT_TRANSLATION.put("simplequests.current", "Current quest [%s]");
+        DEFAULT_TRANSLATION.put("simplequests.current.no", "No active quest");
+        DEFAULT_TRANSLATION.put("simplequests.reset", "Reset current quest [%s]");
+        DEFAULT_TRANSLATION.put("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
+        DEFAULT_TRANSLATION.put("simplequests.reset.notfound", "No active quest with id %s");
+        DEFAULT_TRANSLATION.put("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
+        DEFAULT_TRANSLATION.put("simplequests.reset.all", "Reset all progress for %s");
+        DEFAULT_TRANSLATION.put("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
+        DEFAULT_TRANSLATION.put("simplequests.unlock.fail", "No such quest %s");
 
-        defaultTranslation.put("simplequests.missing.advancement", "Advancement with id %s missing");
-        defaultTranslation.put("simplequests.kill", "Finished kill task %s");
-        defaultTranslation.put("simplequests.quest.noexist", "No quest exists with id %s");
-        defaultTranslation.put("simplequests.quest.category.noexist", "No quest category exists with id %s");
-        defaultTranslation.put("simplequests.task", "Finished task %s");
-        defaultTranslation.put("simplequests.interaction.dupe", "You already interacted with this predicate");
-        defaultTranslation.put("simplequests.interaction.block.dupe.true", "You already interacted with this block");
-        defaultTranslation.put("simplequests.interaction.block.dupe.false", "You already broke this block");
+        DEFAULT_TRANSLATION.put("simplequests.missing.advancement", "Advancement with id %s missing");
+        DEFAULT_TRANSLATION.put("simplequests.kill", "Finished kill task %s");
+        DEFAULT_TRANSLATION.put("simplequests.quest.noexist", "No quest exists with id %s");
+        DEFAULT_TRANSLATION.put("simplequests.quest.category.noexist", "No quest category exists with id %s");
+        DEFAULT_TRANSLATION.put("simplequests.task", "Finished task %s");
+        DEFAULT_TRANSLATION.put("simplequests.interaction.dupe", "You already interacted with this predicate");
+        DEFAULT_TRANSLATION.put("simplequests.interaction.block.dupe.true", "You already interacted with this block");
+        DEFAULT_TRANSLATION.put("simplequests.interaction.block.dupe.false", "You already broke this block");
 
-        defaultTranslation.put(PlayerData.AcceptType.REQUIREMENTS.langKey(), "Missing requirements for quest");
-        defaultTranslation.put(PlayerData.AcceptType.DAILYFULL.langKey(), "You can't repeat this quest again today");
-        defaultTranslation.put(PlayerData.AcceptType.DELAY.langKey(), "Quest on cooldown for %s");
-        defaultTranslation.put(PlayerData.AcceptType.ONETIME.langKey(), "This is a onetime quest");
-        defaultTranslation.put(PlayerData.AcceptType.ACCEPT.langKey(), "Quest acceptable");
-        defaultTranslation.put(PlayerData.AcceptType.LOCKED.langKey(), "You can't accept this quest");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.REQUIREMENTS.langKey(), "Missing requirements for quest");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.DAILYFULL.langKey(), "You can't repeat this quest again today");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.DELAY.langKey(), "Quest on cooldown for %s");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.ONETIME.langKey(), "This is a onetime quest");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.ACCEPT.langKey(), "Quest acceptable");
+        DEFAULT_TRANSLATION.put(PlayerData.AcceptType.LOCKED.langKey(), "You can't accept this quest");
 
-        defaultTranslation.put("simplequests.gui.main", "Quests");
-        defaultTranslation.put("simplequests.gui.confirm", "Accept this quest?");
-        defaultTranslation.put("simplequests.gui.reset", "Reset this quest? No refunds!");
-        defaultTranslation.put("simplequests.gui.yes", "Yes");
-        defaultTranslation.put("simplequests.gui.no", "No");
+        DEFAULT_TRANSLATION.put("simplequests.gui.main", "Quests");
+        DEFAULT_TRANSLATION.put("simplequests.gui.composite.quest", "Select Quest");
+        DEFAULT_TRANSLATION.put("simplequests.gui.confirm", "Accept this quest?");
+        DEFAULT_TRANSLATION.put("simplequests.gui.reset", "Reset this quest? No refunds!");
+        DEFAULT_TRANSLATION.put("simplequests.gui.yes", "Yes");
+        DEFAULT_TRANSLATION.put("simplequests.gui.no", "No");
 
-        defaultTranslation.put("simplequests.gui.next", "Next Page");
-        defaultTranslation.put("simplequests.gui.prev", "Previous Page");
-        defaultTranslation.put("simplequests.gui.button.main", "Back");
+        DEFAULT_TRANSLATION.put("simplequests.gui.next", "Next Page");
+        DEFAULT_TRANSLATION.put("simplequests.gui.prev", "Previous Page");
+        DEFAULT_TRANSLATION.put("simplequests.gui.button.main", "Back");
 
-        defaultTranslation.put("simplequests.reload", "Reloading configs");
+        DEFAULT_TRANSLATION.put("simplequests.reload", "Reloading configs");
 
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".single", "Give %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
-        defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
-        defaultTranslation.put(QuestEntryImpls.KillEntry.ID.toString(), "Kill %s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
-        defaultTranslation.put(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
-        defaultTranslation.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
-        defaultTranslation.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.ItemEntry.ID + ".single", "Give %1$s x%2$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.KillEntry.ID.toString(), "Kill %s x%2$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
+        DEFAULT_TRANSLATION.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
 
-        defaultTranslation.put("quest.progress", "%1$s - %2$s");
-        defaultTranslation.put(ProgressionTrackerImpl.KILL_PROGRESS, "Killed: %1$s/%2$s");
-        defaultTranslation.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
-        defaultTranslation.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
-        defaultTranslation.put(ProgressionTrackerImpl.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
-        defaultTranslation.put(ProgressionTrackerImpl.FISHING_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put("quest.progress", "%1$s - %2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.KILL_PROGRESS, "Killed: %1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.FISHING_PROGRESS, "%1$s/%2$s");
     }
 
     private Map<String, String> translation = new HashMap<>();
@@ -139,7 +140,7 @@ public class LangManager {
             File def = configDir.resolve("en_us.json").toFile();
             if (!def.exists()) {
                 def.createNewFile();
-                saveTo(def, defaultTranslation);
+                saveTo(def, DEFAULT_TRANSLATION);
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
@@ -155,7 +156,7 @@ public class LangManager {
             //en_us is basically used as a default modifiable file
             if (lang.equals("en_us")) {
                 Map<String, String> ordered = new LinkedHashMap<>();
-                defaultTranslation.forEach((key, t) -> ordered.put(key, this.translation.getOrDefault(key, t)));
+                DEFAULT_TRANSLATION.forEach((key, t) -> ordered.put(key, this.translation.getOrDefault(key, t)));
                 saveTo(this.confDir.resolve("en_us.json").toFile(), ordered);
             }
         } catch (IOException e) {
@@ -167,7 +168,7 @@ public class LangManager {
     }
 
     public String get(String key) {
-        return this.translation.getOrDefault(key, ConfigHandler.config.fallBackToEnLang ? defaultTranslation.getOrDefault(key, key) : key);
+        return this.translation.getOrDefault(key, ConfigHandler.config.fallBackToEnLang ? DEFAULT_TRANSLATION.getOrDefault(key, key) : key);
     }
 
     private static void saveTo(File file, Map<String, String> translation) {
