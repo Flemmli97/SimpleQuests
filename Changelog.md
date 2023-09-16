@@ -1,3 +1,21 @@
+Simple Quests 1.4.0
+================
+- Add quest complete event for fabric and forge
+- Moved some things to api
+- Add dailyQuestAmount: If >= 0 will select up to x amount of daily quests instead of all
+- Internal: All QuestEntry use Codecs now
+- Added Multi-Entry types:   
+  Those types allow a entry to provide multiple possible tasks.
+  E.g. an item entry where you have to submit either item a or b x amount.
+- Added composite quests:
+  Composite quests are quests that refer to other quests. 
+  You can only select one of them at the same time
+- Add fishing quest entry
+- Quest guis current page gets saved when going back
+- Renamed /simplequests show to /simplequests quests
+- is_visible for QuestCategory:
+  If true quests in this category are not shown with the current quest command
+
 Simple Quests 1.3.2
 ================
 - Port to 1.20.1  
