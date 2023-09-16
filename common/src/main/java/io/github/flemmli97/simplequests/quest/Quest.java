@@ -109,7 +109,6 @@ public class Quest extends QuestBase {
         if (!this.questSubmissionTrigger.isEmpty() || full)
             obj.addProperty("submission_trigger", this.questSubmissionTrigger);
         JsonObject entries = new JsonObject();
-        SimpleQuests.logger.debug("Serializing " + this.id);
         this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
         obj.add("entries", entries);
         obj.addProperty("type", ID.toString());

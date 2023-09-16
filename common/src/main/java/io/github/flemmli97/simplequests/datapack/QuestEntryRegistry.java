@@ -38,6 +38,7 @@ public class QuestEntryRegistry {
         registerSerializer(QuestEntryMultiImpl.MultiLocationEntry.ID, QuestEntryMultiImpl.MultiLocationEntry.CODEC);
         registerSerializer(QuestEntryMultiImpl.MultiEntityInteractEntry.ID, QuestEntryMultiImpl.MultiEntityInteractEntry.CODEC);
         registerSerializer(QuestEntryMultiImpl.MultiBlockInteractEntry.ID, QuestEntryMultiImpl.MultiBlockInteractEntry.CODEC);
+        registerSerializer(QuestEntryMultiImpl.MultiCraftingEntry.ID, QuestEntryMultiImpl.MultiCraftingEntry.CODEC);
         registerSerializer(QuestEntryMultiImpl.MultiFishingEntry.ID, QuestEntryMultiImpl.MultiFishingEntry.CODEC);
     }
 
