@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface QuestEntry {
 
@@ -37,7 +37,7 @@ public interface QuestEntry {
     /**
      * @return A function that will continuesly get called as long as the player has this entry task to complete
      */
-    default Function<PlayerData, Boolean> tickable() {
+    default Predicate<PlayerData> tickable() {
         return null;
     }
 
