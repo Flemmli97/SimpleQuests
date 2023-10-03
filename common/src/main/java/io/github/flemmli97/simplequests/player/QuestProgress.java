@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class QuestProgress {
 
@@ -54,7 +55,7 @@ public class QuestProgress {
     private final Map<String, ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry>> blockInteractionCounter = new HashMap<>();
     private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.FishingEntry>> fishingCounter = new HashMap<>();
 
-    private final Map<String, Function<PlayerData, Boolean>> tickables = new HashMap<>();
+    private final Map<String, Predicate<PlayerData>> tickables = new HashMap<>();
 
     private QuestBase base;
     private int questIndex;
@@ -139,7 +140,7 @@ public class QuestProgress {
         this.questEntries.forEach((s, e) -> {
             e.onAccept(data);
             if (!this.entries.contains(s)) {
-                Function<PlayerData, Boolean> ticker = e.tickable();
+                Predicate<PlayerData> ticker = e.tickable();
                 if (ticker != null)
                     this.tickables.put(s, ticker);
             }
@@ -258,7 +259,7 @@ public class QuestProgress {
     public Pair<Boolean, Set<QuestEntry>> tickProgress(PlayerData data) {
         Set<QuestEntry> fullfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
-            if (e.getValue().apply(data)) {
+            if (e.getValue().test(data)) {
                 fullfilled.add(this.questEntries.get(e.getKey()));
                 this.entries.add(e.getKey());
                 return true;
