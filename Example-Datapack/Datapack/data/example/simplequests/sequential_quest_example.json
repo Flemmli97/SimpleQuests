@@ -1,0 +1,19 @@
+{
+  "task": "Example for a sequential quest",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:cobbled_deepslate",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "quests": [
+    "example:hidden/sequential_a",
+    "example:hidden/sequential_b"
+  ],
+  "type": "simplequests:sequential_quest"
+}
