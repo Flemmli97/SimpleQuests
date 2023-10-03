@@ -10,6 +10,7 @@ import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.QuestEntryMultiImpl;
+import io.github.flemmli97.simplequests.quest.SequentialQuest;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -329,6 +330,25 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .withIcon(new ItemStack(Items.COBBLED_DEEPSLATE))
                 .addQuest(new ResourceLocation("example", "hidden/selection_a"))
                 .addQuest(new ResourceLocation("example", "hidden/selection_b")));
+
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "hidden/sequential_a"),
+                "Sequential Quest Example a",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay(36000)
+                .withCategory(hidden)
+                .addTaskEntry("andesite", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.ANDESITE).build(), 15, "Give 15 andesite", true)));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "hidden/sequential_b"),
+                "Sequential Quest Example b",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .withCategory(hidden)
+                .addTaskEntry("granite", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.GRANITE).build(), 15, "Give 15 granite", true)));
+        this.addQuest(new SequentialQuest.Builder(new ResourceLocation("example", "sequential_quest_example"),
+                "Example for a sequential quest",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay(36000)
+                .withIcon(new ItemStack(Items.COBBLED_DEEPSLATE))
+                .addQuest(new ResourceLocation("example", "hidden/sequential_a"))
+                .addQuest(new ResourceLocation("example", "hidden/sequential_b")));
     }
 
     @Override

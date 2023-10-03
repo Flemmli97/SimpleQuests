@@ -86,15 +86,15 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         QuestBase base = QuestsManager.instance().getAllQuests().get(id);
-        if (base == null) {
+        if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
             ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
             return 0;
         }
-        if (!(base instanceof Quest quest)) {
+        if (base instanceof CompositeQuest) {
             ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.quest.is_selection"), id), false);
             return 0;
         }
-        if (PlayerData.get(player).acceptQuest(quest, null))
+        if (PlayerData.get(player).acceptQuest(base, 0))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
@@ -103,7 +103,7 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         QuestBase base = QuestsManager.instance().getAllQuests().get(id);
-        if (base == null) {
+        if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
             ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.quest.noexist"), id), false);
             return 0;
         }
@@ -124,7 +124,7 @@ public class QuestCommand {
             ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.lang.get("simplequests.quest.composite.resolve.none"), composite, select), false);
             return 0;
         }
-        if (PlayerData.get(player).acceptQuest(quest, composite))
+        if (PlayerData.get(player).acceptQuest(quest, i))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
@@ -228,14 +228,6 @@ public class QuestCommand {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), true), build);
     }
 
-    public static CompletableFuture<Suggestions> questsCompositeGetQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
-        QuestBase quest = QuestsManager.instance().getAllQuests().get(ResourceLocationArgument.getId(context, "quest"));
-        if (!(quest instanceof CompositeQuest composite))
-            return SharedSuggestionProvider.suggest(List.of(), build);
-        return SharedSuggestionProvider.suggest(composite.getCompositeQuests().stream()
-                .map(ResourceLocation::toString).collect(Collectors.toList()), build);
-    }
-
     public static CompletableFuture<Suggestions> activequests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(PlayerData.get(context.getSource().getPlayerOrException())
                 .getCurrentQuest().stream().map(prog -> prog.getQuest().id.toString())
@@ -245,7 +237,7 @@ public class QuestCommand {
     private static List<String> acceptableQuests(ServerPlayer player, boolean composite) {
         return QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
+                .filter(e -> e.getValue().category.canBeSelected && (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList());
     }
 

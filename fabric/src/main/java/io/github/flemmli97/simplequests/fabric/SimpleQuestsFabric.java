@@ -4,6 +4,7 @@ import io.github.flemmli97.simplequests.QuestCommand;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import net.fabricmc.api.ModInitializer;
@@ -36,7 +37,8 @@ public class SimpleQuestsFabric implements ModInitializer {
     public void onInitialize() {
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new Reloader());
-        CommandRegistrationCallback.EVENT.register(((dispatcher, context, selection) -> QuestCommand.register(dispatcher)));
+        CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated, selection) -> QuestCommand.register(dispatcher)));
+        QuestBaseRegistry.register();
         QuestEntryRegistry.register();
         ConfigHandler.init();
         SimpleQuests.permissionAPI = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");

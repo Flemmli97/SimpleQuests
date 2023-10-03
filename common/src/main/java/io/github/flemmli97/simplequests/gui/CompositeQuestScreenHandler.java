@@ -65,7 +65,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         player.openMenu(fac);
     }
 
-    private ItemStack ofQuest(Quest quest, ServerPlayer player) {
+    private ItemStack ofQuest(Quest quest, int idx, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         ItemStack stack = quest.getIcon();
         stack.setHoverName(quest.getTask().setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
@@ -78,7 +78,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
         stack.getOrCreateTagElement("display").put("Lore", lore);
-        stack.getOrCreateTagElement("SimpleQuests").putString("Quest", quest.id.toString());
+        stack.getOrCreateTagElement("SimpleQuests").putInt("Quest", idx);
         return stack;
     }
 
@@ -106,9 +106,9 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
                 inv.updateStack(i, QuestGui.emptyFiller());
             else {
                 if (id < this.quests.size()) {
-                    ItemStack stack = this.ofQuest(questMap.get(this.quests.get(id)), serverPlayer);
+                    ItemStack stack = this.ofQuest(questMap.get(this.quests.get(id)), id, serverPlayer);
                     if (!stack.isEmpty()) {
-                        inv.updateStack(i, this.ofQuest(questMap.get(this.quests.get(id)), serverPlayer));
+                        inv.updateStack(i, stack);
                         id++;
                     }
                 }
@@ -140,16 +140,16 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             return false;
         }
-        ResourceLocation id = new ResourceLocation(tag.getString("Quest"));
-        Quest actual = QuestsManager.instance().getActualQuests(id);
+        int idx = tag.getInt("Quest");
+        Quest actual = this.quest.resolveToQuest(player, idx);
         if (actual == null) {
-            SimpleQuests.logger.error("No such quest " + id);
+            SimpleQuests.logger.error("No such quest for composite " + this.quest.id);
             return false;
         }
         ConfirmScreenHandler.openConfirmScreen(player, b -> {
             if (b) {
                 player.closeContainer();
-                if (PlayerData.get(player).acceptQuest(actual, this.quest))
+                if (PlayerData.get(player).acceptQuest(this.quest, idx))
                     QuestGui.playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
                 else
                     QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);

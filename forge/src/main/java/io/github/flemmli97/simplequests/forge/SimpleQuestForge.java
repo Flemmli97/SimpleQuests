@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.forge;
 import io.github.flemmli97.simplequests.QuestCommand;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -31,6 +32,7 @@ public class SimpleQuestForge {
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactBlock);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::breakBlock);
+        QuestBaseRegistry.register();
         QuestEntryRegistry.register();
         ConfigHandler.init();
         SimpleQuests.ftbRanks = ModList.get().isLoaded("ftbranks");

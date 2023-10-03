@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 public abstract class QuestBase implements Comparable<QuestBase> {
 
+    public static final String TYPE_ID = "type";
+
     public final ResourceLocation id;
     public final QuestCategory category;
     public final List<ResourceLocation> neededParentQuests;
@@ -37,7 +39,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     private String repeatDelayString;
 
-    public final EntityPredicate unlockCondition;
+    protected final EntityPredicate unlockCondition;
 
     public QuestBase(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                      ItemStack icon, int repeatDelay, int repeatDaily, int sortingId,
@@ -111,6 +113,10 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return obj;
     }
 
+    public boolean isUnlocked(ServerPlayer player) {
+        return this.unlockCondition.matches(player, player);
+    }
+
     public MutableComponent getTask() {
         return Component.translatable(this.questTaskString);
     }
@@ -146,6 +152,10 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     }
 
     public abstract Quest resolveToQuest(ServerPlayer player, int idx);
+
+    public boolean isDynamic() {
+        return false;
+    }
 
     @Override
     public String toString() {

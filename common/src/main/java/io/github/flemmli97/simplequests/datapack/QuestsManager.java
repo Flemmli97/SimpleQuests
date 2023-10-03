@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.quest.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
@@ -111,11 +110,8 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                             if (questCategory == null)
                                 throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
                         }
-                        QuestBase base;
-                        if (obj.get("type").getAsString().equals(CompositeQuest.ID.toString()))
-                            base = CompositeQuest.of(res, questCategory, obj);
-                        else
-                            base = Quest.of(res, questCategory, obj);
+                        ResourceLocation questType = new ResourceLocation(obj.get(QuestBase.TYPE_ID).getAsString());
+                        QuestBase base = QuestBaseRegistry.deserialize(questType, res, questCategory, obj);
                         map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
                                 .put(res, base);
                     }

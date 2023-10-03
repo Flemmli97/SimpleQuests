@@ -1,0 +1,30 @@
+{
+  "category": "example:hidden",
+  "task": "Sequential Quest Example b",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:paper",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "entries": {
+    "granite": {
+      "predicate": {
+        "items": [
+          "minecraft:granite"
+        ]
+      },
+      "description": "Give 15 granite",
+      "amount": 15,
+      "consumeItems": true,
+      "id": "simplequests:item"
+    }
+  },
+  "type": "simplequests:quest"
+}
