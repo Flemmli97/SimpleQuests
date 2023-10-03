@@ -6,7 +6,6 @@ import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.quest.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
@@ -256,7 +255,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 }, "simplequests.gui.reset");
             } else
                 CompositeQuestScreenHandler.openScreen(player, composite, this.category, this.canGoBack, this.page);
-        } else if (quest instanceof Quest actual) {
+        } else {
             ConfirmScreenHandler.openConfirmScreen(player, b -> {
                 if (b) {
                     player.closeContainer();
@@ -264,7 +263,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                         PlayerData.get(player).reset(quest.id, true);
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
-                        if (PlayerData.get(player).acceptQuest(actual, null))
+                        if (PlayerData.get(player).acceptQuest(quest, 0))
                             playSongToPlayer(player, SoundEvents.NOTE_BLOCK_PLING, 1, 1.2f);
                         else
                             playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);

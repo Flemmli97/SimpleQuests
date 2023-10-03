@@ -34,9 +34,9 @@ public class Quest extends QuestBase {
 
     public final String questSubmissionTrigger;
 
-    private Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                  ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
-                  boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command) {
+    protected Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
+                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
+                    boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command) {
         super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock,
                 icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition);
         this.entries = entries;
@@ -111,7 +111,7 @@ public class Quest extends QuestBase {
         JsonObject entries = new JsonObject();
         this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
         obj.add("entries", entries);
-        obj.addProperty("type", ID.toString());
+        obj.addProperty(QuestBase.TYPE_ID, ID.toString());
         return obj;
     }
 
