@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class QuestEntryImpls {
 
@@ -257,7 +258,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public Function<PlayerData, Boolean> tickable() {
+        public Predicate<PlayerData> tickable() {
             return d -> {
                 ServerPlayer p = d.getPlayer();
                 return p.tickCount % 20 == 0 && p.blockPosition().distSqr(this.pos) < this.minDist * this.minDist;
@@ -296,7 +297,7 @@ public class QuestEntryImpls {
         }
 
         @Override
-        public Function<PlayerData, Boolean> tickable() {
+        public Predicate<PlayerData> tickable() {
             return d -> {
                 ServerPlayer p = d.getPlayer();
                 return p.tickCount % 20 == 0 && this.location.matches(p.getLevel(), p.getX(), p.getY(), p.getZ());
