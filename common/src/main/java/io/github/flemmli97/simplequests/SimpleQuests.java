@@ -11,19 +11,19 @@ public class SimpleQuests {
 
     public static final String MODID = "simplequests";
 
-    public static final Logger logger = LogManager.getLogger("simplequests");
+    public static final Logger LOGGER = LogManager.getLogger("simplequests");
 
-    private static LoaderHandler handler;
+    private static LoaderHandler HANDLER;
 
-    public static boolean ftbRanks;
-    public static boolean permissionAPI;
+    public static boolean FTB_RANKS;
+    public static boolean PERMISSION_API;
 
     public static void updateLoaderImpl(LoaderHandler impl) {
-        handler = impl;
+        HANDLER = impl;
     }
 
     public static LoaderHandler getHandler() {
-        return handler;
+        return HANDLER;
     }
 
     public static void onInteractEntity(ServerPlayer player, Entity entity, InteractionHand hand) {

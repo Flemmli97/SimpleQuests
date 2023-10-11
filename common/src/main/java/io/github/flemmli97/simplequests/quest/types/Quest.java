@@ -1,14 +1,14 @@
-package io.github.flemmli97.simplequests.quest;
+package io.github.flemmli97.simplequests.quest.types;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
+import io.github.flemmli97.simplequests.quest.QuestCategory;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -29,8 +28,8 @@ public class Quest extends QuestBase {
 
     private final Map<String, QuestEntry> entries;
 
-    public final ResourceLocation loot;
-    public final String command;
+    private final ResourceLocation loot;
+    private final String command;
 
     public final String questSubmissionTrigger;
 
@@ -46,62 +45,24 @@ public class Quest extends QuestBase {
     }
 
     public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
-        ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
-        JsonObject entries = GsonHelper.getAsJsonObject(obj, "entries");
-        entries.entrySet().forEach(ent -> {
-            if (!ent.getValue().isJsonObject())
-                throw new JsonSyntaxException("Expected JsonObject for " + ent.getKey() + " but was " + ent.getValue());
-            ResourceLocation entryID = new ResourceLocation(GsonHelper.getAsString(ent.getValue().getAsJsonObject(), "id"));
-            builder.put(ent.getKey(), QuestEntryRegistry.deserialize(entryID, ent.getValue().getAsJsonObject()));
-        });
-        ImmutableList.Builder<ResourceLocation> parents = new ImmutableList.Builder<>();
-        JsonElement e = obj.get("parent_id");
-        if (e != null) {
-            if (e.isJsonPrimitive() && !e.getAsString().isEmpty())
-                parents.add(new ResourceLocation(e.getAsString()));
-            else if (e.isJsonArray()) {
-                e.getAsJsonArray().forEach(ea -> {
-                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
-                        parents.add(new ResourceLocation(ea.getAsString()));
-                    }
-                });
-            }
-        }
-        ImmutableList.Builder<String> desc = new ImmutableList.Builder<>();
-        JsonElement descEl = obj.get("description");
-        if (descEl != null) {
-            if (descEl.isJsonPrimitive() && !descEl.getAsString().isEmpty())
-                desc.add(descEl.getAsString());
-            else if (descEl.isJsonArray()) {
-                descEl.getAsJsonArray().forEach(ea -> {
-                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
-                        desc.add(ea.getAsString());
-                    }
-                });
-            }
-        }
-        return new Quest(id,
-                category,
-                GsonHelper.getAsString(obj, "task"),
-                desc.build(),
-                parents.build(),
-                GsonHelper.getAsBoolean(obj, "redo_parent", false),
-                GsonHelper.getAsBoolean(obj, "need_unlock", false),
-                new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")),
-                ParseHelper.icon(obj, "icon", Items.PAPER),
-                ParseHelper.tryParseTime(obj, "repeat_delay", 0),
-                GsonHelper.getAsInt(obj, "repeat_daily", 0),
-                GsonHelper.getAsInt(obj, "sorting_id", 0),
-                builder.build(),
-                GsonHelper.getAsBoolean(obj, "daily_quest", false),
-                GsonHelper.getAsString(obj, "submission_trigger", ""),
-                EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)),
-                GsonHelper.getAsString(obj, "command", ""));
+        return QuestBase.of(task -> {
+            Quest.Builder builder = new Builder(id, task, new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")))
+                    .withSubmissionTrigger(GsonHelper.getAsString(obj, "submission_trigger", ""))
+                    .setCompletionCommand(GsonHelper.getAsString(obj, "command", ""));
+            JsonObject entries = GsonHelper.getAsJsonObject(obj, "entries");
+            entries.entrySet().forEach(ent -> {
+                if (!ent.getValue().isJsonObject())
+                    throw new JsonSyntaxException("Expected JsonObject for " + ent.getKey() + " but was " + ent.getValue());
+                ResourceLocation entryID = new ResourceLocation(GsonHelper.getAsString(ent.getValue().getAsJsonObject(), "id"));
+                builder.addTaskEntry(ent.getKey(), QuestEntryRegistry.deserialize(entryID, ent.getValue().getAsJsonObject()));
+            });
+            return builder;
+        }, category, obj).build();
     }
 
     @Override
     public JsonObject serialize(boolean withId, boolean full) {
-        SimpleQuests.logger.debug("Serializing " + ID + " with id " + this.id);
+        SimpleQuests.LOGGER.debug("Serializing " + ID + " with id " + this.id);
         JsonObject obj = super.serialize(withId, full);
         obj.addProperty("loot_table", this.loot.toString());
         if (!this.command.isEmpty() || full)
@@ -109,7 +70,7 @@ public class Quest extends QuestBase {
         if (!this.questSubmissionTrigger.isEmpty() || full)
             obj.addProperty("submission_trigger", this.questSubmissionTrigger);
         JsonObject entries = new JsonObject();
-        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
+        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't save quest entry" + e))));
         obj.add("entries", entries);
         obj.addProperty(QuestBase.TYPE_ID, ID.toString());
         return obj;
@@ -137,27 +98,45 @@ public class Quest extends QuestBase {
     }
 
     @Override
-    public Quest resolveToQuest(ServerPlayer player, int idx) {
+    public String submissionTrigger(ServerPlayer player, int idx) {
+        return this.questSubmissionTrigger;
+    }
+
+    @Override
+    public QuestBase resolveToQuest(ServerPlayer player, int idx) {
+        if (idx != 0)
+            return null;
         return this;
     }
 
-    public Map<String, QuestEntry> resolveTasks(ServerPlayer player) {
+    @Override
+    public ResourceLocation getLoot() {
+        return this.loot;
+    }
+
+    @Override
+    public void onComplete(ServerPlayer player) {
+        QuestBase.runCommand(player, this.command);
+    }
+
+    @Override
+    public Map<String, QuestEntry> resolveTasks(ServerPlayer player, int questIndex) {
         ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
         for (Map.Entry<String, QuestEntry> i : this.entries.entrySet()) {
-            builder.put(i.getKey(), i.getValue().resolve(player));
+            builder.put(i.getKey(), i.getValue().resolve(player, this));
         }
         return builder.build();
     }
 
     public static class Builder extends BuilderBase<Builder> {
 
-        private final Map<String, QuestEntry> entries = new LinkedHashMap<>();
+        protected final Map<String, QuestEntry> entries = new LinkedHashMap<>();
 
-        private final ResourceLocation loot;
+        protected final ResourceLocation loot;
 
-        private String submissionTrigger = "";
+        protected String submissionTrigger = "";
 
-        private String command = "";
+        protected String command = "";
 
         public Builder(ResourceLocation id, String task, ResourceLocation loot) {
             super(id, task);

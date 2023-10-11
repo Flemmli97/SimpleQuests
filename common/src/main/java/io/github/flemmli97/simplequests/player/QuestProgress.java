@@ -7,17 +7,16 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.JsonCodecs;
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.QuestCompletionState;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
-import io.github.flemmli97.simplequests.quest.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestBase;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
-import io.github.flemmli97.simplequests.quest.SequentialQuest;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -59,14 +58,14 @@ public class QuestProgress {
 
     private QuestBase base;
     private int questIndex;
-    private Quest quest;
+    private QuestBase quest;
     private Map<String, QuestEntry> questEntries;
 
     public QuestProgress(QuestBase quest, PlayerData data, int subQuestIndex) {
         this.base = quest;
         this.questIndex = subQuestIndex;
         this.quest = quest.resolveToQuest(data.getPlayer(), this.questIndex);
-        this.questEntries = this.quest.resolveTasks(data.getPlayer());
+        this.questEntries = this.base.resolveTasks(data.getPlayer(), this.questIndex);
         this.setup(data);
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
@@ -92,7 +91,7 @@ public class QuestProgress {
         return (name, entry, prog) -> {
             ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.interactionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createEntityInteractTracker(entry));
             if (!interacted.isApplicable(entity.getUUID())) {
-                player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                 return false;
             }
             if (entry.check(player, entity)) {
@@ -106,7 +105,7 @@ public class QuestProgress {
         return (name, entry, prog) -> {
             ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry));
             if (!interacted.isApplicable(pos)) {
-                player.sendMessage(new TranslatableComponent(ConfigHandler.lang.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                 return false;
             }
             if (entry.check(player, pos, use)) {
@@ -147,20 +146,18 @@ public class QuestProgress {
         });
     }
 
-    public Quest getQuest() {
+    public QuestBase getQuest() {
+        return this.base;
+    }
+
+    public QuestBase subQuest() {
         return this.quest;
     }
 
-    public ResourceLocation getLoot() {
-        return this.base instanceof SequentialQuest sequential ? sequential.loot : this.quest.loot;
-    }
-
-    public String getCommandToRun() {
-        return this.base instanceof SequentialQuest sequential ? sequential.command : this.quest.command;
-    }
-
-    public ResourceLocation getCompletionID() {
-        return this.base.id;
+    public Collection<ResourceLocation> getCompletionID() {
+        if (this.base instanceof CompositeQuest)
+            return Set.of(this.base.id, this.quest.id);
+        return Set.of(this.base.id);
     }
 
     public Map<String, QuestEntry> getQuestEntries() {
@@ -170,15 +167,19 @@ public class QuestProgress {
     public SubmitType submit(ServerPlayer player, String trigger) {
         boolean any = false;
         for (Map.Entry<String, QuestEntry> entry : this.questEntries.entrySet()) {
-            if (this.entries.contains(entry.getKey()) && !this.quest.questSubmissionTrigger.equals(trigger))
+            if (this.entries.contains(entry.getKey()) && !this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
                 this.entries.add(entry.getKey());
                 any = true;
             }
         }
-        boolean b = this.tryComplete(player, trigger);
-        return b ? SubmitType.COMPLETE : any ? SubmitType.PARTIAL : SubmitType.NOTHING;
+        return switch (this.tryComplete(player, trigger)) {
+            case COMPLETE -> SubmitType.COMPLETE;
+            case PARTIAL -> SubmitType.PARTIAL_COMPLETE;
+            case NO -> any ? SubmitType.PARTIAL : SubmitType.NOTHING;
+
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -198,23 +199,23 @@ public class QuestProgress {
         return fullfilled;
     }
 
-    public boolean tryComplete(ServerPlayer player, String trigger) {
-        boolean completed = this.quest.questSubmissionTrigger.equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
-        if (completed && (!(this.base instanceof CompositeQuest))) {
-            Quest next = this.base.resolveToQuest(player, this.questIndex + 1);
+    public QuestCompletionState tryComplete(ServerPlayer player, String trigger) {
+        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
+        if (completed && (!(this.getQuest() instanceof CompositeQuest))) {
+            QuestBase next = this.getQuest().resolveToQuest(player, this.questIndex + 1);
             if (next != null) {
                 this.quest = next;
-                this.questEntries = this.quest.resolveTasks(player);
+                this.questEntries = this.quest.resolveTasks(player, 0);
                 this.questIndex += 1;
                 this.resetTrackers();
                 PlayerData data = PlayerData.get(player);
                 this.setup(data);
                 if (!this.tickables.isEmpty())
                     data.addTickableProgress(this);
-                return false;
+                return QuestCompletionState.PARTIAL;
             }
         }
-        return completed;
+        return completed ? QuestCompletionState.COMPLETE : QuestCompletionState.NO;
     }
 
     public List<String> finishedTasks() {
@@ -289,7 +290,7 @@ public class QuestProgress {
         }
         tag.putInt("QuestIndex", this.questIndex);
         CompoundTag entries = new CompoundTag();
-        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't save quest entry" + e))));
+        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't save quest entry" + e))));
         tag.put("QuestEntries", entries);
 
         ListTag list = new ListTag();
@@ -320,14 +321,14 @@ public class QuestProgress {
             if (e instanceof JsonObject obj) {
                 this.base = QuestBaseRegistry.deserializeFull(obj);
             }
-            if (this.quest == null) {
-                SimpleQuests.logger.error("Couldn't reconstruct dynamic quest. Skipping");
+            if (this.base == null) {
+                SimpleQuests.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
                 throw new IllegalStateException();
             }
         } else {
             this.base = QuestsManager.instance().getActualQuests(new ResourceLocation(tag.getString("Quest")));
             if (this.base == null) {
-                SimpleQuests.logger.error("Cant find quest with id " + tag.getString("Quest") + ". Skipping");
+                SimpleQuests.LOGGER.error("Cant find quest with id " + tag.getString("Quest") + ". Skipping");
                 throw new IllegalStateException();
             }
         }
@@ -336,10 +337,10 @@ public class QuestProgress {
         if (tag.contains("QuestEntries")) {
             ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
-            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't read quest entry" + e))));
+            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't read quest entry" + e))));
             this.questEntries = builder.build();
         } else {
-            this.questEntries = this.quest.resolveTasks(player);
+            this.questEntries = this.quest.resolveTasks(player, this.questIndex);
         }
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));
@@ -359,7 +360,7 @@ public class QuestProgress {
     @SuppressWarnings("unchecked")
     private <E, F extends QuestEntry, T extends ProgressionTracker<E, F>> void loadTracker(Function<F, T> func, Map<String, T> map, String name, CompoundTag tag) {
         if (this.quest == null) {
-            SimpleQuests.logger.error("Quest not set. This shouldn't be!");
+            SimpleQuests.LOGGER.error("Quest not set. This shouldn't be!");
             throw new IllegalStateException();
         }
         try {
@@ -367,13 +368,14 @@ public class QuestProgress {
             entry.load(tag.get(name));
             map.putIfAbsent(name, entry);
         } catch (ClassCastException e) {
-            SimpleQuests.logger.error("Couldn't find quest entry for tracker {}", name);
+            SimpleQuests.LOGGER.error("Couldn't find quest entry for tracker {}", name);
         }
     }
 
     enum SubmitType {
         COMPLETE,
         PARTIAL,
+        PARTIAL_COMPLETE,
         NOTHING
     }
 }

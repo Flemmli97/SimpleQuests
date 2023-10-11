@@ -6,8 +6,8 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.types.Quest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
@@ -39,21 +39,21 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public boolean hasPerm(CommandSourceStack src, String perm, boolean adminCmd) {
-        if (SimpleQuests.ftbRanks && src.getEntity() instanceof ServerPlayer player) {
-            return FTBRanksAPI.getPermissionValue(player, perm).asBoolean().orElse(src.hasPermission(!adminCmd ? ConfigHandler.config.mainPermLevel : ConfigHandler.config.opPermLevel));
+        if (SimpleQuests.FTB_RANKS && src.getEntity() instanceof ServerPlayer player) {
+            return FTBRanksAPI.getPermissionValue(player, perm).asBoolean().orElse(src.hasPermission(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel));
         }
-        return src.hasPermission(!adminCmd ? ConfigHandler.config.mainPermLevel : ConfigHandler.config.opPermLevel);
+        return src.hasPermission(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel);
     }
 
     @Override
     public boolean hasPerm(ServerPlayer player, String perm, boolean adminCmd) {
-        if (SimpleQuests.ftbRanks) {
-            return FTBRanksAPI.getPermissionValue(player, perm).asBoolean().orElse(player.hasPermissions(!adminCmd ? ConfigHandler.config.mainPermLevel : ConfigHandler.config.opPermLevel));
+        if (SimpleQuests.FTB_RANKS) {
+            return FTBRanksAPI.getPermissionValue(player, perm).asBoolean().orElse(player.hasPermissions(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel));
         }
-        return player.hasPermissions(!adminCmd ? ConfigHandler.config.mainPermLevel : ConfigHandler.config.opPermLevel);
+        return player.hasPermissions(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel);
     }
 
-    private static final int warpAmount = 4;
+    private static final int WRAP_AMOUNT = 4;
 
     @Override
     public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
@@ -61,7 +61,7 @@ public class LoaderImpl implements LoaderHandler {
             return List.of(new TranslatableComponent(entry.description()));
         //Forge clients do it already
         List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate());
-        if (all.size() < warpAmount || !NetworkHooks.isVanillaConnection(player.connection.connection))
+        if (all.size() < WRAP_AMOUNT || !NetworkHooks.isVanillaConnection(player.connection.connection))
             return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
         MutableComponent items = null;
@@ -75,9 +75,9 @@ public class LoaderImpl implements LoaderHandler {
             } else
                 items.append(new TextComponent(", ")).append(comp);
             i++;
-            if ((list.size() == 0 && i >= warpAmount - 1) || i >= warpAmount) {
+            if ((list.size() == 0 && i >= WRAP_AMOUNT - 1) || i >= WRAP_AMOUNT) {
                 if (list.size() == 0) {
-                    list.add(new TranslatableComponent(ConfigHandler.lang.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
+                    list.add(new TranslatableComponent(ConfigHandler.LANG.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;

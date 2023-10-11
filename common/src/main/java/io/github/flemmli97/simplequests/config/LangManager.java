@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +33,7 @@ public class LangManager {
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     @SuppressWarnings({"UnstableApiUsage"})
-    private static final Type mapType = new TypeToken<Map<String, String>>() {
+    private static final Type MAP_TYPE = new TypeToken<Map<String, String>>() {
     }.getType();
 
     private static final Map<String, String> DEFAULT_TRANSLATION = new LinkedHashMap<>();
@@ -148,13 +148,13 @@ public class LangManager {
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
-        this.reload(ConfigHandler.config.lang);
+        this.reload(ConfigHandler.CONFIG.lang);
     }
 
     public void reload(String lang) {
         try {
             FileReader reader = new FileReader(this.confDir.resolve(lang + ".json").toFile());
-            this.translation = GSON.fromJson(reader, mapType);
+            this.translation = GSON.fromJson(reader, MAP_TYPE);
             reader.close();
             //en_us is basically used as a default modifiable file
             if (lang.equals("en_us")) {
@@ -171,7 +171,7 @@ public class LangManager {
     }
 
     public String get(String key) {
-        return this.translation.getOrDefault(key, ConfigHandler.config.fallBackToEnLang ? DEFAULT_TRANSLATION.getOrDefault(key, key) : key);
+        return this.translation.getOrDefault(key, ConfigHandler.CONFIG.fallBackToEnLang ? DEFAULT_TRANSLATION.getOrDefault(key, key) : key);
     }
 
     private static void saveTo(File file, Map<String, String> translation) {

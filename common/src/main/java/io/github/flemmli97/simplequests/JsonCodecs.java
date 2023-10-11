@@ -17,6 +17,7 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
@@ -34,9 +35,9 @@ public class JsonCodecs {
     public static Codec<LocationPredicate> LOCATION_PREDICATE_CODEC = jsonCodecBuilder(LocationPredicate::serializeToJson, LocationPredicate::fromJson, "LocationPredicate");
     // The default BlockPos Codec writes to an array, this writes to a map of x, y, z
     public static Codec<BlockPos> BLOCK_POS_CODEC = RecordCodecBuilder.create((instance) ->
-            instance.group(Codec.INT.fieldOf("x").forGetter(d -> d.getX()),
-                    Codec.INT.fieldOf("y").forGetter(d -> d.getY()),
-                    Codec.INT.fieldOf("z").forGetter(d -> d.getZ())
+            instance.group(Codec.INT.fieldOf("x").forGetter(Vec3i::getX),
+                    Codec.INT.fieldOf("y").forGetter(Vec3i::getY),
+                    Codec.INT.fieldOf("z").forGetter(Vec3i::getZ)
             ).apply(instance, BlockPos::new));
 
     public static Codec<NumberProvider> NUMER_PROVIDER_CODEC = JsonCodecs.jsonCodecBuilder(GSON::toJsonTree, e -> GSON.fromJson(e, NumberProvider.class), "NumberProvider");

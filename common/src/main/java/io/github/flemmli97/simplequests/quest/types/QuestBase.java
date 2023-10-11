@@ -1,8 +1,11 @@
-package io.github.flemmli97.simplequests.quest;
+package io.github.flemmli97.simplequests.quest.types;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.api.QuestEntry;
+import io.github.flemmli97.simplequests.quest.ParseHelper;
+import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
@@ -10,13 +13,16 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class QuestBase implements Comparable<QuestBase> {
@@ -29,8 +35,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public final int repeatDelay, repeatDaily;
 
-    private final String questTaskString;
-    private final List<String> questTaskDesc;
+    protected final String questTaskString;
+    protected final List<String> questTaskDesc;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -66,6 +72,53 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             list.add(new TextComponent(" - ").append(e.getValue().translation(player)));
         }
         return list;
+    }
+
+    public static void runCommand(ServerPlayer player, String command) {
+        if (!command.isEmpty())
+            player.getServer().getCommands().performCommand(player.createCommandSourceStack().withPermission(4), command);
+    }
+
+    public static <B extends BuilderBase<B>> B of(Function<String, B> questBuilder,
+                                                  QuestCategory category, JsonObject obj) {
+        B questbuilder = questBuilder.apply(GsonHelper.getAsString(obj, "task"));
+        questbuilder.withCategory(category);
+        JsonElement descEl = obj.get("description");
+        if (descEl != null) {
+            if (descEl.isJsonPrimitive() && !descEl.getAsString().isEmpty())
+                questbuilder.addDescription(descEl.getAsString());
+            else if (descEl.isJsonArray()) {
+                descEl.getAsJsonArray().forEach(ea -> {
+                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
+                        questbuilder.addDescription(ea.getAsString());
+                    }
+                });
+            }
+        }
+        JsonElement e = obj.get("parent_id");
+        if (e != null) {
+            if (e.isJsonPrimitive() && !e.getAsString().isEmpty())
+                questbuilder.addParent(new ResourceLocation(e.getAsString()));
+            else if (e.isJsonArray()) {
+                e.getAsJsonArray().forEach(ea -> {
+                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
+                        questbuilder.addParent(new ResourceLocation(ea.getAsString()));
+                    }
+                });
+            }
+        }
+        if (GsonHelper.getAsBoolean(obj, "redo_parent", false))
+            questbuilder.setRedoParent();
+        if (GsonHelper.getAsBoolean(obj, "need_unlock", false))
+            questbuilder.needsUnlocking();
+        questbuilder.withIcon(ParseHelper.icon(obj, "icon", Items.PAPER));
+        questbuilder.setRepeatDelay(ParseHelper.tryParseTime(obj, "repeat_delay", 0));
+        questbuilder.setMaxDaily(GsonHelper.getAsInt(obj, "repeat_daily", 0));
+        questbuilder.withSortingNum(GsonHelper.getAsInt(obj, "sorting_id", 0));
+        if (GsonHelper.getAsBoolean(obj, "daily_quest", false))
+            questbuilder.setDailyQuest();
+        questbuilder.withUnlockCondition(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
+        return questbuilder;
     }
 
     public JsonObject serialize(boolean withId, boolean full) {
@@ -122,7 +175,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return new TranslatableComponent(this.questTaskString);
     }
 
-    public List<MutableComponent> getDescription() {
+    public List<MutableComponent> getDescription(ServerPlayer player) {
         return this.questTaskDesc.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
     }
 
@@ -152,7 +205,24 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         this.repeatDelayString = repeatDelayString;
     }
 
-    public abstract Quest resolveToQuest(ServerPlayer player, int idx);
+    /**
+     * The trigger required to complete this quest
+     */
+    public String submissionTrigger(ServerPlayer player, int idx) {
+        return "";
+    }
+
+    @Nullable
+    public abstract QuestBase resolveToQuest(ServerPlayer player, int idx);
+
+    public abstract ResourceLocation getLoot();
+
+    public abstract void onComplete(ServerPlayer player);
+
+    public void onReset(ServerPlayer player) {
+    }
+
+    public abstract Map<String, QuestEntry> resolveTasks(ServerPlayer player, int questIndex);
 
     public boolean isDynamic() {
         return false;

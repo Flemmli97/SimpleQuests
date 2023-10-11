@@ -3,7 +3,7 @@ package io.github.flemmli97.simplequests.player;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.IntTag;
@@ -50,7 +50,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
                 } else if (perc <= 0.7) {
                     form = ChatFormatting.GOLD;
                 }
-                return new TranslatableComponent(ConfigHandler.lang.get(FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+                return new TranslatableComponent(ConfigHandler.LANG.get(FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
             }
 
             @Override
@@ -95,7 +95,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
                 } else if (perc <= 0.7) {
                     form = ChatFormatting.GOLD;
                 }
-                return new TranslatableComponent(ConfigHandler.lang.get(KILL_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+                return new TranslatableComponent(ConfigHandler.LANG.get(KILL_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
             }
 
             @Override
@@ -139,7 +139,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
                 } else if (perc <= 0.7) {
                     form = ChatFormatting.GOLD;
                 }
-                return new TranslatableComponent(ConfigHandler.lang.get(CRAFTING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+                return new TranslatableComponent(ConfigHandler.LANG.get(CRAFTING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
             }
 
             @Override
@@ -184,14 +184,14 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
                 } else if (perc <= 0.7) {
                     form = ChatFormatting.GOLD;
                 }
-                return new TranslatableComponent(ConfigHandler.lang.get(BLOCK_INTERACT_PROGRESS), this.pos.size(), this.questEntry().amount()).withStyle(form);
+                return new TranslatableComponent(ConfigHandler.LANG.get(BLOCK_INTERACT_PROGRESS), this.pos.size(), this.questEntry().amount()).withStyle(form);
             }
 
             @Override
             public Tag save() {
                 ListTag list = new ListTag();
                 this.pos.forEach(pos -> list.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
-                        .getOrThrow(false, SimpleQuests.logger::error)));
+                        .getOrThrow(false, SimpleQuests.LOGGER::error)));
                 return list;
             }
 
@@ -199,7 +199,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             public void load(Tag tag) {
                 try {
                     ListTag list = (ListTag) tag;
-                    list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.logger::error)));
+                    list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.LOGGER::error)));
                 } catch (ClassCastException ignored) {
                 }
             }
@@ -233,7 +233,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
                 } else if (perc <= 0.7) {
                     form = ChatFormatting.GOLD;
                 }
-                return new TranslatableComponent(ConfigHandler.lang.get(ENTITY_INTERACT_PROGRESS), this.entities.size(), this.questEntry().amount()).withStyle(form);
+                return new TranslatableComponent(ConfigHandler.LANG.get(ENTITY_INTERACT_PROGRESS), this.entities.size(), this.questEntry().amount()).withStyle(form);
             }
 
             @Override
