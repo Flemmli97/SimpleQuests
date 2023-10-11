@@ -5,8 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
-import io.github.flemmli97.simplequests.quest.QuestEntryMultiImpl;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryMultiImpl;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class QuestEntryRegistry {
     public static QuestEntry deserialize(ResourceLocation res, JsonObject obj) {
         Codec<QuestEntry> d = MAP.get(res);
         if (d != null)
-            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuests.logger.error("Couldn't deserialize QuestEntry from json " + e));
+            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't deserialize QuestEntry from json " + e));
         throw new IllegalStateException("Missing entry for key " + res);
     }
 }

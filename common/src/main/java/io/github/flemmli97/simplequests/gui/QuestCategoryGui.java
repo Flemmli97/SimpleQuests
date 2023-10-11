@@ -55,7 +55,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return Component.translatable(ConfigHandler.lang.get("simplequests.gui.main"));
+                return Component.translatable(ConfigHandler.LANG.get("simplequests.gui.main"));
             }
         };
         player.openMenu(fac);
@@ -95,7 +95,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         for (int i = 0; i < 54; i++) {
             if (i == 8 && this.categories.size() > ENTRY_PER_PAGE) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(Component.translatable(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                close.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -119,14 +119,14 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
                 ItemStack stack = emptyFiller();
                 if (this.page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(Component.translatable(ConfigHandler.lang.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(Component.translatable(ConfigHandler.lang.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
@@ -165,7 +165,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         ResourceLocation id = new ResourceLocation(tag.getString("QuestCategory"));
         QuestCategory category = QuestsManager.instance().getQuestCategory(id);
         if (category == null) {
-            SimpleQuests.logger.error("No such category " + id);
+            SimpleQuests.LOGGER.error("No such category " + id);
             return false;
         }
         player.closeContainer();

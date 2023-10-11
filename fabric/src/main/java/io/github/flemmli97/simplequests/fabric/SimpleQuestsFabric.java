@@ -24,7 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class SimpleQuestsFabric implements ModInitializer {
 
-    public static Event<SimpleQuestAPI.OnQuestComplete> QUEST_COMPLETE = EventFactory.createArrayBacked(SimpleQuestAPI.OnQuestComplete.class,
+    public static final Event<SimpleQuestAPI.OnQuestComplete> QUEST_COMPLETE = EventFactory.createArrayBacked(SimpleQuestAPI.OnQuestComplete.class,
             listener -> (serverPlayer, trigger, quest, progress) -> {
                 for (SimpleQuestAPI.OnQuestComplete event : listener) {
                     if (!event.onComplete(serverPlayer, trigger, quest, progress))
@@ -41,8 +41,8 @@ public class SimpleQuestsFabric implements ModInitializer {
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();
         ConfigHandler.init();
-        SimpleQuests.permissionAPI = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
-        SimpleQuests.ftbRanks = FabricLoader.getInstance().isModLoaded("ftbranks");
+        SimpleQuests.PERMISSION_API = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
+        SimpleQuests.FTB_RANKS = FabricLoader.getInstance().isModLoaded("ftbranks");
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (player instanceof ServerPlayer serverPlayer)
                 SimpleQuests.onInteractEntity(serverPlayer, entity, hand);

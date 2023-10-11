@@ -2,8 +2,8 @@ package io.github.flemmli97.simplequests;
 
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.types.Quest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;

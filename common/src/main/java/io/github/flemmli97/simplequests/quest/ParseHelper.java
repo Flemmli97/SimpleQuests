@@ -90,7 +90,7 @@ public class ParseHelper {
             return stack;
         }
         ItemStack result = STACK_CODEC.parse(JsonOps.INSTANCE, element)
-                .resultOrPartial(SimpleQuests.logger::error).orElse(ItemStack.EMPTY);
+                .resultOrPartial(SimpleQuests.LOGGER::error).orElse(ItemStack.EMPTY);
         if (result.isEmpty())
             return new ItemStack(fallback);
         return result;
@@ -99,6 +99,6 @@ public class ParseHelper {
     public static Optional<JsonElement> writeItemStackToJson(ItemStack stack, Item defaultValue) {
         if (stack.getCount() == 1 && !stack.hasTag())
             return defaultValue != null && stack.getItem() == defaultValue ? Optional.empty() : Optional.of(new JsonPrimitive(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()));
-        return STACK_CODEC.encodeStart(JsonOps.INSTANCE, stack).resultOrPartial(SimpleQuests.logger::error);
+        return STACK_CODEC.encodeStart(JsonOps.INSTANCE, stack).resultOrPartial(SimpleQuests.LOGGER::error);
     }
 }
