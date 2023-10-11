@@ -2,17 +2,16 @@ package io.github.flemmli97.simplequests.player;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests.api.QuestCompletionState;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
-import io.github.flemmli97.simplequests.quest.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
-import io.github.flemmli97.simplequests.quest.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.quest.types.Quest;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -76,46 +74,46 @@ public class PlayerData {
     }
 
     public boolean acceptQuest(QuestBase quest, int subQuestIndex) {
-        Quest resolved = quest.resolveToQuest(this.player, subQuestIndex);
-        int maxConcurrent = resolved.category.getMaxConcurrentQuests();
+        int maxConcurrent = quest.category.getMaxConcurrentQuests();
         if (maxConcurrent > 0 && this.currentQuests.stream()
-                .filter(p -> !p.getQuest().isDailyQuest && (!resolved.category.sameCategoryOnly || p.getQuest().category == resolved.category)).toList().size() >= maxConcurrent) {
-            this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
+                .filter(p -> !p.getQuest().isDailyQuest && (!quest.category.sameCategoryOnly || p.getQuest().category == quest.category)).toList().size() >= maxConcurrent) {
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.active.full")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
-        if (this.isActive(resolved)) {
-            this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED));
+        if (this.isActive(quest)) {
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.active")).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         AcceptType type = this.canAcceptQuest(quest);
         if (type != AcceptType.ACCEPT) {
             if (type == AcceptType.DELAY)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey()), this.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(type.langKey()), this.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
             else
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(type.langKey())).withStyle(ChatFormatting.DARK_RED));
             return false;
         }
         QuestProgress prog = new QuestProgress(quest, this, subQuestIndex);
         this.currentQuests.add(prog);
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.accept"), resolved.getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
+        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.accept"), prog.subQuest().getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
         return true;
     }
 
-    public boolean submit(String trigger, boolean sendFailMessage) {
+    public Map<ResourceLocation, QuestCompletionState> submit(String trigger, boolean sendFailMessage) {
         if (this.currentQuests.isEmpty()) {
             if (sendFailMessage)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
-            return false;
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
+            return Map.of();
         }
-        boolean any = false;
+        Map<ResourceLocation, QuestCompletionState> completion = new HashMap<>();
         List<QuestProgress> completed = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
             switch (prog.submit(this.player, trigger)) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
-                    any = true;
+                    completion.put(prog.getQuest().id, QuestCompletionState.COMPLETE);
                 }
+                case PARTIAL_COMPLETE -> completion.put(prog.getQuest().id, QuestCompletionState.PARTIAL);
                 case PARTIAL -> this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 case NOTHING -> {
                     if (sendFailMessage)
@@ -124,37 +122,43 @@ public class PlayerData {
             }
         }
         this.currentQuests.removeAll(completed);
-        return any;
+        return completion;
     }
 
-    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
-        this.tryFullFill(clss, pred, onFullfill, "");
+    public <T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
+        return this.tryFullFill(clss, pred, onFullfill, "");
     }
 
-    public <T extends QuestEntry> void tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
+    public <T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> tryFullFill(Class<T> clss, SimpleQuestAPI.QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
+        Map<ResourceLocation, QuestCompletionState> completion = new HashMap<>();
         this.currentQuests.forEach(prog -> {
             Set<Pair<String, T>> fulfilled = prog.tryFullFill(clss, pred);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(p -> onFullfill.accept(prog, p));
             }
-            if (prog.tryComplete(this.getPlayer(), trigger)) {
+            QuestCompletionState state = prog.tryComplete(this.getPlayer(), trigger);
+            if (state == QuestCompletionState.COMPLETE) {
                 this.completeQuest(prog);
                 completed.add(prog);
+                completion.put(prog.getQuest().id, QuestCompletionState.COMPLETE);
+            } else if (state == QuestCompletionState.PARTIAL) {
+                completion.put(prog.getQuest().id, QuestCompletionState.PARTIAL);
             }
         });
         this.currentQuests.removeAll(completed);
+        return completion;
     }
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onFished(Collection<ItemStack> loot) {
         this.tryFullFill(QuestEntryImpls.FishingEntry.class, QuestProgress.createFishingPredicate(this.player, loot),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onInteractWith(Entity entity) {
@@ -162,44 +166,48 @@ public class PlayerData {
             return;
         this.interactionCooldown = 2;
         this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onBlockInteract(BlockPos pos, boolean use) {
         this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     public void onItemCrafted(ItemStack stack, int amount, String trigger) {
         this.tryFullFill(QuestEntryImpls.CraftingEntry.class, QuestProgress.createCraftingPredicate(this.player, stack, amount),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
     }
 
     private void completeQuest(QuestProgress prog) {
-        LootTable lootTable = this.player.getServer().getLootTables().get(prog.getLoot());
-        CriteriaTriggers.GENERATE_LOOT.trigger(this.player, prog.getLoot());
-        LootContext.Builder builder = new LootContext.Builder(this.player.getLevel())
-                .withParameter(LootContextParams.ORIGIN, this.player.position())
-                .withParameter(LootContextParams.DAMAGE_SOURCE, this.player.damageSources().magic())
-                .withParameter(LootContextParams.THIS_ENTITY, this.player)
-                .withLuck(this.player.getLuck());
-        List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
-        loot.forEach(stack -> {
-            boolean bl = this.player.getInventory().add(stack);
-            if (!bl || !stack.isEmpty()) {
-                ItemEntity itemEntity = this.player.drop(stack, false);
-                if (itemEntity != null) {
-                    itemEntity.setNoPickUpDelay();
-                    itemEntity.setThrower(this.player.getUUID());
+        ResourceLocation lootID = prog.getQuest().getLoot();
+        if (lootID != null) {
+            LootTable lootTable = this.player.getServer().getLootTables().get(lootID);
+            CriteriaTriggers.GENERATE_LOOT.trigger(this.player, lootID);
+            LootContext.Builder builder = new LootContext.Builder(this.player.getLevel())
+                    .withParameter(LootContextParams.ORIGIN, this.player.position())
+                    .withParameter(LootContextParams.DAMAGE_SOURCE, this.player.damageSources().magic())
+                    .withParameter(LootContextParams.THIS_ENTITY, this.player)
+                    .withLuck(this.player.getLuck());
+            List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
+            loot.forEach(stack -> {
+                boolean bl = this.player.getInventory().add(stack);
+                if (!bl || !stack.isEmpty()) {
+                    ItemEntity itemEntity = this.player.drop(stack, false);
+                    if (itemEntity != null) {
+                        itemEntity.setNoPickUpDelay();
+                        itemEntity.setThrower(this.player.getUUID());
+                    }
                 }
-            }
+            });
+        }
+        prog.getQuest().onComplete(this.player);
+        prog.getCompletionID().forEach(id -> {
+            this.cooldownTracker.put(id, this.player.level.getGameTime());
+            this.unlockTracker.add(id);
         });
-        if (!prog.getCommandToRun().isEmpty())
-            this.player.getServer().getCommands().performPrefixedCommand(this.player.createCommandSourceStack(), prog.getCommandToRun());
-        this.cooldownTracker.put(prog.getCompletionID(), this.player.level.getGameTime());
-        this.unlockTracker.add(prog.getCompletionID());
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.finish"), prog.getQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
+        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.finish"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
                 Quest quest = QuestsManager.instance().getActualQuests(res);
@@ -216,7 +224,7 @@ public class PlayerData {
     public void reset(ResourceLocation res, boolean forced, boolean sendMsg) {
         if (this.currentQuests.isEmpty()) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED));
             return;
         }
         QuestProgress prog = null;
@@ -228,18 +236,19 @@ public class PlayerData {
         }
         if (prog == null) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset.notfound"), res).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.reset.notfound"), res).withStyle(ChatFormatting.DARK_RED));
             return;
         }
         if (!forced && this.resetTick == -1) {
             this.resetTick = this.player.level.getGameTime();
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.reset.confirm")).withStyle(ChatFormatting.DARK_RED));
             return;
         } else if (forced || this.player.level.getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.reset"), prog.getQuest().getTask()).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.reset"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
+            prog.getQuest().onReset(this.player);
         }
         this.resetTick = -1;
     }
@@ -249,7 +258,7 @@ public class PlayerData {
     }
 
     public boolean isActive(QuestBase quest) {
-        return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest.id) || quest instanceof CompositeQuest comp && comp.getCompositeQuests().contains(prog.getQuest().id));
+        return this.isActive(quest.id);
     }
 
     public boolean isActive(ResourceLocation quest) {
@@ -288,7 +297,7 @@ public class PlayerData {
             this.tickables.add(progress);
     }
 
-    public void removeQuestProgress(QuestProgress progress) {
+    public void removeTickableQuestProgress(QuestProgress progress) {
         this.tickables.remove(progress);
     }
 
@@ -306,9 +315,9 @@ public class PlayerData {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.lang.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
             }
-            if (prog.tryComplete(this.getPlayer(), trigger)) {
+            if (prog.tryComplete(this.getPlayer(), trigger) == QuestCompletionState.COMPLETE) {
                 this.completeQuest(prog);
                 completed.add(prog);
                 return true;
@@ -335,7 +344,7 @@ public class PlayerData {
             List<Quest> daily = QuestsManager.instance().getDailyQuests().stream().toList();
             this.questRandom.setSeed(this.dailySeed);
             Collections.shuffle(daily, this.questRandom);
-            int amount = ConfigHandler.config.dailyQuestAmount == -1 ? daily.size() : Mth.clamp(ConfigHandler.config.dailyQuestAmount, 0, daily.size());
+            int amount = ConfigHandler.CONFIG.dailyQuestAmount == -1 ? daily.size() : Mth.clamp(ConfigHandler.CONFIG.dailyQuestAmount, 0, daily.size());
             for (int i = 0; i < amount; i++) {
                 Quest quest = daily.get(i);
                 this.currentQuests.add(new QuestProgress(quest, this, 0));
@@ -411,6 +420,7 @@ public class PlayerData {
     }
 
     public void resetAll() {
+        this.currentQuests.forEach(p -> p.getQuest().onReset(this.player));
         this.currentQuests.clear();
         this.cooldownTracker.clear();
         this.unlockTracker.clear();

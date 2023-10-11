@@ -9,9 +9,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
+import io.github.flemmli97.simplequests.quest.types.Quest;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -69,10 +69,10 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                         throw new IllegalStateException("Duplicate data file ignored with ID " + id);
                     }
                 } else {
-                    SimpleQuests.logger.error("Couldn't load data file {} from {} as it's null or empty", id, fileRes);
+                    SimpleQuests.LOGGER.error("Couldn't load data file {} from {} as it's null or empty", id, fileRes);
                 }
             } catch (IllegalArgumentException | IOException | JsonParseException e) {
-                SimpleQuests.logger.error("Couldn't parse data file {} from {}", new Object[]{id, fileRes, e});
+                SimpleQuests.LOGGER.error("Couldn't parse data file {} from {}", new Object[]{id, fileRes, e});
             }
         });
         return map;

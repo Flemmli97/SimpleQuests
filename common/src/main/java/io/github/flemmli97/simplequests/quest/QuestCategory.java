@@ -45,7 +45,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
 
     public int getMaxConcurrentQuests() {
         if (this.maxConcurrentQuests == -1)
-            return ConfigHandler.config.maxConcurrentQuest;
+            return ConfigHandler.CONFIG.maxConcurrentQuest;
         return this.maxConcurrentQuests;
     }
 

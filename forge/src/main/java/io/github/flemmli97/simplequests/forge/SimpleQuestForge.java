@@ -35,7 +35,7 @@ public class SimpleQuestForge {
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();
         ConfigHandler.init();
-        SimpleQuests.ftbRanks = ModList.get().isLoaded("ftbranks");
+        SimpleQuests.FTB_RANKS = ModList.get().isLoaded("ftbranks");
     }
 
     public static void addReload(AddReloadListenerEvent event) {

@@ -6,14 +6,15 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.Quest;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
+import io.github.flemmli97.simplequests.quest.types.Quest;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class SimpleQuestAPI {
@@ -24,9 +25,10 @@ public class SimpleQuestAPI {
      * @param clss       Class of a {@link QuestEntry} that should get this trigger
      * @param pred       Predicate for if the QuestEntry should be fullfilled
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
+     * @return The completed quests
      */
-    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
-        PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill);
+    public static <T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
+        return PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill);
     }
 
     /**
@@ -46,8 +48,9 @@ public class SimpleQuestAPI {
      * @param trigger         String representing a trigger for what quests should be completed.
      *                        Quests without a trigger specified check for empty strings
      * @param sendFailMessage If true and player has no active quests notifies the player
+     * @return The quests that got partially or fully completed
      */
-    public static <T extends QuestEntry> boolean submit(ServerPlayer serverPlayer, @Nonnull String trigger, boolean sendFailMessage) {
+    public static <T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> submit(ServerPlayer serverPlayer, @Nonnull String trigger, boolean sendFailMessage) {
         return PlayerData.get(serverPlayer).submit(trigger, sendFailMessage);
     }
 

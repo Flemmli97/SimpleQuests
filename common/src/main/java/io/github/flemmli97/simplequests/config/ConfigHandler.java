@@ -7,17 +7,17 @@ public class ConfigHandler {
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
-    public static Config config;
-    public static LangManager lang;
+    public static Config CONFIG;
+    public static LangManager LANG;
 
     public static void init() {
-        config = new Config();
-        lang = new LangManager();
+        CONFIG = new Config();
+        LANG = new LangManager();
         reloadConfigs();
     }
 
     public static void reloadConfigs() {
-        config.load();
-        lang.reload(ConfigHandler.config.lang);
+        CONFIG.load();
+        LANG.reload(ConfigHandler.CONFIG.lang);
     }
 }

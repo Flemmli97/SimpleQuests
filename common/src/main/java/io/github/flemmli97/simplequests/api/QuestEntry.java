@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests.api;
 
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,8 +45,11 @@ public interface QuestEntry {
     /**
      * Get the actual QuestEntry for the given player when the player accepts a quest with this entry
      * In most cases return self
+     *
+     * @param player Player that accepted the quest
+     * @param base   The quest containing this entry
      */
-    default QuestEntry resolve(ServerPlayer player) {
+    default QuestEntry resolve(ServerPlayer player, QuestBase base) {
         return this;
     }
 }

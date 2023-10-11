@@ -1,11 +1,11 @@
 package io.github.flemmli97.simplequests.datapack;
 
 import com.google.gson.JsonObject;
-import io.github.flemmli97.simplequests.quest.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.Quest;
-import io.github.flemmli97.simplequests.quest.QuestBase;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
-import io.github.flemmli97.simplequests.quest.SequentialQuest;
+import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
+import io.github.flemmli97.simplequests.quest.types.Quest;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
+import io.github.flemmli97.simplequests.quest.types.SequentialQuest;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class QuestBaseRegistry {
         throw new IllegalStateException("Missing entry for key " + type);
     }
 
-    interface QuestReader {
+    public interface QuestReader {
 
         QuestBase fromJson(ResourceLocation id, QuestCategory category, JsonObject obj);
 
