@@ -91,7 +91,8 @@ public class QuestProgress {
         return (name, entry, prog) -> {
             ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.interactionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createEntityInteractTracker(entry));
             if (!interacted.isApplicable(entity.getUUID())) {
-                player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                if (!prog.getQuest().category.isSilent)
+                    player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                 return false;
             }
             if (entry.check(player, entity)) {
@@ -105,7 +106,8 @@ public class QuestProgress {
         return (name, entry, prog) -> {
             ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry));
             if (!interacted.isApplicable(pos)) {
-                player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                if (!prog.getQuest().category.isSilent)
+                    player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                 return false;
             }
             if (entry.check(player, pos, use)) {

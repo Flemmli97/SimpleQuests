@@ -52,7 +52,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<ItemPredicate, Pair<ItemPredicate, String>> val = this.predicate.get(ctx.getRandom().nextInt(this.predicate.size()));
             return new QuestEntryImpls.ItemEntry(val.map(e -> e, Pair::getFirst),
                     this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond), this.consumeItems);
@@ -84,7 +84,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<EntityPredicate, Pair<EntityPredicate, String>> val = this.predicate.get(ctx.getRandom().nextInt(this.predicate.size()));
             return new QuestEntryImpls.KillEntry(val.map(e -> e, Pair::getFirst),
                     this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond));
@@ -113,7 +113,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             return new QuestEntryImpls.XPEntry(this.amount.getInt(ctx));
         }
     }
@@ -143,7 +143,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             return new QuestEntryImpls.AdvancementEntry(this.advancements.get(ctx.getRandom().nextInt(this.advancements.size())), this.reset);
         }
     }
@@ -173,7 +173,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<BlockPos, Pair<BlockPos, String>> val = this.positions.get(ctx.getRandom().nextInt(this.positions.size()));
             return new QuestEntryImpls.PositionEntry(val.map(e -> e, Pair::getFirst), this.minDist, val.map(e -> "", Pair::getSecond));
         }
@@ -201,7 +201,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<LocationPredicate, String> val = this.locations.get(ctx.getRandom().nextInt(this.locations.size()));
             return new QuestEntryImpls.LocationEntry(val.getFirst(), val.getSecond());
         }
@@ -244,7 +244,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
             Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(EntityPredicate.ANY, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
             return new QuestEntryImpls.EntityInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.consume, this.taskDescription, val.getSecond(), entity.getSecond());
@@ -294,7 +294,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
             Pair<BlockPredicate, String> entity = this.blockPredicates.isEmpty() ? Pair.of(BlockPredicate.ANY, "") : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
             while (val.getFirst() == ItemPredicate.ANY && entity.getFirst() == BlockPredicate.ANY) {
@@ -338,7 +338,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
             Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(EntityPredicate.ANY, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
             return new QuestEntryImpls.CraftingEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.taskDescription, val.getSecond(), entity.getSecond());
@@ -378,7 +378,7 @@ public class QuestEntryMultiImpl {
 
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
-            LootContext ctx = EntityPredicate.createContext(player, player);
+            LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
             Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(EntityPredicate.ANY, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
             return new QuestEntryImpls.FishingEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.taskDescription, val.getSecond(), entity.getSecond());
