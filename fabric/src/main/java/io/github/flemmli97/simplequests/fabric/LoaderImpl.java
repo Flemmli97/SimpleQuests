@@ -5,6 +5,8 @@ import io.github.flemmli97.simplequests.LoaderHandler;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.fabric.client.FabricClientHandler;
+import io.github.flemmli97.simplequests.network.SQPacket;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.types.Quest;
@@ -82,7 +84,7 @@ public class LoaderImpl implements LoaderHandler {
             i++;
             if ((list.size() == 0 && i >= WRAP_AMOUNT - 1) || i >= WRAP_AMOUNT) {
                 if (list.size() == 0) {
-                    list.add(new TranslatableComponent(ConfigHandler.LANG.get(entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
+                    list.add(new TranslatableComponent(ConfigHandler.LANG.get(player, entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;
@@ -101,5 +103,10 @@ public class LoaderImpl implements LoaderHandler {
     @Override
     public boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress) {
         return SimpleQuestsFabric.QUEST_COMPLETE.invoker().onComplete(player, trigger, quest, progress);
+    }
+
+    @Override
+    public void sendToServer(SQPacket packet) {
+        FabricClientHandler.sendToServer(packet);
     }
 }

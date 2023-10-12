@@ -1,5 +1,6 @@
 package io.github.flemmli97.simplequests.config;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,6 +8,7 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -97,7 +99,7 @@ public class LangManager {
         DEFAULT_TRANSLATION.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
         DEFAULT_TRANSLATION.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
 
-        DEFAULT_TRANSLATION.put("quest.progress", "%1$s - %2$s");
+        DEFAULT_TRANSLATION.put("simplequest.quest.progress", "%1$s - %2$s");
         DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.KILL_PROGRESS, "Killed: %1$s/%2$s");
         DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
         DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
@@ -170,8 +172,15 @@ public class LangManager {
         }
     }
 
-    public String get(String key) {
+    public String get(ServerPlayer player, String key) {
+        // If mod is on client let client handle translation
+        if (player != null && PlayerData.get(player).hasClient)
+            return key;
         return this.translation.getOrDefault(key, ConfigHandler.CONFIG.fallBackToEnLang ? DEFAULT_TRANSLATION.getOrDefault(key, key) : key);
+    }
+
+    public static Map<String, String> getDefaultTranslation() {
+        return ImmutableMap.copyOf(DEFAULT_TRANSLATION);
     }
 
     private static void saveTo(File file, Map<String, String> translation) {

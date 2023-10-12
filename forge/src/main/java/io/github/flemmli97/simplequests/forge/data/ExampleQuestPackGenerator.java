@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests.forge.test;
+package io.github.flemmli97.simplequests.forge.data;
 
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
@@ -50,7 +50,19 @@ public class ExampleQuestPackGenerator extends QuestProvider {
     private static final String PACK_META = "{\"pack\": {\"pack_format\": 9,\"description\": [{\"text\":\"Example Quests\",\"color\":\"gold\"}]}}";
 
     public ExampleQuestPackGenerator(DataGenerator gen, boolean full) {
-        super(gen, full);
+        super(createGenerator(gen), full);
+    }
+
+    /**
+     * Reroute to Example Questpack folder
+     */
+    private static DataGenerator createGenerator(DataGenerator old) {
+        String path = System.getProperty("ExampleGenPath");
+        if (path.isEmpty())
+            return old;
+        DataGenerator newGen = new DataGenerator(Path.of(path), old.getInputFolders());
+        old.getProviders().forEach(newGen::addProvider);
+        return newGen;
     }
 
     @SubscribeEvent
@@ -58,6 +70,9 @@ public class ExampleQuestPackGenerator extends QuestProvider {
         DataGenerator data = event.getGenerator();
         if (event.includeServer()) {
             data.addProvider(new ExampleQuestPackGenerator(data, true));
+        }
+        if (event.includeClient()) {
+            data.addProvider(new LangGen(data));
         }
     }
 

@@ -6,5 +6,6 @@
   "max_concurrent_quests": -1,
   "sorting_id": 0,
   "selectable": true,
-  "is_visible": true
+  "is_visible": true,
+  "is_silent": false
 }

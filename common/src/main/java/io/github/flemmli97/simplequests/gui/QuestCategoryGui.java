@@ -47,7 +47,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
             throw new IllegalStateException("This is a server side container");
     }
 
-    public static void openGui(Player player) {
+    public static void openGui(ServerPlayer player) {
         MenuProvider fac = new MenuProvider() {
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
@@ -56,7 +56,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return new TranslatableComponent(ConfigHandler.LANG.get("simplequests.gui.main"));
+                return new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.gui.main"));
             }
         };
         player.openMenu(fac);
@@ -96,7 +96,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         for (int i = 0; i < 54; i++) {
             if (i == 8 && this.categories.size() > ENTRY_PER_PAGE) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                close.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -120,14 +120,14 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
                 ItemStack stack = emptyFiller();
                 if (this.page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get(this.player, "simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get(this.player, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)

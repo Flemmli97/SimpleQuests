@@ -75,7 +75,7 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "category");
         QuestCategory category = QuestsManager.instance().getQuestCategory(id);
         if (category == null) {
-            ctx.getSource().sendFailure(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.category.noexist"), id));
+            ctx.getSource().sendFailure(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.category.noexist"), id));
             return 0;
         }
         QuestGui.openGui(player, category, false, 0);
@@ -87,11 +87,11 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         QuestBase base = QuestsManager.instance().getAllQuests().get(id);
         if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.noexist"), id), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.noexist"), id), false);
             return 0;
         }
         if (base instanceof CompositeQuest) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.is_selection"), id), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.is_selection"), id), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(base, 0))
@@ -104,11 +104,11 @@ public class QuestCommand {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
         QuestBase base = QuestsManager.instance().getAllQuests().get(id);
         if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.noexist"), id), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.noexist"), id), false);
             return 0;
         }
         if (!(base instanceof CompositeQuest composite)) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.composite.noexist"), id), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.composite.noexist"), id), false);
             return 0;
         }
         ResourceLocation select = ResourceLocationArgument.getId(ctx, "select");
@@ -121,7 +121,7 @@ public class QuestCommand {
         }
         QuestBase quest = composite.resolveToQuest(player, i);
         if (quest == null) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.quest.composite.resolve.none"), composite, select), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.quest.composite.resolve.none"), composite, select), false);
             return 0;
         }
         if (PlayerData.get(player).acceptQuest(composite, i))
@@ -136,7 +136,7 @@ public class QuestCommand {
         if (!quests.isEmpty()) {
             ctx.getSource().sendSuccess(new TextComponent("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.current"), prog.subQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
+                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.current"), prog.subQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
                 prog.subQuest().getDescription(player).forEach(c -> ctx.getSource().sendSuccess(c, false));
                 List<String> finished = prog.finishedTasks();
                 prog.getQuestEntries().entrySet().stream()
@@ -146,12 +146,12 @@ public class QuestCommand {
                             if (progress == null)
                                 ctx.getSource().sendSuccess(e.getValue().translation(player).withStyle(ChatFormatting.RED), false);
                             else
-                                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
+                                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequest.quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
                         });
             });
             return Command.SINGLE_SUCCESS;
         } else {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
         }
         return 0;
     }
@@ -173,7 +173,7 @@ public class QuestCommand {
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
         ConfigHandler.reloadConfigs();
-        ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.reload")), true);
+        ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(null, "simplequests.reload")), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -188,7 +188,7 @@ public class QuestCommand {
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetCooldown();
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(null, "simplequests.reset.cooldown"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
             i++;
         }
         return i;
@@ -198,7 +198,7 @@ public class QuestCommand {
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player).resetAll();
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(null, "simplequests.reset.all"), player.getName()).withStyle(ChatFormatting.DARK_RED), true);
             i++;
         }
         return i;
@@ -207,14 +207,14 @@ public class QuestCommand {
     private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
         if (!QuestsManager.instance().getAllQuests().containsKey(res)) {
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.unlock.fail"), res), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(null, "simplequests.unlock.fail"), res), true);
             return 0;
         }
         int i = 0;
         for (ServerPlayer player : EntityArgument.getPlayers(ctx, "target")) {
             PlayerData.get(player)
                     .unlockQuest(res);
-            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get("simplequests.unlock"), player.getName(), res), true);
+            ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(null, "simplequests.unlock"), player.getName(), res), true);
             i++;
         }
         return i;
