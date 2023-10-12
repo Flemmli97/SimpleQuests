@@ -58,7 +58,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
      */
     private static DataGenerator createGenerator(DataGenerator old) {
         String path = System.getProperty("ExampleGenPath");
-        if (path.isEmpty())
+        if (path == null || path.isEmpty())
             return old;
         DataGenerator newGen = new DataGenerator(Path.of(path), old.getInputFolders());
         old.getProviders().forEach(newGen::addProvider);
