@@ -110,7 +110,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                             if (questCategory == null)
                                 throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
                         }
-                        ResourceLocation questType = new ResourceLocation(obj.get(QuestBase.TYPE_ID).getAsString());
+                        ResourceLocation questType = new ResourceLocation(GsonHelper.getAsString(obj, QuestBase.TYPE_ID, Quest.ID.toString()));
                         QuestBase base = QuestBaseRegistry.deserialize(questType, res, questCategory, obj);
                         map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
                                 .put(res, base);
