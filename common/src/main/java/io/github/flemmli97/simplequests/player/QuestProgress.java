@@ -152,8 +152,16 @@ public class QuestProgress {
         return this.base;
     }
 
-    public QuestBase subQuest() {
-        return this.quest;
+    public MutableComponent getTask(ServerPlayer player) {
+        return this.getQuest().getTask(player, this.questIndex);
+    }
+
+    public MutableComponent formattedQuest(ServerPlayer player) {
+        return this.getQuest().getFormattedWith(player, this.questIndex, this.getQuestEntries());
+    }
+
+    public List<MutableComponent> getDescription(ServerPlayer player) {
+        return this.getQuest().getDescription(player, this.questIndex);
     }
 
     public Collection<ResourceLocation> getCompletionID() {

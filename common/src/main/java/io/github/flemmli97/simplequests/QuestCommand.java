@@ -136,8 +136,8 @@ public class QuestCommand {
         if (!quests.isEmpty()) {
             ctx.getSource().sendSuccess(new TextComponent("====================").withStyle(ChatFormatting.GREEN), false);
             quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.current"), prog.subQuest().getTask()).withStyle(ChatFormatting.GOLD), false);
-                prog.subQuest().getDescription(player).forEach(c -> ctx.getSource().sendSuccess(c, false));
+                ctx.getSource().sendSuccess(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.current"), prog.getTask(player)).withStyle(ChatFormatting.GOLD), false);
+                prog.getDescription(player).forEach(c -> ctx.getSource().sendSuccess(c, false));
                 List<String> finished = prog.finishedTasks();
                 prog.getQuestEntries().entrySet().stream()
                         .filter(e -> !finished.contains(e.getKey()))

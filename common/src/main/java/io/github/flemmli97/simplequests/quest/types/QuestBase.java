@@ -171,16 +171,48 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return this.unlockCondition.matches(player, player);
     }
 
-    public MutableComponent getTask() {
-        return new TranslatableComponent(this.questTaskString);
+    public final MutableComponent getTask(ServerPlayer player) {
+        return this.getTask(player, -1);
     }
 
-    public List<MutableComponent> getDescription(ServerPlayer player) {
-        return this.questTaskDesc.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
+    /**
+     * The quest task to do. Delegates to subquests if possible
+     *
+     * @param idx If -1 should return itself
+     */
+    public MutableComponent getTask(ServerPlayer player, int idx) {
+        QuestBase resolved = this.resolveToQuest(player, idx);
+        if (resolved == null)
+            return new TranslatableComponent(this.questTaskString);
+        return resolved.getTask(player);
     }
 
-    public MutableComponent getFormattedWith(ServerPlayer player, Map<String, QuestEntry> resolvedTasks, ChatFormatting... subFormatting) {
-        MutableComponent main = new TextComponent("").append(this.getTask().withStyle(ChatFormatting.LIGHT_PURPLE));
+    public final List<MutableComponent> getDescription(ServerPlayer player) {
+        return this.getDescription(player, -1);
+    }
+
+    /**
+     * The quest description. Delegates to subquests if possible
+     *
+     * @param idx If -1 should return itself
+     */
+    public List<MutableComponent> getDescription(ServerPlayer player, int idx) {
+        QuestBase resolved = this.resolveToQuest(player, idx);
+        if (resolved == null)
+            return this.questTaskDesc.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
+        return resolved.getDescription(player);
+    }
+
+    /**
+     * The formatted quest with the given tasks. Delegates to subquests if possible
+     *
+     * @param idx If -1 should return itself
+     */
+    public MutableComponent getFormattedWith(ServerPlayer player, int idx, Map<String, QuestEntry> resolvedTasks, ChatFormatting... subFormatting) {
+        QuestBase resolved = this.resolveToQuest(player, idx);
+        if (resolved != null)
+            return this.getFormattedWith(player, -1, resolvedTasks, subFormatting);
+        MutableComponent main = new TextComponent("").append(this.getTask(player, idx).withStyle(ChatFormatting.LIGHT_PURPLE));
         for (MutableComponent tasks : getFormattedTasks(player, resolvedTasks)) {
             if (subFormatting != null)
                 main.append("\n").append(tasks.withStyle(subFormatting));
