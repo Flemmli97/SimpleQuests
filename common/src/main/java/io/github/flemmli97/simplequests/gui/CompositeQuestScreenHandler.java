@@ -69,7 +69,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     private ItemStack ofQuest(Quest quest, int idx, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         ItemStack stack = quest.getIcon();
-        stack.setHoverName(quest.getTask().setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.setHoverName(quest.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         ListTag lore = new ListTag();
         quest.getDescription(player).forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(c.getStyle().withItalic(false))))));
         if (data.isActive(quest)) {
