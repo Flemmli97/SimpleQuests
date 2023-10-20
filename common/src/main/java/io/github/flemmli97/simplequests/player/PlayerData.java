@@ -12,6 +12,7 @@ import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.types.Quest;
 import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -101,7 +102,7 @@ public class PlayerData {
         QuestProgress prog = new QuestProgress(quest, this, subQuestIndex);
         this.currentQuests.add(prog);
         if (!prog.getQuest().category.isSilent)
-            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.accept"), prog.subQuest().getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.accept"), prog.formattedQuest(this.player)).withStyle(ChatFormatting.DARK_GREEN));
         return true;
     }
 
@@ -231,7 +232,7 @@ public class PlayerData {
         });
         this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getQuest().category.isSilent)
-            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.finish"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.finish"), prog.getTask(this.player)).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
                 Quest quest = QuestsManager.instance().getActualQuests(res);
@@ -270,7 +271,7 @@ public class PlayerData {
             return;
         } else if (forced || this.player.level().getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.reset"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.reset"), prog.getTask(this.player)).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
             prog.getQuest().onReset(this.player);
         }
