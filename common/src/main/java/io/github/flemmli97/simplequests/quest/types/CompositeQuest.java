@@ -68,10 +68,6 @@ public class CompositeQuest extends QuestBase {
     }
 
     @Override
-    public void onComplete(ServerPlayer player) {
-    }
-
-    @Override
     public String submissionTrigger(ServerPlayer player, int idx) {
         if (idx < 0 || idx >= this.compositeQuests.size())
             return super.submissionTrigger(player, idx);

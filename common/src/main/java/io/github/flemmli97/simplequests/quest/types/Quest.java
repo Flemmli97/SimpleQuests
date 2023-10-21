@@ -116,6 +116,7 @@ public class Quest extends QuestBase {
 
     @Override
     public void onComplete(ServerPlayer player) {
+        super.onComplete(player);
         QuestBase.runCommand(player, this.command);
     }
 
