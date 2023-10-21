@@ -328,10 +328,9 @@ public class QuestProgress {
     public void load(CompoundTag tag, ServerPlayer player) {
         if (tag.contains("DynamicQuest")) {
             JsonElement e = NbtOps.INSTANCE.convertTo(JsonCodecs.NullableJsonOps.INSTANCE, tag.getCompound("DynamicQuest"));
-            if (e instanceof JsonObject obj) {
-                this.base = QuestBaseRegistry.deserializeFull(obj);
-            }
-            if (this.base == null) {
+            try {
+                this.base = QuestBaseRegistry.deserializeFull(e.getAsJsonObject());
+            } catch (Exception ex) {
                 SimpleQuests.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
                 throw new IllegalStateException();
             }
