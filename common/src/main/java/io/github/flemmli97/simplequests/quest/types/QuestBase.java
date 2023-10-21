@@ -7,6 +7,7 @@ import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.quest.ParseHelper;
 import io.github.flemmli97.simplequests.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -14,8 +15,14 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -249,7 +256,29 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public abstract ResourceLocation getLoot();
 
-    public abstract void onComplete(ServerPlayer player);
+    public void onComplete(ServerPlayer player) {
+        ResourceLocation lootID = this.getLoot();
+        if (lootID != null) {
+            LootTable lootTable = player.getServer().getLootTables().get(lootID);
+            CriteriaTriggers.GENERATE_LOOT.trigger(player, lootID);
+            LootContext.Builder builder = new LootContext.Builder(player.getLevel())
+                    .withParameter(LootContextParams.ORIGIN, player.position())
+                    .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.MAGIC)
+                    .withParameter(LootContextParams.THIS_ENTITY, player)
+                    .withLuck(player.getLuck());
+            List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
+            loot.forEach(stack -> {
+                boolean bl = player.getInventory().add(stack);
+                if (!bl || !stack.isEmpty()) {
+                    ItemEntity itemEntity = player.drop(stack, false);
+                    if (itemEntity != null) {
+                        itemEntity.setNoPickUpDelay();
+                        itemEntity.setOwner(player.getUUID());
+                    }
+                }
+            });
+        }
+    }
 
     public void onReset(ServerPlayer player) {
     }

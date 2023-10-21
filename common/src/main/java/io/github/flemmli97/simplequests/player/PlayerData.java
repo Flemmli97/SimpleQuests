@@ -13,7 +13,6 @@ import io.github.flemmli97.simplequests.quest.types.Quest;
 import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -24,15 +23,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -204,27 +197,6 @@ public class PlayerData {
     }
 
     private void completeQuest(QuestProgress prog) {
-        ResourceLocation lootID = prog.getQuest().getLoot();
-        if (lootID != null) {
-            LootTable lootTable = this.player.getServer().getLootTables().get(lootID);
-            CriteriaTriggers.GENERATE_LOOT.trigger(this.player, lootID);
-            LootContext.Builder builder = new LootContext.Builder(this.player.getLevel())
-                    .withParameter(LootContextParams.ORIGIN, this.player.position())
-                    .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.MAGIC)
-                    .withParameter(LootContextParams.THIS_ENTITY, this.player)
-                    .withLuck(this.player.getLuck());
-            List<ItemStack> loot = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
-            loot.forEach(stack -> {
-                boolean bl = this.player.getInventory().add(stack);
-                if (!bl || !stack.isEmpty()) {
-                    ItemEntity itemEntity = this.player.drop(stack, false);
-                    if (itemEntity != null) {
-                        itemEntity.setNoPickUpDelay();
-                        itemEntity.setOwner(this.player.getUUID());
-                    }
-                }
-            });
-        }
         prog.getQuest().onComplete(this.player);
         prog.getCompletionID().forEach(id -> {
             this.cooldownTracker.put(id, this.player.level.getGameTime());
