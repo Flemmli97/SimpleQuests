@@ -34,7 +34,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return Component.translatable(ConfigHandler.LANG.get(guiKey));
+                return Component.translatable(ConfigHandler.LANG.get(player, guiKey));
             }
         };
         player.openMenu(fac);
@@ -43,16 +43,18 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
+        if (!(player instanceof ServerPlayer serverPlayer))
+            return;
         for (int i = 0; i < 9; i++) {
             switch (i) {
                 case 3 -> {
                     ItemStack yes = new ItemStack(Items.GREEN_WOOL);
-                    yes.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.yes")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    yes.setHoverName(Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.yes")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, yes);
                 }
                 case 5 -> {
                     ItemStack no = new ItemStack(Items.RED_WOOL);
-                    no.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.no")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    no.setHoverName(Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.no")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, no);
                 }
                 default -> inv.updateStack(i, QuestGui.emptyFiller());

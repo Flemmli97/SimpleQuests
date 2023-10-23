@@ -91,7 +91,7 @@ public class QuestProgress {
             ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.interactionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createEntityInteractTracker(entry));
             if (!interacted.isApplicable(entity.getUUID())) {
                 if (!prog.getQuest().category.isSilent)
-                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
+                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, entity)) {
@@ -106,7 +106,7 @@ public class QuestProgress {
             ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry));
             if (!interacted.isApplicable(pos)) {
                 if (!prog.getQuest().category.isSilent)
-                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED));
+                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, pos, use)) {
