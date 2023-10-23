@@ -1,3 +1,15 @@
+Simple Quests 1.5.0
+================
+- Impl Sequential quest type: 
+  Allows chaining of multiple quests that need to be fullfilled
+- A lot of internal changes for more dynamic handling
+- `is_silent` field for QuestCategory:  
+  If true Quests in that category will not have any chat outputs.
+- MultiEntries now randomize the entries based on fixed (daily changing) random seed
+- If mod is on client now the client will handle translation
+- Reduce conversion amount of older datapack versions:  
+  Only position entries need update now
+
 Simple Quests 1.4.0
 ================
 - Add quest complete event for fabric and forge
