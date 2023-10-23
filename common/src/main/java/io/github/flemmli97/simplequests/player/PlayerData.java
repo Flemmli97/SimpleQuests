@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,8 +61,9 @@ public class PlayerData {
     private long resetTick = -1;
 
     private LocalDateTime questTrackerTime = LocalDateTime.now();
-    private int dailySeed;
+    private long dailySeed;
     private final Random questRandom = new Random();
+    private final RandomSource randomSource = RandomSource.create();
     private final Map<ResourceLocation, Integer> dailyQuestsTracker = new HashMap<>();
 
     private int interactionCooldown;
@@ -94,7 +97,8 @@ public class PlayerData {
         }
         QuestProgress prog = new QuestProgress(quest, this, subQuestIndex);
         this.currentQuests.add(prog);
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.accept"), prog.subQuest().getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
+        if (!prog.getQuest().category.isSilent)
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.accept"), prog.subQuest().getFormattedWith(this.player, prog.getQuestEntries())).withStyle(ChatFormatting.DARK_GREEN));
         return true;
     }
 
@@ -153,12 +157,18 @@ public class PlayerData {
 
     public void onKill(LivingEntity entity) {
         this.tryFullFill(QuestEntryImpls.KillEntry.class, QuestProgress.createKillPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                });
     }
 
     public void onFished(Collection<ItemStack> loot) {
         this.tryFullFill(QuestEntryImpls.FishingEntry.class, QuestProgress.createFishingPredicate(this.player, loot),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.kill"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                });
     }
 
     public void onInteractWith(Entity entity) {
@@ -166,17 +176,26 @@ public class PlayerData {
             return;
         this.interactionCooldown = 2;
         this.tryFullFill(QuestEntryImpls.EntityInteractEntry.class, QuestProgress.createInteractionPredicate(this.player, entity),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                });
     }
 
     public void onBlockInteract(BlockPos pos, boolean use) {
         this.tryFullFill(QuestEntryImpls.BlockInteractEntry.class, QuestProgress.createBlockInteractionPredicate(this.player, pos, use),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                });
     }
 
     public void onItemCrafted(ItemStack stack, int amount, String trigger) {
         this.tryFullFill(QuestEntryImpls.CraftingEntry.class, QuestProgress.createCraftingPredicate(this.player, stack, amount),
-                (prog, p) -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                (prog, p) -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                }, trigger);
     }
 
     private void completeQuest(QuestProgress prog) {
@@ -207,7 +226,8 @@ public class PlayerData {
             this.unlockTracker.add(id);
         });
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.finish"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
+        if (!prog.getQuest().category.isSilent)
+            this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.finish"), prog.subQuest().getTask()).withStyle(ChatFormatting.DARK_GREEN));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
                 Quest quest = QuestsManager.instance().getActualQuests(res);
@@ -315,7 +335,10 @@ public class PlayerData {
             Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.getSecond().forEach(e -> this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN)));
+                fulfilled.getSecond().forEach(e -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get("simplequests.task"), e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
+                });
             }
             if (prog.tryComplete(this.getPlayer(), trigger) == QuestCompletionState.COMPLETE) {
                 this.completeQuest(prog);
@@ -333,7 +356,7 @@ public class PlayerData {
 
         LocalDateTime now = LocalDateTime.now();
         if (this.questTrackerTime == null || this.questTrackerTime.getDayOfYear() != now.getDayOfYear()) {
-            this.dailySeed = this.player.getRandom().nextInt();
+            this.dailySeed = this.player.getRandom().nextLong();
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
                 Quest quest = QuestsManager.instance().getActualQuests(r);
@@ -351,6 +374,12 @@ public class PlayerData {
                 this.dailyQuestsTracker.put(quest.id, 1);
             }
         }
+    }
+
+    public RandomSource getRandom(@Nullable ResourceLocation quest) {
+        long time = this.cooldownTracker.getOrDefault(quest, 0L);
+        this.randomSource.setSeed(this.dailySeed + time);
+        return this.randomSource;
     }
 
     public String formattedCooldown(QuestBase quest) {

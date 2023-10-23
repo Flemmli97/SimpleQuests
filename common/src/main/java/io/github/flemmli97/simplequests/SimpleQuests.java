@@ -1,11 +1,16 @@
 package io.github.flemmli97.simplequests;
 
 import io.github.flemmli97.simplequests.player.PlayerData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class SimpleQuests {
 
@@ -29,5 +34,11 @@ public class SimpleQuests {
     public static void onInteractEntity(ServerPlayer player, Entity entity, InteractionHand hand) {
         if (hand == InteractionHand.MAIN_HAND)
             PlayerData.get(player).onInteractWith(entity);
+    }
+
+    public static LootContext createContext(ServerPlayer player, Entity entity, @Nullable ResourceLocation quest) {
+        return new LootContext.Builder(player.getLevel()).withParameter(LootContextParams.THIS_ENTITY, entity)
+                .withParameter(LootContextParams.ORIGIN, player.position()).withRandom(PlayerData.get(player).getRandom(quest))
+                .create(LootContextParamSets.ADVANCEMENT_ENTITY);
     }
 }
