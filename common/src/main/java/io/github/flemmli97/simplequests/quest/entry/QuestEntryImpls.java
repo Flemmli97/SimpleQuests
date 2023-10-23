@@ -105,7 +105,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            Function<String, String> key = s -> !this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(this.getId().toString() + s);
+            Function<String, String> key = s -> !this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString() + s);
             List<MutableComponent> formattedItems = itemComponents(this.predicate);
             if (formattedItems.isEmpty())
                 return Component.translatable(key.apply(".empty"));
@@ -159,9 +159,9 @@ public class QuestEntryImpls {
             EntityPredicateAccessor acc = (EntityPredicateAccessor) this.predicate;
             String s = acc.getEntityType().serializeToJson().getAsString();
             if (s.startsWith("#")) {
-                return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(this.getId().toString() + ".tag"), Component.literal(s).withStyle(ChatFormatting.AQUA), this.amount);
+                return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString() + ".tag"), Component.literal(s).withStyle(ChatFormatting.AQUA), this.amount);
             }
-            return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(this.getId().toString()), Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
+            return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString()), Component.translatable(Util.makeDescriptionId("entity", new ResourceLocation(s))).withStyle(ChatFormatting.AQUA), this.amount);
         }
 
         @Nullable
@@ -193,7 +193,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return Component.translatable(ConfigHandler.LANG.get(this.getId().toString()), this.amount);
+            return Component.translatable(ConfigHandler.LANG.get(player, this.getId().toString()), this.amount);
         }
     }
 
@@ -226,10 +226,10 @@ public class QuestEntryImpls {
             Advancement advancement = player.getServer().getAdvancements().getAdvancement(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = Component.translatable(ConfigHandler.LANG.get("simplequests.missing.advancement"), this.advancement());
+                adv = Component.translatable(ConfigHandler.LANG.get(player, "simplequests.missing.advancement"), this.advancement());
             else
                 adv = advancement.getChatComponent();
-            return Component.translatable(ConfigHandler.LANG.get(this.getId().toString()), adv);
+            return Component.translatable(ConfigHandler.LANG.get(player, this.getId().toString()), adv);
         }
     }
 
@@ -254,7 +254,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
+            return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
         }
 
         @Override

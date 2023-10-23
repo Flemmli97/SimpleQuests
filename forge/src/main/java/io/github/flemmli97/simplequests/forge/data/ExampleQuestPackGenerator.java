@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests.forge.test;
+package io.github.flemmli97.simplequests.forge.data;
 
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
@@ -41,6 +41,7 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,13 +51,24 @@ public class ExampleQuestPackGenerator extends QuestProvider {
     private static final String PACK_META = "{\"pack\": {\"pack_format\": 9,\"description\": [{\"text\":\"Example Quests\",\"color\":\"gold\"}]}}";
 
     public ExampleQuestPackGenerator(PackOutput output, boolean full) {
-        super(output, full);
+        super(createGenerator(output), full);
+    }
+
+    /**
+     * Reroute to Example Questpack folder
+     */
+    private static PackOutput createGenerator(PackOutput old) {
+        String path = System.getProperty("ExampleGenPath");
+        if (path == null || path.isEmpty())
+            return old;
+        return new PackOutput(Path.of(path));
     }
 
     @SubscribeEvent
     public static void data(GatherDataEvent event) {
         DataGenerator data = event.getGenerator();
         data.addProvider(event.includeServer(), new ExampleQuestPackGenerator(data.getPackOutput(), true));
+        data.addProvider(event.includeClient(), new LangGen(data));
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
+import io.github.flemmli97.simplequests.network.PacketRegistrar;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -14,13 +15,19 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class SimpleQuestsFabric implements ModInitializer {
 
@@ -58,11 +65,24 @@ public class SimpleQuestsFabric implements ModInitializer {
                 PlayerData.get(serverPlayer).onBlockInteract(pos, false);
             return true;
         }));
+        PacketRegistrar.registerServerPackets(new PacketRegistrar.ServerPacketRegister() {
+            @Override
+            public <P> void registerMessage(int index, ResourceLocation id, Class<P> clss, BiConsumer<P, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, P> decoder, BiConsumer<P, ServerPlayer> handler) {
+                ServerPlayNetworking.registerGlobalReceiver(id, handlerServer(decoder, handler));
+            }
+        }, 0);
     }
 
     public static void onDeath(LivingEntity entity, DamageSource source) {
         if (entity.getKillCredit() instanceof ServerPlayer player) {
             PlayerData.get(player).onKill(entity);
         }
+    }
+
+    private static <T> ServerPlayNetworking.PlayChannelHandler handlerServer(Function<FriendlyByteBuf, T> decoder, BiConsumer<T, ServerPlayer> handler) {
+        return (server, player, handler1, buf, responseSender) -> {
+            T pkt = decoder.apply(buf);
+            server.execute(() -> handler.accept(pkt, player));
+        };
     }
 }

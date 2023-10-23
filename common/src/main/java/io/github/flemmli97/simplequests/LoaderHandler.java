@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests;
 
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
+import io.github.flemmli97.simplequests.network.SQPacket;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.types.Quest;
@@ -33,4 +34,5 @@ public interface LoaderHandler {
 
     boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress);
 
+    void sendToServer(SQPacket packet);
 }

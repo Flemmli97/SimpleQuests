@@ -60,7 +60,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
 
             @Override
             public Component getDisplayName() {
-                return Component.translatable(ConfigHandler.LANG.get("simplequests.gui.composite.quest"));
+                return Component.translatable(ConfigHandler.LANG.get(player, "simplequests.gui.composite.quest"));
             }
         };
         player.openMenu(fac);
@@ -101,7 +101,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             int mod = i % 9;
             if (i == 0) {
                 ItemStack stack = new ItemStack(Items.ARROW);
-                stack.setHoverName(Component.translatable(ConfigHandler.LANG.get("simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.setHoverName(Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, stack);
             } else if ((additionalData.rows > 2 && (i < 9 || i > this.size - 1)) || mod == 0 || mod == 8)
                 inv.updateStack(i, QuestGui.emptyFiller());
