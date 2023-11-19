@@ -4,13 +4,14 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/buried_treasure",
-  "command": "",
   "icon": "minecraft:dirt",
   "repeat_delay": 0,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": true,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/buried_treasure",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "interact": {
@@ -24,5 +25,6 @@
       "consumeItems": true,
       "id": "simplequests:item"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

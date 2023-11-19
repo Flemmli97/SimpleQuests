@@ -4,13 +4,14 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "command": "",
   "icon": "minecraft:dirt",
   "repeat_delay": 36000,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "sword": {
@@ -33,5 +34,6 @@
       "consumeItems": true,
       "id": "simplequests:item"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

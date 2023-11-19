@@ -4,13 +4,14 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "icon": "minecraft:emerald_block",
   "repeat_delay": "1w:5d:3h:2m",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "place": {
@@ -25,5 +26,6 @@
       "description": "Place 3 emerald blocks",
       "id": "simplequests:block_interact"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

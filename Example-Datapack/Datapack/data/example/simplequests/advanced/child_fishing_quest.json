@@ -4,13 +4,14 @@
   "parent_id": "example:item_example",
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "command": "",
   "icon": "minecraft:cod",
   "repeat_delay": "2h",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "fish": {
@@ -35,5 +36,6 @@
       "consumeItems": true,
       "id": "simplequests:item"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

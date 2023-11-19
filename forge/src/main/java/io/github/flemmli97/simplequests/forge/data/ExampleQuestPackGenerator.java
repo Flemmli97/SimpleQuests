@@ -10,6 +10,7 @@ import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryMultiImpl;
 import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
 import io.github.flemmli97.simplequests.quest.types.Quest;
+import io.github.flemmli97.simplequests.quest.types.QuestBase;
 import io.github.flemmli97.simplequests.quest.types.SequentialQuest;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
@@ -299,6 +300,24 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                         .hasEnchantment(new EnchantmentPredicate(Enchantments.UNBREAKING, MinMaxBounds.Ints.atLeast(1))).build(),
                         BlockPredicate.Builder.block().of(Blocks.QUARTZ_STAIRS)
                                 .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(HorizontalDirectionalBlock.FACING, Direction.EAST).build()).build(), 3, false, false, "Quartz Stairs")));
+
+        // Visibility tests
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "visibility/requirements"),
+                "Example for an item quest needing an requirements to accept",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay(36000)
+                .withIcon(new ItemStack(Items.DIRT))
+                .setVisibility(QuestBase.Visibility.ALWAYS)
+                .withUnlockCondition(EntityPredicate.Builder.entity().located(LocationPredicate.atYLocation(MinMaxBounds.Doubles.atLeast(64))).build())
+                .addDescription("Requires player to be y > 64")
+                .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.COD).build(), 15, "Give 15 cods", true)));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "visibility/daily_limit"),
+                "Example for an item quest completable only once per day",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setMaxDaily(1)
+                .withIcon(new ItemStack(Items.DIRT))
+                .setVisibility(QuestBase.Visibility.ALWAYS)
+                .addTaskEntry("fish", new QuestEntryImpls.ItemEntry(ItemPredicate.Builder.item().of(Items.COD).build(), 15, "Give 15 cods", true)));
 
         QuestCategory category = new QuestCategory.Builder(new ResourceLocation("example", "category_1"), "Example category 1")
                 .withIcon(new ItemStack(Items.DIAMOND_BLOCK)).build();

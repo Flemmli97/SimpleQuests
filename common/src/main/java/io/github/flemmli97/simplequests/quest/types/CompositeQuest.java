@@ -25,8 +25,8 @@ public class CompositeQuest extends QuestBase {
 
     protected CompositeQuest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                              ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, boolean isDailyQuest, EntityPredicate unlockCondition,
-                             List<ResourceLocation> compositeQuests) {
-        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition);
+                             List<ResourceLocation> compositeQuests, Visibility visibility) {
+        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
         this.compositeQuests = compositeQuests;
     }
 
@@ -105,7 +105,7 @@ public class CompositeQuest extends QuestBase {
         public CompositeQuest build() {
             CompositeQuest quest = new CompositeQuest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.isDailyQuest,
-                    this.unlockCondition, this.compositeQuests);
+                    this.unlockCondition, this.compositeQuests, this.visibility);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }

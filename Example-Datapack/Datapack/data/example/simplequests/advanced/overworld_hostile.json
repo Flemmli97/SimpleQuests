@@ -4,8 +4,6 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "command": "",
   "icon": {
     "item": "minecraft:diamond_sword",
     "count": 1,
@@ -15,6 +13,9 @@
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "zombies": {
@@ -52,5 +53,6 @@
       "amount": 5,
       "id": "simplequests:xp"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }

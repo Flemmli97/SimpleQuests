@@ -4,13 +4,14 @@
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": true,
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "command": "",
   "icon": "minecraft:nether_brick",
   "repeat_delay": "2w",
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
   "submission_trigger": "",
   "entries": {
     "piglin": {
@@ -39,5 +40,6 @@
       "reset": false,
       "id": "simplequests:advancement"
     }
-  }
+  },
+  "type": "simplequests:quest"
 }
