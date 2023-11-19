@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.gui.CurrentQuestGui;
 import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -130,28 +131,7 @@ public class QuestCommand {
 
     private static int current(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        List<QuestProgress> quests = PlayerData.get(player).getCurrentQuest()
-                .stream().filter(p -> p.getQuest().category.isVisible).toList();
-        if (!quests.isEmpty()) {
-            ctx.getSource().sendSuccess(Component.literal("====================").withStyle(ChatFormatting.GREEN), false);
-            quests.forEach(prog -> {
-                ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.current"), prog.getTask(player)).withStyle(ChatFormatting.GOLD), false);
-                prog.getDescription(player).forEach(c -> ctx.getSource().sendSuccess(c, false));
-                List<String> finished = prog.finishedTasks();
-                prog.getQuestEntries().entrySet().stream()
-                        .filter(e -> !finished.contains(e.getKey()))
-                        .forEach(e -> {
-                            MutableComponent progress = e.getValue().progress(player, prog, e.getKey());
-                            if (progress == null)
-                                ctx.getSource().sendSuccess(e.getValue().translation(player).withStyle(ChatFormatting.RED), false);
-                            else
-                                ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.LANG.get(player, "simplequest.quest.progress"), e.getValue().translation(player).withStyle(ChatFormatting.RED), progress).withStyle(ChatFormatting.RED), false);
-                        });
-            });
-            return Command.SINGLE_SUCCESS;
-        } else {
-            ctx.getSource().sendSuccess(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.current.no")).withStyle(ChatFormatting.DARK_RED), false);
-        }
+        CurrentQuestGui.openGui(player);
         return 0;
     }
 
