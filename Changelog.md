@@ -1,3 +1,12 @@
+Simple Quests 1.5.1
+================
+- Change current quest command to display a gui instead of outputting to chat
+- Fix daily quest amount tracker not tracking
+- Add `visibility` field to quests. Determines whether the quest shows up in the gui or not:
+  `DEFAULT`: default behaviour. Shows only acceptable quests
+  `ALWAYS`: always shows the quest even if player can't accept it
+  `NEVER`: never show the quest
+
 Simple Quests 1.5.0
 ================
 - Impl Sequential quest type: 
