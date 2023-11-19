@@ -1,27 +1,26 @@
 {
-  "category": "example:hidden",
-  "task": "Sequential Quest Example a",
+  "task": "Example for an item quest completable only once per day",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "icon": "minecraft:paper",
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
+  "icon": "minecraft:dirt",
+  "repeat_delay": 0,
+  "repeat_daily": 1,
   "sorting_id": 0,
   "daily_quest": false,
-  "visibility": "DEFAULT",
+  "visibility": "ALWAYS",
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "entries": {
-    "andesite": {
+    "fish": {
       "predicate": {
         "items": [
-          "minecraft:andesite"
+          "minecraft:cod"
         ]
       },
-      "description": "Give 15 andesite",
+      "description": "Give 15 cods",
       "amount": 15,
       "consumeItems": true,
       "id": "simplequests:item"

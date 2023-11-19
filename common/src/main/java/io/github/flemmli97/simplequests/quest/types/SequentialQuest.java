@@ -28,8 +28,8 @@ public class SequentialQuest extends QuestBase {
 
     protected SequentialQuest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                               ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, boolean isDailyQuest, EntityPredicate unlockCondition,
-                              List<ResourceLocation> compositeQuests, ResourceLocation loot, String command) {
-        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition);
+                              List<ResourceLocation> compositeQuests, ResourceLocation loot, String command, Visibility visibility) {
+        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
         this.quests = compositeQuests;
         this.loot = loot;
         this.command = command;
@@ -128,7 +128,7 @@ public class SequentialQuest extends QuestBase {
         public SequentialQuest build() {
             SequentialQuest quest = new SequentialQuest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.isDailyQuest,
-                    this.unlockCondition, this.compositeQuests, this.loot, this.command);
+                    this.unlockCondition, this.compositeQuests, this.loot, this.command, this.visibility);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }

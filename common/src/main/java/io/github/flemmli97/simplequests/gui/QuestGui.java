@@ -102,6 +102,12 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         }
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
+        MutableComponent requirement = switch (type) {
+            case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED -> new TranslatableComponent(ConfigHandler.LANG.get(player, type.langKey())).withStyle(ChatFormatting.DARK_RED);
+            default -> null;
+        };
+        if (requirement != null)
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(requirement.setStyle(requirement.getStyle().withItalic(false)))));
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putString("Quest", quest.id.toString());
         return stack;
@@ -126,7 +132,10 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(data.category());
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
-            PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(questMap.get(res));
+            QuestBase quest = questMap.get(res);
+            if (quest.visibility != QuestBase.Visibility.DEFAULT)
+                return quest.visibility == QuestBase.Visibility.NEVER;
+            PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(quest);
             return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
                     || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
         });

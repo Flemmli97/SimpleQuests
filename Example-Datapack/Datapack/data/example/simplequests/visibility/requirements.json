@@ -1,27 +1,35 @@
 {
-  "category": "example:hidden",
-  "task": "Sequential Quest Example a",
-  "description": [],
+  "task": "Example for an item quest needing an requirements to accept",
+  "description": "Requires player to be y > 64",
   "parent_id": [],
   "redo_parent": false,
   "need_unlock": false,
-  "icon": "minecraft:paper",
+  "unlock_condition": {
+    "location": {
+      "position": {
+        "y": {
+          "min": 64.0
+        }
+      }
+    }
+  },
+  "icon": "minecraft:dirt",
   "repeat_delay": 36000,
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": false,
-  "visibility": "DEFAULT",
+  "visibility": "ALWAYS",
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "entries": {
-    "andesite": {
+    "fish": {
       "predicate": {
         "items": [
-          "minecraft:andesite"
+          "minecraft:cod"
         ]
       },
-      "description": "Give 15 andesite",
+      "description": "Give 15 cods",
       "amount": 15,
       "consumeItems": true,
       "id": "simplequests:item"

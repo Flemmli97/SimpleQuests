@@ -36,6 +36,7 @@
   "simplequests.gui.reset": "Reset this quest? No refunds!",
   "simplequests.gui.yes": "Yes",
   "simplequests.gui.no": "No",
+  "simplequests.gui.quest.current": "Active Quests",
   "simplequests.gui.next": "Next Page",
   "simplequests.gui.previous": "Previous Page",
   "simplequests.gui.button.main": "Back",

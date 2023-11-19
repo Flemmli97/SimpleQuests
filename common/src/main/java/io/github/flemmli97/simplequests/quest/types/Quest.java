@@ -35,9 +35,9 @@ public class Quest extends QuestBase {
 
     protected Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                     ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
-                    boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command) {
+                    boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command, Visibility visibility) {
         super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock,
-                icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition);
+                icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
         this.entries = entries;
         this.loot = loot;
         this.command = command;
@@ -168,7 +168,7 @@ public class Quest extends QuestBase {
         public Quest build() {
             Quest quest = new Quest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest,
-                    this.submissionTrigger, this.unlockCondition, this.command);
+                    this.submissionTrigger, this.unlockCondition, this.command, this.visibility);
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }
