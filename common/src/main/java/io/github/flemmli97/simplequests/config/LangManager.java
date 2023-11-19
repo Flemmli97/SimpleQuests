@@ -81,6 +81,7 @@ public class LangManager {
         DEFAULT_TRANSLATION.put("simplequests.gui.reset", "Reset this quest? No refunds!");
         DEFAULT_TRANSLATION.put("simplequests.gui.yes", "Yes");
         DEFAULT_TRANSLATION.put("simplequests.gui.no", "No");
+        DEFAULT_TRANSLATION.put("simplequests.gui.quest.current", "Active Quests");
 
         DEFAULT_TRANSLATION.put("simplequests.gui.next", "Next Page");
         DEFAULT_TRANSLATION.put("simplequests.gui.previous", "Previous Page");
