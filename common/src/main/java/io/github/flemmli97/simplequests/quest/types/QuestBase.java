@@ -54,9 +54,11 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     protected final EntityPredicate unlockCondition;
 
+    public final Visibility visibility;
+
     public QuestBase(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                      ItemStack icon, int repeatDelay, int repeatDaily, int sortingId,
-                     boolean isDailyQuest, EntityPredicate unlockCondition) {
+                     boolean isDailyQuest, EntityPredicate unlockCondition, Visibility visibility) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
         this.questTaskString = questTaskString;
@@ -70,6 +72,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         this.icon = icon;
         this.isDailyQuest = isDailyQuest;
         this.unlockCondition = unlockCondition;
+        this.visibility = visibility;
     }
 
     public static List<MutableComponent> getFormattedTasks(ServerPlayer player, Map<String, QuestEntry> resolvedTasks) {
@@ -124,6 +127,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         if (GsonHelper.getAsBoolean(obj, "daily_quest", false))
             questbuilder.setDailyQuest();
         questbuilder.withUnlockCondition(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
+        questbuilder.setVisibility(Visibility.valueOf(GsonHelper.getAsString(obj, "visibility", Visibility.DEFAULT.toString())));
         return questbuilder;
     }
 
@@ -170,6 +174,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             obj.addProperty("sorting_id", this.sortingId);
         if (this.isDailyQuest || full)
             obj.addProperty("daily_quest", this.isDailyQuest);
+        if (this.visibility != Visibility.DEFAULT || full)
+            obj.addProperty("visibility", this.visibility.toString());
         return obj;
     }
 
@@ -325,6 +331,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         protected ItemStack icon = new ItemStack(Items.PAPER);
 
+        protected Visibility visibility = Visibility.DEFAULT;
+
         protected BuilderBase(ResourceLocation id, String task) {
             this.id = id;
             this.questTaskString = task;
@@ -391,8 +399,19 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             return this.asThis();
         }
 
+        public T setVisibility(Visibility visibility) {
+            this.visibility = visibility;
+            return this.asThis();
+        }
+
         protected abstract T asThis();
 
         public abstract QuestBase build();
+    }
+
+    public enum Visibility {
+        DEFAULT,
+        ALWAYS,
+        NEVER
     }
 }

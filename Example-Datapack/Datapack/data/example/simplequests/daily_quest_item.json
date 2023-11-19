@@ -9,6 +9,7 @@
   "repeat_daily": 0,
   "sorting_id": 0,
   "daily_quest": true,
+  "visibility": "DEFAULT",
   "loot_table": "minecraft:chests/buried_treasure",
   "command": "",
   "submission_trigger": "",
