@@ -201,6 +201,7 @@ public class PlayerData {
         prog.getCompletionID().forEach(id -> {
             this.cooldownTracker.put(id, this.player.level.getGameTime());
             this.unlockTracker.add(id);
+            this.dailyQuestsTracker.compute(id, (key, i) -> i == null ? 1 : ++i);
         });
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getQuest().category.isSilent)
