@@ -1,3 +1,7 @@
+Simple Quests 1.3.1.1
+================
+- Fix translation errors
+
 Simple Quests 1.3.1
 ================
 - Add some more context to some stuff (API)
