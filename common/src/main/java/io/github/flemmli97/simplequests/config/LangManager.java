@@ -85,8 +85,8 @@ public class LangManager {
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
         defaultTranslation.put(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID.toString(), "Kill entity %s");
-        defaultTranslation.put(QuestEntryImpls.EntityInteractEntry.ID + ".tag", "Kill entities in the tag %s");
+        defaultTranslation.put(QuestEntryImpls.KillEntry.ID.toString(), "Kill entity %s");
+        defaultTranslation.put(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s");
         defaultTranslation.put(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
         defaultTranslation.put(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
         defaultTranslation.put("simplequests:predicate", "Kill %1$s x%2$s");
