@@ -246,6 +246,7 @@ public class PlayerData {
             if (sendMsg)
                 this.player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get(this.player, "simplequests.reset"), prog.getTask(this.player)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             this.currentQuests.remove(prog);
+            this.removeTickableQuestProgress(prog);
             prog.getQuest().onReset(this.player);
         }
         this.resetTick = -1;

@@ -1,3 +1,7 @@
+Simple Quests 1.5.2
+================
+- Fix ticking quests not resetting (e.g. location quests)
+
 Simple Quests 1.5.1
 ================
 - Change current quest command to display a gui instead of outputting to chat
