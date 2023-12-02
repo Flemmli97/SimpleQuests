@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests.quest.types;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.quest.ParseHelper;
@@ -125,7 +126,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         questbuilder.withSortingNum(GsonHelper.getAsInt(obj, "sorting_id", 0));
         if (GsonHelper.getAsBoolean(obj, "daily_quest", false))
             questbuilder.setDailyQuest();
-        questbuilder.withUnlockCondition(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
+        questbuilder.withUnlockCondition(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)).orElse(null));
         questbuilder.setVisibility(Visibility.valueOf(GsonHelper.getAsString(obj, "visibility", Visibility.DEFAULT.toString())));
         return questbuilder;
     }
@@ -159,8 +160,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             obj.addProperty("redo_parent", this.redoParent);
         if (this.needsUnlock || full)
             obj.addProperty("need_unlock", this.needsUnlock);
-        if (this.unlockCondition != EntityPredicate.ANY || full)
-            obj.add("unlock_condition", this.unlockCondition.serializeToJson());
+        if (this.unlockCondition != null || full)
+            obj.add("unlock_condition", this.unlockCondition == null ? JsonNull.INSTANCE : this.unlockCondition.serializeToJson());
         ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
                 .ifPresent(icon -> obj.add("icon", icon));
         if (this.repeatDelayString != null)
@@ -327,7 +328,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         protected int sortingId;
 
-        protected EntityPredicate unlockCondition = EntityPredicate.ANY;
+        protected EntityPredicate unlockCondition = null;
 
         protected ItemStack icon = new ItemStack(Items.PAPER);
 

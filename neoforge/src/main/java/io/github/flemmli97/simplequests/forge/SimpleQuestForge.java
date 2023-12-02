@@ -12,30 +12,27 @@ import io.github.flemmli97.simplequests.player.PlayerData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.network.NetworkRegistry;
+import net.neoforged.neoforge.network.simple.MessageFunctions;
+import net.neoforged.neoforge.network.simple.SimpleChannel;
 
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Mod(value = SimpleQuests.MODID)
 public class SimpleQuestForge {
@@ -50,14 +47,14 @@ public class SimpleQuestForge {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "*", (s1, s2) -> true));
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(SimpleQuestForge::commonSetup);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactBlock);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::breakBlock);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::command);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::interactBlock);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestForge::breakBlock);
         if (FMLEnvironment.dist == Dist.CLIENT)
-            MinecraftForge.EVENT_BUS.addListener(ForgeClientHandler::login);
+            NeoForge.EVENT_BUS.addListener(ForgeClientHandler::login);
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();
         ConfigHandler.init();
@@ -68,7 +65,7 @@ public class SimpleQuestForge {
         PacketRegistrar.registerServerPackets(new PacketRegistrar.ServerPacketRegister() {
             @Override
             public <P> void registerMessage(int index, ResourceLocation id, Class<P> clss, BiConsumer<P, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, P> decoder, BiConsumer<P, ServerPlayer> handler) {
-                DISPATCHER.registerMessage(index, clss, encoder, decoder, handlerServer(handler), Optional.of(NetworkDirection.PLAY_TO_SERVER));
+                DISPATCHER.registerMessage(index, clss, encoder::accept, decoder::apply, handlerServer(handler));
             }
         }, 0);
     }
@@ -102,10 +99,10 @@ public class SimpleQuestForge {
             PlayerData.get(serverPlayer).onBlockInteract(event.getPos(), false);
     }
 
-    private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> handlerServer(BiConsumer<T, ServerPlayer> handler) {
+    private static <T> MessageFunctions.MessageConsumer<T> handlerServer(BiConsumer<T, ServerPlayer> handler) {
         return (p, ctx) -> {
-            ctx.get().enqueueWork(() -> handler.accept(p, ctx.get().getSender()));
-            ctx.get().setPacketHandled(true);
+            ctx.enqueueWork(() -> handler.accept(p, ctx.getSender()));
+            ctx.setPacketHandled(true);
         };
     }
 }

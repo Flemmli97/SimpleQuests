@@ -11,15 +11,15 @@ import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import io.github.flemmli97.simplequests.quest.types.Quest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.NetworkHooks;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class LoaderImpl implements LoaderHandler {
 
     @Override
     public ResourceLocation fromEntity(Entity entity) {
-        return ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
     }
 
     @Override
@@ -95,12 +95,12 @@ public class LoaderImpl implements LoaderHandler {
             if (handler.onComplete(event.player, event.trigger, event.quest, event.progress))
                 event.setCanceled(true);
         };
-        MinecraftForge.EVENT_BUS.addListener(cons);
+        NeoForge.EVENT_BUS.addListener(cons);
     }
 
     @Override
     public boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress) {
-        return !MinecraftForge.EVENT_BUS.post(new QuestCompleteEvent(player, trigger, quest, progress));
+        return NeoForge.EVENT_BUS.post(new QuestCompleteEvent(player, trigger, quest, progress)).isCanceled();
     }
 
     @Override

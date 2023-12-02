@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests.forge.client;
 
 import io.github.flemmli97.simplequests.client.ClientHandler;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
 public class ForgeClientHandler {
 
