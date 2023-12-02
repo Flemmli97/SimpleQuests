@@ -6,5 +6,24 @@
 
 Server side questing mod
 
-If you would contribute a language PR into this mod with your lang file.  
+If you would like to contribute a language PR into this mod with your lang file.  
 The lang files go under `common/src/resources/data/simplequests/lang`
+
+
+To use this mod as a dependency add the following snippet to your build.gradle:  
+```groovy
+repositories {
+    maven {
+        name = "Flemmli97"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
+}
+
+dependencies {    
+    //Fabric/Loom==========    
+    modImplementation("io.github.flemmli97:simplequests:${minecraft_version}-${mod_version}-${mod_loader}")
+    
+    //Forge==========    
+    compile fg.deobf("io.github.flemmli97:simplequests:${minecraft_version}-${mod_version}-${mod_loader}")
+}
+```
