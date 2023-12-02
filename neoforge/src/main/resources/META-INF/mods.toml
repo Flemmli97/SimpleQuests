@@ -2,6 +2,8 @@ modLoader="javafml"
 loaderVersion="[${loader_version},)"
 license="All rights reserved"
 issueTrackerURL="https://github.com/Flemmli97/SimpleQuests/issues"
+[[mixins]]
+config = "simplequests.mixins.json"
 [[mods]]
 modId="simplequests"
 version="${version}"
@@ -17,7 +19,7 @@ versionRange="[${mcversion},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simplequests]]
-modId="forge"
+modId="neoforge"
 mandatory=true
 versionRange="[${forge_version},)"
 ordering="NONE"

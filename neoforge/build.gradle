@@ -1,4 +1,4 @@
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-fabric-neoforge/forge.gradle"
+apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-fabric-neoforge/neoforge.gradle"
 
 loom {
     runs {
@@ -8,9 +8,6 @@ loom {
             property("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
         }
     }
-    /*neoforge {
-        mixinConfigs = ["simplequests.mixins.json"]
-    }*/
 }
 
 repositories {
