@@ -1,6 +1,7 @@
 Simple Quests 1.5.2
 ================
 - Fix ticking quests not resetting (e.g. location quests)
+- Update to 1.20.2
 
 Simple Quests 1.5.1
 ================
