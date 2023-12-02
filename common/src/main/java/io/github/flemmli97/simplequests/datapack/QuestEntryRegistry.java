@@ -55,7 +55,7 @@ public class QuestEntryRegistry {
     public static QuestEntry deserialize(ResourceLocation res, JsonObject obj) {
         Codec<QuestEntry> d = MAP.get(res);
         if (d != null)
-            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't deserialize QuestEntry from json " + e));
+            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuests.LOGGER.error("Couldn't deserialize QuestEntry " + res + " from json " + e));
         throw new IllegalStateException("Missing entry for key " + res);
     }
 }

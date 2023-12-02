@@ -6,8 +6,6 @@
   "mixins": [
     "ServerPlayerMixin",
     "AbstractContainerAccessor",
-    "EntityPredicateAccessor",
-    "ItemPredicateAccessor",
     "ItemStackMixin",
     "FishingRodHookedMixin"
   ],

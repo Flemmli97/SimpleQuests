@@ -180,7 +180,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     }
 
     public boolean isUnlocked(ServerPlayer player) {
-        return this.unlockCondition.matches(player, player);
+        return this.unlockCondition == null || this.unlockCondition.matches(player, player);
     }
 
     public final MutableComponent getTask(ServerPlayer player) {
