@@ -1,3 +1,11 @@
+Simple Quests 1.5.3
+================
+- Add category daily limit: 
+  Instead of daily limit for one quest this counts the category
+- Add player context to all entries:
+  All entries now accept a `playerPredicate` field.
+  Allows for additional checks when completing tasks e.g. player needs to do the task while sneaking
+
 Simple Quests 1.5.2
 ================
 - Fix ticking quests not resetting (e.g. location quests)
