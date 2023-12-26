@@ -15,10 +15,9 @@
   "submission_trigger": "",
   "entries": {
     "sword": {
+      "amount": 1,
+      "consumeItems": true,
       "predicate": {
-        "items": [
-          "minecraft:diamond_sword"
-        ],
         "enchantments": [
           {
             "enchantment": "minecraft:sharpness",
@@ -27,11 +26,12 @@
               "max": 3
             }
           }
+        ],
+        "items": [
+          "minecraft:diamond_sword"
         ]
       },
       "description": "Give 1 diamond sword with sharp 2 or 3",
-      "amount": 1,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

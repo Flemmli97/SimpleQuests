@@ -27,10 +27,10 @@
     },
     "zombies_baby": {
       "predicate": {
-        "type": "minecraft:zombie",
         "flags": {
           "is_baby": true
-        }
+        },
+        "type": "minecraft:zombie"
       },
       "amount": 3,
       "id": "simplequests:entity"

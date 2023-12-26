@@ -15,17 +15,17 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
-      "item": {
-        "items": [
-          "minecraft:name_tag"
-        ]
-      },
       "predicate": {
         "type": "minecraft:chicken"
       },
       "amount": 2,
       "consume": true,
       "description": "Use nametag on 2 chickens",
+      "item": {
+        "items": [
+          "minecraft:name_tag"
+        ]
+      },
       "id": "simplequests:entity_interact"
     }
   },

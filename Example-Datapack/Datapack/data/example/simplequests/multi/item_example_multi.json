@@ -18,6 +18,8 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "consumeItems": true,
+      "description": "Give 10-15 cods or salmon",
       "predicates": [
         {
           "items": [
@@ -34,12 +36,10 @@
         }
       ],
       "amount": {
-        "type": "minecraft:uniform",
-        "min": 10,
-        "max": 15
+        "min": 10.0,
+        "max": 15.0,
+        "type": "minecraft:uniform"
       },
-      "consumeItems": true,
-      "description": "Give 10-15 cods or salmon",
       "id": "simplequests:multi_item"
     }
   },

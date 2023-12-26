@@ -36,7 +36,8 @@ import java.util.function.Predicate;
 public class QuestEntryImpls {
 
     public record ItemEntry(ItemPredicate predicate, int amount,
-                            String description, boolean consumeItems) implements QuestEntry {
+                            String description, boolean consumeItems,
+                            EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "item");
 
@@ -44,11 +45,14 @@ public class QuestEntryImpls {
                 instance.group(ItemPredicate.CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
                         Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems)
-                ).apply(instance, (pred, desc, amount, consume) -> new ItemEntry(pred, amount, desc.orElse(""), consume)));
+                        Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (pred, desc, amount, consume, player) -> new ItemEntry(pred, amount, desc.orElse(""), consume, player.orElse(null))));
 
         @Override
         public boolean submit(ServerPlayer player) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
             List<ItemStack> matching = new ArrayList<>();
             int i = 0;
             for (ItemStack stack : player.getInventory().items) {
@@ -128,13 +132,15 @@ public class QuestEntryImpls {
         }
     }
 
-    public record KillEntry(EntityPredicate predicate, int amount, String description) implements QuestEntry {
+    public record KillEntry(EntityPredicate predicate, int amount, String description,
+                            EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final Codec<KillEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(EntityPredicate.CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
-                ).apply(instance, (pred, amount, desc) -> new KillEntry(pred, amount, desc.orElse(""))));
+                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (pred, amount, desc, player) -> new KillEntry(pred, amount, desc.orElse(""), player.orElse(null))));
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity");
 
@@ -156,6 +162,11 @@ public class QuestEntryImpls {
             return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString()), entities.withStyle(ChatFormatting.AQUA), this.amount);
         }
 
+        public boolean check(ServerPlayer player, Entity entity) {
+            return (this.playerPredicate == null || this.playerPredicate.matches(player, player))
+                    && this.predicate.matches(player, entity);
+        }
+
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
@@ -163,14 +174,19 @@ public class QuestEntryImpls {
         }
     }
 
-    public record XPEntry(int amount) implements QuestEntry {
+    public record XPEntry(int amount,
+                          EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "xp");
         public static final Codec<XPEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)).apply(instance, XPEntry::new));
+                instance.group(ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                                EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)))
+                        .apply(instance, (amount, pred) -> new XPEntry(amount, pred.orElse(null))));
 
         @Override
         public boolean submit(ServerPlayer player) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
             if (player.experienceLevel >= this.amount) {
                 player.giveExperienceLevels(-this.amount);
                 return true;
@@ -189,16 +205,20 @@ public class QuestEntryImpls {
         }
     }
 
-    public record AdvancementEntry(ResourceLocation advancement, boolean reset) implements QuestEntry {
+    public record AdvancementEntry(ResourceLocation advancement, boolean reset,
+                                   EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "advancement");
         public static final Codec<AdvancementEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(ResourceLocation.CODEC.fieldOf("advancement").forGetter(d -> d.advancement),
-                        Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset)
-                ).apply(instance, AdvancementEntry::new));
+                        Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (advancement, reset, pred) -> new AdvancementEntry(advancement, reset, pred.orElse(null))));
 
         @Override
         public boolean submit(ServerPlayer player) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
             AdvancementHolder adv = player.getServer().getAdvancements().get(this.advancement);
             boolean ret = adv != null && (player.getAdvancements().getOrStartProgress(adv).isDone());
             if (ret && this.reset) {
@@ -225,14 +245,16 @@ public class QuestEntryImpls {
         }
     }
 
-    public record PositionEntry(BlockPos pos, int minDist, String description) implements QuestEntry {
+    public record PositionEntry(BlockPos pos, int minDist, String description,
+                                EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "position");
         public static final Codec<PositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.BLOCK_POS_CODEC.fieldOf("pos").forGetter(d -> d.pos),
                         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
-                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description))
-                ).apply(instance, (pred, amount, desc) -> new PositionEntry(pred, amount, desc.orElse(""))));
+                        Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (pred, amount, desc, player) -> new PositionEntry(pred, amount, desc.orElse(""), player.orElse(null))));
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -253,6 +275,8 @@ public class QuestEntryImpls {
         public Predicate<PlayerData> tickable() {
             return d -> {
                 ServerPlayer p = d.getPlayer();
+                if (this.playerPredicate != null && !this.playerPredicate.matches(p, p))
+                    return false;
                 return p.tickCount % 20 == 0 && p.blockPosition().distSqr(this.pos) < this.minDist * this.minDist;
             };
         }
@@ -264,14 +288,16 @@ public class QuestEntryImpls {
      * @param location    The LocationPredicate to check
      * @param description Parsing a location predicate is way too complicated. Its easier instead to have the datapack maker provide a description instead
      */
-    public record LocationEntry(LocationPredicate location, String description) implements QuestEntry {
+    public record LocationEntry(LocationPredicate location, String description,
+                                EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "location");
 
         public static final Codec<LocationEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(LocationPredicate.CODEC.fieldOf("predicate").forGetter(d -> d.location),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
-                ).apply(instance, LocationEntry::new));
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (pred, desc, player) -> new LocationEntry(pred, desc, player.orElse(null))));
 
         @Override
         public boolean submit(ServerPlayer player) {
@@ -292,6 +318,8 @@ public class QuestEntryImpls {
         public Predicate<PlayerData> tickable() {
             return d -> {
                 ServerPlayer p = d.getPlayer();
+                if (this.playerPredicate != null && !this.playerPredicate.matches(p, p))
+                    return false;
                 return p.tickCount % 20 == 0 && this.location.matches(p.serverLevel(), p.getX(), p.getY(), p.getZ());
             };
         }
@@ -304,7 +332,8 @@ public class QuestEntryImpls {
      */
     public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount,
                                       boolean consume, String description, String heldDescription,
-                                      String entityDescription) implements QuestEntry {
+                                      String entityDescription,
+                                      EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "entity_interact");
         public static final Codec<EntityInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
@@ -315,11 +344,13 @@ public class QuestEntryImpls {
                         ItemPredicate.CODEC.optionalFieldOf("item").forGetter(d -> Optional.ofNullable(d.heldItem)),
                         EntityPredicate.CODEC.optionalFieldOf("predicate").forGetter(d -> Optional.ofNullable(d.entityPredicate)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume)
-                ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount, consume) -> new EntityInteractEntry(item.orElse(null), pred.orElse(null), amount, consume, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
+                        Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount, consume, player) ->
+                        new EntityInteractEntry(item.orElse(null), pred.orElse(null), amount, consume, desc, heldDesc.orElse(""), entityDesc.orElse(""), player.orElse(null))));
 
         public EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entityPredicate, int amount, boolean consume, String description) {
-            this(heldItem, entityPredicate, amount, consume, description, "", "");
+            this(heldItem, entityPredicate, amount, consume, description, "", "", null);
         }
 
         @Override
@@ -344,6 +375,8 @@ public class QuestEntryImpls {
         }
 
         public boolean check(ServerPlayer player, Entity entity) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
             boolean b = (this.heldItem == null || this.heldItem.matches(player.getMainHandItem())) &&
                     (this.entityPredicate == null || this.entityPredicate.matches(player, entity));
             if (b && this.consume && !player.isCreative()) {
@@ -360,7 +393,8 @@ public class QuestEntryImpls {
      */
     public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
                                      boolean consumeItem, String description, String heldDescription,
-                                     String blockDescription) implements QuestEntry {
+                                     String blockDescription,
+                                     EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "block_interact");
         public static final Codec<BlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
@@ -372,16 +406,17 @@ public class QuestEntryImpls {
                         ItemPredicate.CODEC.optionalFieldOf("item").forGetter(d -> Optional.ofNullable(d.heldItem)),
                         BlockPredicate.CODEC.optionalFieldOf("block").forGetter(d -> Optional.ofNullable(d.blockPredicate)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.BOOL.fieldOf("use").forGetter(d -> d.use)
-                ).apply(instance, (consume, desc, heldDesc, blockDescription, item, block, amount, use) -> {
+                        Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
+                        EntityPredicate.CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (consume, desc, heldDesc, blockDescription, item, block, amount, use, player) -> {
                     if (item.isEmpty() && block.isEmpty())
                         throw new IllegalStateException("Either item or block has to be defined");
-                    return new BlockInteractEntry(item.orElse(null), block.orElse(null), amount, use, consume, desc, heldDesc.orElse(""), blockDescription.orElse(""));
+                    return new BlockInteractEntry(item.orElse(null), block.orElse(null), amount, use, consume, desc, heldDesc.orElse(""), blockDescription.orElse(""), player.orElse(null));
                 }));
 
         public BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
                                   boolean consumeItem, String description) {
-            this(heldItem, blockPredicate, amount, use, consumeItem, description, "", "");
+            this(heldItem, blockPredicate, amount, use, consumeItem, description, "", "", null);
         }
 
         @Override
@@ -406,6 +441,8 @@ public class QuestEntryImpls {
         }
 
         public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
             if (use != this.use)
                 return false;
             boolean b = (this.heldItem == null || this.heldItem.matches(player.getMainHandItem())) &&

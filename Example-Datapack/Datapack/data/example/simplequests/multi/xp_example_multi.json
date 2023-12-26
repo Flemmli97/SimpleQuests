@@ -16,9 +16,9 @@
   "entries": {
     "xp": {
       "amount": {
-        "type": "minecraft:uniform",
-        "min": 5,
-        "max": 10
+        "min": 5.0,
+        "max": 10.0,
+        "type": "minecraft:uniform"
       },
       "description": "Submit xp to this quest",
       "id": "simplequests:multi_xp"

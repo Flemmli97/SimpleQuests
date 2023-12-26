@@ -19,10 +19,9 @@
   "submission_trigger": "",
   "entries": {
     "break": {
+      "amount": 3,
+      "use": false,
       "item": {
-        "items": [
-          "minecraft:diamond_pickaxe"
-        ],
         "enchantments": [
           {
             "enchantment": "minecraft:unbreaking",
@@ -30,6 +29,9 @@
               "min": 1
             }
           }
+        ],
+        "items": [
+          "minecraft:diamond_pickaxe"
         ]
       },
       "block": {
@@ -40,8 +42,6 @@
           "facing": "east"
         }
       },
-      "amount": 3,
-      "use": false,
       "consumeItem": false,
       "description": "Quartz Stairs",
       "id": "simplequests:block_interact"

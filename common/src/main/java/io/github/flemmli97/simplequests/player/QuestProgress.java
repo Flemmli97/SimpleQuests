@@ -78,7 +78,7 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.KillEntry> createKillPredicate(ServerPlayer player, LivingEntity entity) {
         return (name, entry, prog) -> {
-            if (entry.predicate().matches(player, entity)) {
+            if (entry.check(player, entity)) {
                 return prog.killCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createKillTracker(entry)).apply(1);
             }
             return false;

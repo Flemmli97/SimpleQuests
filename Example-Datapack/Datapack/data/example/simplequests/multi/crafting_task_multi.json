@@ -34,9 +34,9 @@
         }
       ],
       "amount": {
-        "type": "minecraft:uniform",
-        "min": 3,
-        "max": 5
+        "min": 3.0,
+        "max": 5.0,
+        "type": "minecraft:uniform"
       },
       "description": "Craft some items",
       "taskDescription": "Craft %1$s %3$sx",

@@ -15,13 +15,13 @@
   "submission_trigger": "",
   "entries": {
     "task": {
+      "amount": 3,
+      "use": true,
       "block": {
         "blocks": [
           "minecraft:chest"
         ]
       },
-      "amount": 3,
-      "use": true,
       "consumeItem": false,
       "description": "Interact with chest x3",
       "id": "simplequests:block_interact"
