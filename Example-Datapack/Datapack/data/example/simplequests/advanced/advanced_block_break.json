@@ -19,6 +19,8 @@
   "submission_trigger": "",
   "entries": {
     "break": {
+      "amount": 3,
+      "use": false,
       "item": {
         "items": [
           "minecraft:diamond_pickaxe"
@@ -40,8 +42,6 @@
           "facing": "east"
         }
       },
-      "amount": 3,
-      "use": false,
       "consumeItem": false,
       "description": "Quartz Stairs",
       "id": "simplequests:block_interact"

@@ -16,14 +16,14 @@
   "submission_trigger": "",
   "entries": {
     "granite": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:granite"
         ]
       },
       "description": "Give 15 granite",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

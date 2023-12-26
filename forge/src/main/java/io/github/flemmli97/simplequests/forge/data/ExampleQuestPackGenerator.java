@@ -207,7 +207,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("1w:5d:3h:2m")
                 .withIcon(new ItemStack(Items.PURPUR_BLOCK))
-                .addTaskEntry("task", new QuestEntryImpls.BlockInteractEntry(null, BlockPredicate.Builder.block().of(Blocks.CHEST).build(), 3, true, false, "Interact with chest x3")));
+                .addTaskEntry("task", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.ANY, BlockPredicate.Builder.block().of(Blocks.CHEST).build(), 3, true, false, "Interact with chest x3")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "block_break"),
                 "Example for block breaking task",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -219,7 +219,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("1w:5d:3h:2m")
                 .withIcon(new ItemStack(Items.EMERALD_BLOCK))
-                .addTaskEntry("place", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), null, 3, true, false, "Place 3 emerald blocks")));
+                .addTaskEntry("place", new QuestEntryImpls.BlockInteractEntry(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), BlockPredicate.ANY, 3, true, false, "Place 3 emerald blocks")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/block_place_multi"),
                 "Example of using multi block place task",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -235,7 +235,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("1d")
                 .withIcon(new ItemStack(Items.STICK))
-                .addTaskEntry("sticks", new QuestEntryImpls.CraftingEntry(ItemPredicate.Builder.item().of(Items.STICK).build(), null, 3, "Craft at 8 sticks")));
+                .addTaskEntry("sticks", new QuestEntryImpls.CraftingEntry(ItemPredicate.Builder.item().of(Items.STICK).build(), EntityPredicate.ANY, 3, "Craft at 8 sticks")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/crafting_task_multi"),
                 "Example of use of a multi crafting task",
                 new ResourceLocation("chests/abandoned_mineshaft"))
@@ -251,7 +251,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .setRepeatDelay("1d")
                 .withIcon(new ItemStack(Items.FISHING_ROD))
-                .addTaskEntry("cod", new QuestEntryImpls.FishingEntry(ItemPredicate.Builder.item().of(Items.COD).build(), null, 5, "Fish 5 cods")));
+                .addTaskEntry("cod", new QuestEntryImpls.FishingEntry(ItemPredicate.Builder.item().of(Items.COD).build(), EntityPredicate.ANY, 5, "Fish 5 cods")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/fishing_task_multi"),
                 "Example of use of a fishing task",
                 new ResourceLocation("chests/abandoned_mineshaft"))

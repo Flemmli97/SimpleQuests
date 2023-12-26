@@ -24,14 +24,14 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:cod"
         ]
       },
       "description": "Give 15 cods",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

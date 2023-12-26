@@ -15,25 +15,25 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:cod"
         ]
       },
       "description": "Give 15 cods",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     },
     "fish_2": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:salmon"
         ]
       },
       "description": "Give 15 salmon",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

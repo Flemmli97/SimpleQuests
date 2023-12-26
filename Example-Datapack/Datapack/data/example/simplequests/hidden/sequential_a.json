@@ -16,14 +16,14 @@
   "submission_trigger": "",
   "entries": {
     "andesite": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:andesite"
         ]
       },
       "description": "Give 15 andesite",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

@@ -15,14 +15,14 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
+      "amount": 5,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:cod"
         ]
       },
       "description": "Give 5 cods",
-      "amount": 5,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

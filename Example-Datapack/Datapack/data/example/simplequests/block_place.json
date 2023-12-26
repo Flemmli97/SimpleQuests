@@ -15,13 +15,13 @@
   "submission_trigger": "",
   "entries": {
     "place": {
+      "amount": 3,
+      "use": true,
       "item": {
         "items": [
           "minecraft:emerald_block"
         ]
       },
-      "amount": 3,
-      "use": true,
       "consumeItem": false,
       "description": "Place 3 emerald blocks",
       "id": "simplequests:block_interact"

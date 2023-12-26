@@ -15,6 +15,8 @@
   "submission_trigger": "",
   "entries": {
     "break": {
+      "amount": 3,
+      "use": false,
       "item": {
         "items": [
           "minecraft:diamond_pickaxe"
@@ -25,8 +27,6 @@
           "minecraft:diamond_ore"
         ]
       },
-      "amount": 3,
-      "use": false,
       "consumeItem": false,
       "description": "Mine diamond ore x3",
       "id": "simplequests:block_interact"
