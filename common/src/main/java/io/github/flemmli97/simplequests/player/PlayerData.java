@@ -58,6 +58,7 @@ public class PlayerData {
     private long dailySeed;
     private final Random questRandom = new Random();
     private final Map<ResourceLocation, Integer> dailyQuestsTracker = new HashMap<>();
+    private final Map<ResourceLocation, Integer> dailyQuestsCategoryTracker = new HashMap<>();
 
     private int interactionCooldown;
 
@@ -203,6 +204,7 @@ public class PlayerData {
             this.unlockTracker.add(id);
             this.dailyQuestsTracker.compute(id, (key, i) -> i == null ? 1 : ++i);
         });
+        this.dailyQuestsTracker.compute(prog.getQuest().category.id, (key, i) -> i == null ? 1 : ++i);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getQuest().category.isSilent)
             this.player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get(this.player, "simplequests.finish"), prog.getTask(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
@@ -278,6 +280,8 @@ public class PlayerData {
         }
         if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
             return AcceptType.DAILYFULL;
+        if (quest.category.maxDaily > 0 && this.dailyQuestsCategoryTracker.getOrDefault(quest.category.id, 0) >= quest.category.maxDaily)
+            return AcceptType.DAILYFULL;
         //One time quests
         if (quest.repeatDelay < 0 && this.cooldownTracker.containsKey(quest.id))
             return AcceptType.ONETIME;
@@ -343,6 +347,7 @@ public class PlayerData {
                     this.reset(r, true, false);
             });
             this.dailyQuestsTracker.clear();
+            this.dailyQuestsCategoryTracker.clear();
             List<Quest> daily = QuestsManager.instance().getDailyQuests().stream().toList();
             this.questRandom.setSeed(this.dailySeed);
             Collections.shuffle(daily, this.questRandom);
@@ -393,6 +398,9 @@ public class PlayerData {
         CompoundTag daily = new CompoundTag();
         this.dailyQuestsTracker.forEach((res, amount) -> daily.putInt(res.toString(), amount));
         tag.put("DailyQuestTracker", daily);
+        CompoundTag dailyCategory = new CompoundTag();
+        this.dailyQuestsCategoryTracker.forEach((res, amount) -> dailyCategory.putInt(res.toString(), amount));
+        tag.put("DailyQuestCategoryTracker", dailyCategory);
         ListTag unlocked = new ListTag();
         this.unlockTracker.forEach(res -> unlocked.add(StringTag.valueOf(res.toString())));
         tag.put("UnlockedQuests", unlocked);
@@ -417,6 +425,8 @@ public class PlayerData {
             this.questTrackerTime = LocalDateTime.parse(tag.getString("TimeTracker"), TIME);
         CompoundTag daily = tag.getCompound("DailyQuestTracker");
         daily.getAllKeys().forEach(key -> this.dailyQuestsTracker.put(new ResourceLocation(key), done.getInt(key)));
+        CompoundTag dailyCategory = tag.getCompound("DailyQuestCategoryTracker");
+        dailyCategory.getAllKeys().forEach(key -> this.dailyQuestsCategoryTracker.put(new ResourceLocation(key), done.getInt(key)));
         ListTag unlocked = tag.getList("UnlockedQuests", Tag.TAG_STRING);
         unlocked.forEach(t -> this.unlockTracker.add(new ResourceLocation(t.getAsString())));
     }
@@ -428,6 +438,8 @@ public class PlayerData {
         this.questTrackerTime = data.questTrackerTime;
         this.dailyQuestsTracker.clear();
         this.dailyQuestsTracker.putAll(data.dailyQuestsTracker);
+        this.dailyQuestsCategoryTracker.clear();
+        this.dailyQuestsCategoryTracker.putAll(data.dailyQuestsCategoryTracker);
         this.hasClient = data.hasClient;
     }
 
@@ -438,6 +450,7 @@ public class PlayerData {
         this.unlockTracker.clear();
         this.questTrackerTime = null;
         this.dailyQuestsTracker.clear();
+        this.dailyQuestsCategoryTracker.clear();
     }
 
     public void resetCooldown() {
