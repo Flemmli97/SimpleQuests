@@ -226,7 +226,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .setRepeatDelay("1w:5d:3h:2m")
                 .withIcon(new ItemStack(Items.EMERALD_BLOCK))
                 .addTaskEntry("place", new QuestEntryMultiImpl.MultiBlockInteractEntry(List.of(
-                        Pair.of(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), "emerald")), List.of(), UniformGenerator.between(3, 5), true, false,
+                        Pair.of(ItemPredicate.Builder.item().of(Items.EMERALD_BLOCK).build(), "emerald")), List.of(), UniformGenerator.between(3, 5), true, false, false,
                         "Place the blocks from the quest", "Place %1$s %3$sx", null)));
 
         //Crafting example

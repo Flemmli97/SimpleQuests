@@ -103,7 +103,7 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.BlockInteractEntry> createBlockInteractionPredicate(ServerPlayer player, BlockPos pos, boolean use) {
         return (name, entry, prog) -> {
-            ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry));
+            ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry, entry.allowDupes()));
             if (!interacted.isApplicable(pos)) {
                 if (!prog.getQuest().category.isSilent)
                     player.sendMessage(new TranslatableComponent(ConfigHandler.LANG.get(player, "simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);

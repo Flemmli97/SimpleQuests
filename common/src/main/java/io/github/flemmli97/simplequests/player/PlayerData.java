@@ -117,7 +117,8 @@ public class PlayerData {
                     completion.put(prog.getQuest().id, QuestCompletionState.COMPLETE);
                 }
                 case PARTIAL_COMPLETE -> completion.put(prog.getQuest().id, QuestCompletionState.PARTIAL);
-                case PARTIAL -> this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                case PARTIAL ->
+                        this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 case NOTHING -> {
                     if (sendFailMessage)
                         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);

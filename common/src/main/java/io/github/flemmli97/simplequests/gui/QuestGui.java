@@ -103,7 +103,8 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
         MutableComponent requirement = switch (type) {
-            case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED -> new TranslatableComponent(ConfigHandler.LANG.get(player, type.langKey())).withStyle(ChatFormatting.DARK_RED);
+            case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
+                    new TranslatableComponent(ConfigHandler.LANG.get(player, type.langKey())).withStyle(ChatFormatting.DARK_RED);
             default -> null;
         };
         if (requirement != null)
