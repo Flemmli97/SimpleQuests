@@ -387,7 +387,8 @@ public class QuestEntryImpls {
         public boolean check(ServerPlayer player, Entity entity) {
             if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
                 return false;
-            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.entityPredicate.matches(player, entity);
+            boolean b = (this.heldItem == null || this.heldItem.matches(player.getMainHandItem())) &&
+                    (this.entityPredicate == null || this.entityPredicate.matches(player, entity));
             if (b && this.consume && !player.isCreative()) {
                 player.getMainHandItem().shrink(1);
             }
@@ -412,8 +413,8 @@ public class QuestEntryImpls {
                         Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
                         Codec.STRING.optionalFieldOf("blockDescription").forGetter(d -> d.blockDescription.isEmpty() ? Optional.empty() : Optional.of(d.blockDescription)),
 
-                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
-                        JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.of(d.blockPredicate)),
+                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.heldItem)),
+                        JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.blockPredicate)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
                         Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
                         JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
@@ -456,7 +457,8 @@ public class QuestEntryImpls {
                 return false;
             if (use != this.use)
                 return false;
-            boolean b = this.heldItem.matches(player.getMainHandItem()) && this.blockPredicate.matches(player.getLevel(), pos);
+            boolean b = (this.heldItem == null || this.heldItem.matches(player.getMainHandItem())) &&
+                    (this.blockPredicate == null || this.blockPredicate.matches(player.getLevel(), pos));
             if (b && this.consumeItem && !player.isCreative()) {
                 player.getMainHandItem().shrink(1);
             }
@@ -474,11 +476,11 @@ public class QuestEntryImpls {
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "crafting");
         public static final Codec<CraftingEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
-                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
+                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.heldDescription)),
+                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.entityDescription)),
 
                         JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
-                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.playerPredicate)),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.playerPredicate)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
                 ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount) -> new CraftingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
 
@@ -508,7 +510,7 @@ public class QuestEntryImpls {
         }
 
         public boolean check(ServerPlayer player, ItemStack stack) {
-            return this.item.matches(stack) && this.playerPredicate.matches(player, player);
+            return this.item.matches(stack) && (this.playerPredicate == null || this.playerPredicate.matches(player, player));
         }
     }
 
@@ -519,11 +521,11 @@ public class QuestEntryImpls {
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "fishing");
         public static final Codec<FishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                        Codec.STRING.optionalFieldOf("itemDescription").forGetter(d -> d.itemDescription.isEmpty() ? Optional.empty() : Optional.of(d.itemDescription)),
-                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
+                        Codec.STRING.optionalFieldOf("itemDescription").forGetter(d -> d.itemDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.itemDescription)),
+                        Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.entityDescription)),
 
                         JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
-                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.playerPredicate)),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.playerPredicate)),
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
                 ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount) -> new FishingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
 
@@ -553,7 +555,7 @@ public class QuestEntryImpls {
         }
 
         public boolean check(ServerPlayer player, ItemStack stack) {
-            return this.item.matches(stack) && this.playerPredicate.matches(player, player);
+            return this.item.matches(stack) && (this.playerPredicate == null || this.playerPredicate.matches(player, player));
         }
     }
 }
