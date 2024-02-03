@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.forge;
 import io.github.flemmli97.simplequests.QuestCommand;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
@@ -60,6 +61,7 @@ public class SimpleQuestForge {
             MinecraftForge.EVENT_BUS.addListener(ForgeClientHandler::login);
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();
+        ProgressionTrackerRegistry.register();
         ConfigHandler.init();
         SimpleQuests.FTB_RANKS = ModList.get().isLoaded("ftbranks");
     }

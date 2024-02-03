@@ -101,11 +101,11 @@ public class LangManager {
         DEFAULT_TRANSLATION.put(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
 
         DEFAULT_TRANSLATION.put("simplequest.quest.progress", "%1$s - %2$s");
-        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.KILL_PROGRESS, "Killed: %1$s/%2$s");
-        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
-        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
-        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
-        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.FISHING_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.KillTracker.KILL_PROGRESS, "Killed: %1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.CraftingTracker.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.BlockTracker.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.EntityTracker.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
+        DEFAULT_TRANSLATION.put(ProgressionTrackerImpl.FishingTracker.FISHING_PROGRESS, "%1$s/%2$s");
     }
 
     private Map<String, String> translation = new HashMap<>();

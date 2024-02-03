@@ -4,6 +4,7 @@ import io.github.flemmli97.simplequests.QuestCommand;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.network.PacketRegistrar;
@@ -47,6 +48,7 @@ public class SimpleQuestsFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> QuestCommand.register(dispatcher)));
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();
+        ProgressionTrackerRegistry.register();
         ConfigHandler.init();
         SimpleQuests.PERMISSION_API = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
         SimpleQuests.FTB_RANKS = FabricLoader.getInstance().isModLoaded("ftbranks");
