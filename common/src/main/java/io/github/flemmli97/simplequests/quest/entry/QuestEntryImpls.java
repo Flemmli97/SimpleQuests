@@ -9,6 +9,7 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.mixin.EntityPredicateAccessor;
 import io.github.flemmli97.simplequests.mixin.ItemPredicateAccessor;
 import io.github.flemmli97.simplequests.player.PlayerData;
+import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
 import io.github.flemmli97.simplequests.player.QuestProgress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -178,7 +179,7 @@ public class QuestEntryImpls {
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
-            return progress.killProgress(player, id);
+            return progress.progressComponent(player, ProgressionTrackerImpl.KillTracker.KEY, id);
         }
     }
 
@@ -379,7 +380,7 @@ public class QuestEntryImpls {
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
-            return progress.interactProgress(player, id);
+            return progress.progressComponent(player, ProgressionTrackerImpl.EntityTracker.KEY, id);
         }
 
         public boolean check(ServerPlayer player, Entity entity) {
@@ -451,7 +452,7 @@ public class QuestEntryImpls {
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
-            return progress.blockInteractProgress(player, id);
+            return progress.progressComponent(player, ProgressionTrackerImpl.BlockTracker.KEY, id);
         }
 
         public boolean check(ServerPlayer player, BlockPos pos, boolean use) {
@@ -507,7 +508,7 @@ public class QuestEntryImpls {
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
-            return progress.craftingProgress(player, id);
+            return progress.progressComponent(player, ProgressionTrackerImpl.CraftingTracker.KEY, id);
         }
 
         public boolean check(ServerPlayer player, ItemStack stack) {
@@ -552,7 +553,7 @@ public class QuestEntryImpls {
         @Nullable
         @Override
         public MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
-            return progress.fishingProgress(player, id);
+            return progress.progressComponent(player, ProgressionTrackerImpl.FishingTracker.KEY, id);
         }
 
         public boolean check(ServerPlayer player, ItemStack stack) {

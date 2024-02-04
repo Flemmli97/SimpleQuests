@@ -10,6 +10,8 @@ import io.github.flemmli97.simplequests.api.QuestCompletionState;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.ProgressionTrackerKey;
+import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
@@ -39,18 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class QuestProgress {
 
     private final List<String> entries = new ArrayList<>();
 
-    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.KillEntry>> killCounter = new HashMap<>();
-    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry>> craftingCounter = new HashMap<>();
-    private final Map<String, ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry>> interactionCounter = new HashMap<>();
-    private final Map<String, ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry>> blockInteractionCounter = new HashMap<>();
-    private final Map<String, ProgressionTracker<Integer, QuestEntryImpls.FishingEntry>> fishingCounter = new HashMap<>();
+    private final Map<ProgressionTrackerKey<?, ?>, Map<String, ProgressionTracker<?, ?>>> progressionTrackers = new HashMap<>();
 
     private final Map<String, Predicate<PlayerData>> tickables = new HashMap<>();
 
@@ -79,7 +76,8 @@ public class QuestProgress {
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.KillEntry> createKillPredicate(ServerPlayer player, LivingEntity entity) {
         return (name, entry, prog) -> {
             if (entry.check(player, entity)) {
-                return prog.killCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createKillTracker(entry)).apply(1);
+                ProgressionTracker<Integer, QuestEntryImpls.KillEntry> track = prog.getOrCreateTracker(ProgressionTrackerImpl.KillTracker.KEY, entry, name);
+                return track.apply(1);
             }
             return false;
         };
@@ -87,7 +85,7 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.EntityInteractEntry> createInteractionPredicate(ServerPlayer player, Entity entity) {
         return (name, entry, prog) -> {
-            ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.interactionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createEntityInteractTracker(entry));
+            ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.getOrCreateTracker(ProgressionTrackerImpl.EntityTracker.KEY, entry, name);
             if (!interacted.isApplicable(entity.getUUID())) {
                 if (!prog.getQuest().category.isSilent)
                     player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
@@ -102,7 +100,7 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.BlockInteractEntry> createBlockInteractionPredicate(ServerPlayer player, BlockPos pos, boolean use) {
         return (name, entry, prog) -> {
-            ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.blockInteractionCounter.computeIfAbsent(name, s -> ProgressionTrackerImpl.createBlockInteractTracker(entry, entry.allowDupes()));
+            ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.getOrCreateTracker(ProgressionTrackerImpl.BlockTracker.KEY, entry, name);
             if (!interacted.isApplicable(pos)) {
                 if (!prog.getQuest().category.isSilent)
                     player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED));
@@ -118,7 +116,8 @@ public class QuestProgress {
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.CraftingEntry> createCraftingPredicate(ServerPlayer player, ItemStack stack, int amount) {
         return (name, entry, prog) -> {
             if (entry.check(player, stack)) {
-                return prog.craftingCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createCraftingTracker(entry)).apply(amount);
+                ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry> track = prog.getOrCreateTracker(ProgressionTrackerImpl.CraftingTracker.KEY, entry, name);
+                return track.apply(amount);
             }
             return false;
         };
@@ -126,9 +125,10 @@ public class QuestProgress {
 
     public static SimpleQuestAPI.QuestEntryPredicate<QuestEntryImpls.FishingEntry> createFishingPredicate(ServerPlayer player, Collection<ItemStack> stacks) {
         return (name, entry, prog) -> {
+            ProgressionTracker<Integer, QuestEntryImpls.FishingEntry> track = prog.getOrCreateTracker(ProgressionTrackerImpl.FishingTracker.KEY, entry, name);
             for (ItemStack stack : stacks) {
                 if (entry.check(player, stack)) {
-                    return prog.fishingCounter.computeIfAbsent(name, (res) -> ProgressionTrackerImpl.createFishingTracker(entry)).apply(1);
+                    return track.apply(1);
                 }
             }
             return false;
@@ -208,7 +208,7 @@ public class QuestProgress {
     }
 
     public QuestCompletionState tryComplete(ServerPlayer player, String trigger) {
-        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
+        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.questEntries.keySet().containsAll(this.entries);
         if (completed && (!(this.getQuest() instanceof CompositeQuest))) {
             QuestBase next = this.getQuest().resolveToQuest(player, this.questIndex + 1);
             if (next != null) {
@@ -230,39 +230,25 @@ public class QuestProgress {
         return ImmutableList.copyOf(this.entries);
     }
 
-    public MutableComponent killProgress(ServerPlayer player, String entry) {
-        ProgressionTracker<Integer, QuestEntryImpls.KillEntry> tracker = this.killCounter.get(entry);
+    public MutableComponent progressComponent(ServerPlayer player, ProgressionTrackerKey<?, ?> key, String entry) {
+        ProgressionTracker<?, ?> tracker = this.getTracker(key, entry);
         if (tracker == null)
             return null;
         return tracker.formattedProgress(player, this);
     }
 
-    public MutableComponent craftingProgress(ServerPlayer player, String entry) {
-        ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry> tracker = this.craftingCounter.get(entry);
-        if (tracker == null)
+    @SuppressWarnings("unchecked")
+    public <T, E extends QuestEntry> ProgressionTracker<T, E> getTracker(ProgressionTrackerKey<T, E> key, String entryName) {
+        Map<String, ProgressionTracker<?, ?>> tracks = this.progressionTrackers.get(key);
+        if (tracks == null)
             return null;
-        return tracker.formattedProgress(player, this);
+        return (ProgressionTracker<T, E>) tracks.get(entryName);
     }
 
-    public MutableComponent interactProgress(ServerPlayer player, String entry) {
-        ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> tracker = this.interactionCounter.get(entry);
-        if (tracker == null)
-            return null;
-        return tracker.formattedProgress(player, this);
-    }
-
-    public MutableComponent blockInteractProgress(ServerPlayer player, String entry) {
-        ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> tracker = this.blockInteractionCounter.get(entry);
-        if (tracker == null)
-            return null;
-        return tracker.formattedProgress(player, this);
-    }
-
-    public MutableComponent fishingProgress(ServerPlayer player, String entry) {
-        ProgressionTracker<Integer, QuestEntryImpls.FishingEntry> tracker = this.fishingCounter.get(entry);
-        if (tracker == null)
-            return null;
-        return tracker.formattedProgress(player, this);
+    @SuppressWarnings("unchecked")
+    public <T, E extends QuestEntry> ProgressionTracker<T, E> getOrCreateTracker(ProgressionTrackerKey<T, E> key, E entry, String entryName) {
+        Map<String, ProgressionTracker<?, ?>> tracks = this.progressionTrackers.computeIfAbsent(key, k -> new HashMap<>());
+        return (ProgressionTracker<T, E>) tracks.computeIfAbsent(entryName, (res) -> ProgressionTrackerRegistry.create(key, entry));
     }
 
     public Pair<Boolean, Set<QuestEntry>> tickProgress(PlayerData data) {
@@ -280,11 +266,7 @@ public class QuestProgress {
 
     public void resetTrackers() {
         this.entries.clear();
-        this.killCounter.clear();
-        this.craftingCounter.clear();
-        this.interactionCounter.clear();
-        this.blockInteractionCounter.clear();
-        this.fishingCounter.clear();
+        this.progressionTrackers.clear();
         this.tickables.clear();
     }
 
@@ -305,21 +287,13 @@ public class QuestProgress {
         this.entries.forEach(res -> list.add(StringTag.valueOf(res)));
         tag.put("FinishedEntries", list);
 
-        CompoundTag kills = new CompoundTag();
-        this.killCounter.forEach((k, v) -> kills.put(k, v.save()));
-        tag.put("KillCounter", kills);
-        CompoundTag crafting = new CompoundTag();
-        this.craftingCounter.forEach((k, v) -> crafting.put(k, v.save()));
-        tag.put("CraftingCounter", crafting);
-        CompoundTag interactions = new CompoundTag();
-        this.interactionCounter.forEach((res, i) -> interactions.put(res, i.save()));
-        tag.put("Interactions", interactions);
-        CompoundTag blockInteractions = new CompoundTag();
-        this.blockInteractionCounter.forEach((res, i) -> blockInteractions.put(res, i.save()));
-        tag.put("BlockInteractions", blockInteractions);
-        CompoundTag fishingCounter = new CompoundTag();
-        this.fishingCounter.forEach((res, i) -> fishingCounter.put(res, i.save()));
-        tag.put("FishingCounter", fishingCounter);
+        CompoundTag progressionTrackers = new CompoundTag();
+        this.progressionTrackers.forEach((key, trackers) -> {
+            CompoundTag trackerTag = new CompoundTag();
+            trackers.forEach((res, i) -> trackerTag.put(res, i.save()));
+            progressionTrackers.put(key.toString(), trackerTag);
+        });
+        tag.put("ProgressionTrackers", progressionTrackers);
         return tag;
     }
 
@@ -352,34 +326,29 @@ public class QuestProgress {
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));
 
-        CompoundTag kills = tag.getCompound("KillCounter");
-        kills.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createKillTracker, this.killCounter, key, kills));
-        CompoundTag crafting = tag.getCompound("CraftingCounter");
-        crafting.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createCraftingTracker, this.craftingCounter, key, crafting));
-        CompoundTag interactions = tag.getCompound("Interactions");
-        interactions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createEntityInteractTracker, this.interactionCounter, key, interactions));
-        CompoundTag blockInteractions = tag.getCompound("BlockInteractions");
-        blockInteractions.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createBlockInteractTracker, this.blockInteractionCounter, key, blockInteractions));
-        CompoundTag fishingCounter = tag.getCompound("FishingCounter");
-        fishingCounter.getAllKeys().forEach(key -> this.loadTracker(ProgressionTrackerImpl::createFishingTracker, this.fishingCounter, key, fishingCounter));
+        CompoundTag progressionTrackers = tag.getCompound("ProgressionTrackers");
+        progressionTrackers.getAllKeys().forEach(key -> {
+            CompoundTag trackers = progressionTrackers.getCompound(key);
+            ProgressionTrackerKey<?, QuestEntry> id = new ProgressionTrackerKey<>(key);
+            Map<String, ProgressionTracker<?, ?>> t = this.progressionTrackers.computeIfAbsent(id, k -> new HashMap<>());
+            trackers.getAllKeys().forEach(entry -> this.loadTracker(id, t, entry, trackers));
+        });
     }
 
-    @SuppressWarnings("unchecked")
-    private <E, F extends QuestEntry, T extends ProgressionTracker<E, F>> void loadTracker(Function<F, T> func, Map<String, T> map, String name, CompoundTag tag) {
+    private void loadTracker(ProgressionTrackerKey<?, QuestEntry> key, Map<String, ProgressionTracker<?, ?>> map, String name, CompoundTag tag) {
         if (this.quest == null) {
             SimpleQuests.LOGGER.error("Quest not set. This shouldn't be!");
             throw new IllegalStateException();
         }
         try {
-            T entry = func.apply((F) this.questEntries.get(name));
-            entry.load(tag.get(name));
+            ProgressionTracker<?, QuestEntry> entry = ProgressionTrackerRegistry.deserialize(key, this.questEntries.get(name), tag.get(name));
             map.putIfAbsent(name, entry);
         } catch (ClassCastException e) {
             SimpleQuests.LOGGER.error("Couldn't find quest entry for tracker {}", name);
         }
     }
 
-    enum SubmitType {
+    public enum SubmitType {
         COMPLETE,
         PARTIAL,
         PARTIAL_COMPLETE,

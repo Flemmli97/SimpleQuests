@@ -3,10 +3,10 @@ package io.github.flemmli97.simplequests.player;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.datapack.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -25,248 +25,256 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
 
     private final E questEntry;
 
-    public static final String FISHING_PROGRESS = QuestEntryImpls.FishingEntry.ID + ".progress";
+    public static class FishingTracker extends ProgressionTrackerImpl<Integer, QuestEntryImpls.FishingEntry> {
 
-    public static ProgressionTracker<Integer, QuestEntryImpls.FishingEntry> createFishingTracker(QuestEntryImpls.FishingEntry entry) {
-        return new ProgressionTrackerImpl<>(entry) {
-            private int value = 0;
+        public static final String FISHING_PROGRESS = QuestEntryImpls.FishingEntry.ID + ".progress";
+        public static final ProgressionTrackerKey<Integer, QuestEntryImpls.FishingEntry> KEY = new ProgressionTrackerKey<>(SimpleQuests.MODID, "fishing_tracker");
+        private int value = 0;
 
-            @Override
-            public boolean isApplicable(Integer value) {
-                return true;
+        public FishingTracker(QuestEntryImpls.FishingEntry questEntry) {
+            super(questEntry);
+        }
+
+        @Override
+        public boolean isApplicable(Integer value) {
+            return true;
+        }
+
+        @Override
+        public boolean apply(Integer value) {
+            this.value += value;
+            return this.value >= this.questEntry().amount();
+        }
+
+        @Override
+        public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+            float perc = this.value / (float) this.questEntry().amount();
+            ChatFormatting form = ChatFormatting.DARK_GREEN;
+            if (perc <= 0.35) {
+                form = ChatFormatting.DARK_RED;
+            } else if (perc <= 0.7) {
+                form = ChatFormatting.GOLD;
             }
+            return Component.translatable(ConfigHandler.LANG.get(player, FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        }
 
-            @Override
-            public boolean apply(Integer value) {
-                this.value += value;
-                return this.value >= this.questEntry().amount();
-            }
+        @Override
+        public Tag save() {
+            return IntTag.valueOf(this.value);
+        }
 
-            @Override
-            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.value / (float) this.questEntry().amount();
-                ChatFormatting form = ChatFormatting.DARK_GREEN;
-                if (perc <= 0.35) {
-                    form = ChatFormatting.DARK_RED;
-                } else if (perc <= 0.7) {
-                    form = ChatFormatting.GOLD;
-                }
-                return Component.translatable(ConfigHandler.LANG.get(player, FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        @Override
+        public void load(Tag tag) {
+            try {
+                this.value = ((NumericTag) tag).getAsInt();
+            } catch (ClassCastException ignored) {
             }
-
-            @Override
-            public Tag save() {
-                return IntTag.valueOf(this.value);
-            }
-
-            @Override
-            public void load(Tag tag) {
-                try {
-                    this.value = ((NumericTag) tag).getAsInt();
-                } catch (ClassCastException ignored) {
-                }
-            }
-        };
+        }
     }
 
-    public static final String KILL_PROGRESS = QuestEntryImpls.KillEntry.ID + ".progress";
+    public static class KillTracker extends ProgressionTrackerImpl<Integer, QuestEntryImpls.KillEntry> {
 
-    public static ProgressionTracker<Integer, QuestEntryImpls.KillEntry> createKillTracker(QuestEntryImpls.KillEntry entry) {
-        return new ProgressionTrackerImpl<>(entry) {
+        public static final String KILL_PROGRESS = QuestEntryImpls.KillEntry.ID + ".progress";
+        public static final ProgressionTrackerKey<Integer, QuestEntryImpls.KillEntry> KEY = new ProgressionTrackerKey<>(SimpleQuests.MODID, "kill_tracker");
 
-            private int value = 0;
+        private int value = 0;
 
-            @Override
-            public boolean isApplicable(Integer value) {
-                return true;
+        public KillTracker(QuestEntryImpls.KillEntry questEntry) {
+            super(questEntry);
+        }
+
+        @Override
+        public boolean isApplicable(Integer value) {
+            return true;
+        }
+
+        @Override
+        public boolean apply(Integer value) {
+            this.value += value;
+            return this.value >= this.questEntry().amount();
+        }
+
+        @Override
+        public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+            float perc = this.value / (float) this.questEntry().amount();
+            ChatFormatting form = ChatFormatting.DARK_GREEN;
+            if (perc <= 0.35) {
+                form = ChatFormatting.DARK_RED;
+            } else if (perc <= 0.7) {
+                form = ChatFormatting.GOLD;
             }
+            return Component.translatable(ConfigHandler.LANG.get(player, KILL_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        }
 
-            @Override
-            public boolean apply(Integer value) {
-                this.value += value;
-                return this.value >= this.questEntry().amount();
-            }
+        @Override
+        public Tag save() {
+            return IntTag.valueOf(this.value);
+        }
 
-            @Override
-            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.value / (float) this.questEntry().amount();
-                ChatFormatting form = ChatFormatting.DARK_GREEN;
-                if (perc <= 0.35) {
-                    form = ChatFormatting.DARK_RED;
-                } else if (perc <= 0.7) {
-                    form = ChatFormatting.GOLD;
-                }
-                return Component.translatable(ConfigHandler.LANG.get(player, KILL_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        @Override
+        public void load(Tag tag) {
+            try {
+                this.value = ((NumericTag) tag).getAsInt();
+            } catch (ClassCastException ignored) {
             }
-
-            @Override
-            public Tag save() {
-                return IntTag.valueOf(this.value);
-            }
-
-            @Override
-            public void load(Tag tag) {
-                try {
-                    this.value = ((NumericTag) tag).getAsInt();
-                } catch (ClassCastException ignored) {
-                }
-            }
-        };
+        }
     }
 
-    public static final String CRAFTING_PROGRESS = QuestEntryImpls.CraftingEntry.ID + ".progress";
+    public static class CraftingTracker extends ProgressionTrackerImpl<Integer, QuestEntryImpls.CraftingEntry> {
 
-    public static ProgressionTracker<Integer, QuestEntryImpls.CraftingEntry> createCraftingTracker(QuestEntryImpls.CraftingEntry entry) {
-        return new ProgressionTrackerImpl<>(entry) {
-            private int value = 0;
+        public static final String CRAFTING_PROGRESS = QuestEntryImpls.CraftingEntry.ID + ".progress";
+        public static final ProgressionTrackerKey<Integer, QuestEntryImpls.CraftingEntry> KEY = new ProgressionTrackerKey<>(SimpleQuests.MODID, "crafting_tracker");
 
-            @Override
-            public boolean isApplicable(Integer value) {
-                return true;
+        private int value = 0;
+
+        public CraftingTracker(QuestEntryImpls.CraftingEntry questEntry) {
+            super(questEntry);
+        }
+
+        @Override
+        public boolean isApplicable(Integer value) {
+            return true;
+        }
+
+        @Override
+        public boolean apply(Integer value) {
+            this.value += value;
+            return this.value >= this.questEntry().amount();
+        }
+
+        @Override
+        public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+            float perc = this.value / (float) this.questEntry().amount();
+            ChatFormatting form = ChatFormatting.DARK_GREEN;
+            if (perc <= 0.35) {
+                form = ChatFormatting.DARK_RED;
+            } else if (perc <= 0.7) {
+                form = ChatFormatting.GOLD;
             }
+            return Component.translatable(ConfigHandler.LANG.get(player, CRAFTING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        }
 
-            @Override
-            public boolean apply(Integer value) {
-                this.value += value;
-                return this.value >= this.questEntry().amount();
-            }
+        @Override
+        public Tag save() {
+            return IntTag.valueOf(this.value);
+        }
 
-            @Override
-            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.value / (float) this.questEntry().amount();
-                ChatFormatting form = ChatFormatting.DARK_GREEN;
-                if (perc <= 0.35) {
-                    form = ChatFormatting.DARK_RED;
-                } else if (perc <= 0.7) {
-                    form = ChatFormatting.GOLD;
-                }
-                return Component.translatable(ConfigHandler.LANG.get(player, CRAFTING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+        @Override
+        public void load(Tag tag) {
+            try {
+                this.value = ((NumericTag) tag).getAsInt();
+            } catch (ClassCastException ignored) {
             }
-
-            @Override
-            public Tag save() {
-                return IntTag.valueOf(this.value);
-            }
-
-            @Override
-            public void load(Tag tag) {
-                try {
-                    this.value = ((NumericTag) tag).getAsInt();
-                } catch (ClassCastException ignored) {
-                }
-            }
-        };
+        }
     }
 
-    public static final String BLOCK_INTERACT_PROGRESS = QuestEntryImpls.BlockInteractEntry.ID + ".progress";
+    public static class BlockTracker extends ProgressionTrackerImpl<BlockPos, QuestEntryImpls.BlockInteractEntry> {
 
-    public static ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> createBlockInteractTracker(QuestEntryImpls.BlockInteractEntry entry) {
-        return createBlockInteractTracker(entry, false);
+        public static final String BLOCK_INTERACT_PROGRESS = QuestEntryImpls.BlockInteractEntry.ID + ".progress";
+        public static final ProgressionTrackerKey<BlockPos, QuestEntryImpls.BlockInteractEntry> KEY = new ProgressionTrackerKey<>(SimpleQuests.MODID, "block_tracker");
+
+        private final Set<BlockPos> pos = new HashSet<>();
+        private int amount;
+        private final boolean allowDupes;
+
+        public BlockTracker(QuestEntryImpls.BlockInteractEntry questEntry) {
+            super(questEntry);
+            this.allowDupes = questEntry.allowDupes();
+        }
+
+        @Override
+        public boolean isApplicable(BlockPos value) {
+            return this.allowDupes || !this.pos.contains(value);
+        }
+
+        @Override
+        public boolean apply(BlockPos value) {
+            if (this.allowDupes || !this.pos.contains(value)) {
+                this.pos.add(value);
+                this.amount++;
+            }
+            return this.amount >= this.questEntry().amount();
+        }
+
+        @Override
+        public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+            float perc = this.amount / (float) this.questEntry().amount();
+            ChatFormatting form = ChatFormatting.DARK_GREEN;
+            if (perc <= 0.35) {
+                form = ChatFormatting.DARK_RED;
+            } else if (perc <= 0.7) {
+                form = ChatFormatting.GOLD;
+            }
+            return Component.translatable(ConfigHandler.LANG.get(player, BLOCK_INTERACT_PROGRESS), this.pos.size(), this.questEntry().amount()).withStyle(form);
+        }
+
+        @Override
+        public Tag save() {
+            ListTag list = new ListTag();
+            this.pos.forEach(pos -> list.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
+                    .getOrThrow(false, SimpleQuests.LOGGER::error)));
+            return list;
+        }
+
+        @Override
+        public void load(Tag tag) {
+            try {
+                ListTag list = (ListTag) tag;
+                list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.LOGGER::error)));
+            } catch (ClassCastException ignored) {
+            }
+        }
     }
 
-    public static ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> createBlockInteractTracker(QuestEntryImpls.BlockInteractEntry entry, boolean allowDupe) {
-        return new ProgressionTrackerImpl<>(entry) {
+    public static class EntityTracker extends ProgressionTrackerImpl<UUID, QuestEntryImpls.EntityInteractEntry> {
 
-            private final Set<BlockPos> pos = new HashSet<>();
-            private int amount;
-            private boolean allowDupes = allowDupe;
+        public static final String ENTITY_INTERACT_PROGRESS = QuestEntryImpls.EntityInteractEntry.ID + ".progress";
+        public static final ProgressionTrackerKey<UUID, QuestEntryImpls.EntityInteractEntry> KEY = new ProgressionTrackerKey<>(SimpleQuests.MODID, "entity_tracker");
 
-            @Override
-            public boolean isApplicable(BlockPos value) {
-                return this.allowDupes || !this.pos.contains(value);
+        private final Set<UUID> entities = new HashSet<>();
+
+        public EntityTracker(QuestEntryImpls.EntityInteractEntry questEntry) {
+            super(questEntry);
+        }
+
+        @Override
+        public boolean isApplicable(UUID value) {
+            return !this.entities.contains(value);
+        }
+
+        @Override
+        public boolean apply(UUID value) {
+            this.entities.add(value);
+            return this.entities.size() >= this.questEntry().amount();
+        }
+
+        @Override
+        public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
+            float perc = this.entities.size() / (float) this.questEntry().amount();
+            ChatFormatting form = ChatFormatting.DARK_GREEN;
+            if (perc <= 0.35) {
+                form = ChatFormatting.DARK_RED;
+            } else if (perc <= 0.7) {
+                form = ChatFormatting.GOLD;
             }
+            return Component.translatable(ConfigHandler.LANG.get(player, ENTITY_INTERACT_PROGRESS), this.entities.size(), this.questEntry().amount()).withStyle(form);
+        }
 
-            @Override
-            public boolean apply(BlockPos value) {
-                if (this.allowDupes || !this.pos.contains(value)) {
-                    this.pos.add(value);
-                    this.amount++;
-                }
-                return this.amount >= this.questEntry().amount();
+        @Override
+        public Tag save() {
+            ListTag list = new ListTag();
+            this.entities.forEach(uuid -> list.add(NbtUtils.createUUID(uuid)));
+            return list;
+        }
+
+        @Override
+        public void load(Tag tag) {
+            try {
+                ListTag list = (ListTag) tag;
+                list.forEach(t -> this.entities.add(NbtUtils.loadUUID(t)));
+            } catch (ClassCastException ignored) {
             }
-
-            @Override
-            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.amount / (float) this.questEntry().amount();
-                ChatFormatting form = ChatFormatting.DARK_GREEN;
-                if (perc <= 0.35) {
-                    form = ChatFormatting.DARK_RED;
-                } else if (perc <= 0.7) {
-                    form = ChatFormatting.GOLD;
-                }
-                return Component.translatable(ConfigHandler.LANG.get(player, BLOCK_INTERACT_PROGRESS), this.pos.size(), this.questEntry().amount()).withStyle(form);
-            }
-
-            @Override
-            public Tag save() {
-                CompoundTag tag = new CompoundTag();
-                ListTag list = new ListTag();
-                this.pos.forEach(pos -> list.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
-                        .getOrThrow(false, SimpleQuests.LOGGER::error)));
-                tag.put("Pos", list);
-                tag.putBoolean("Dupes", this.allowDupes);
-                return list;
-            }
-
-            @Override
-            public void load(Tag tag) {
-                try {
-                    CompoundTag compoundTag = (CompoundTag) tag;
-                    ListTag list = compoundTag.getList("Pos", Tag.TAG_INT_ARRAY);
-                    list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.LOGGER::error)));
-                    this.allowDupes = compoundTag.getBoolean("Dupes");
-                } catch (ClassCastException ignored) {
-                }
-            }
-        };
-    }
-
-    public static final String ENTITY_INTERACT_PROGRESS = QuestEntryImpls.EntityInteractEntry.ID + ".progress";
-
-    public static ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> createEntityInteractTracker(QuestEntryImpls.EntityInteractEntry entry) {
-        return new ProgressionTrackerImpl<>(entry) {
-
-            private final Set<UUID> entities = new HashSet<>();
-
-            @Override
-            public boolean isApplicable(UUID value) {
-                return !this.entities.contains(value);
-            }
-
-            @Override
-            public boolean apply(UUID value) {
-                this.entities.add(value);
-                return this.entities.size() >= this.questEntry().amount();
-            }
-
-            @Override
-            public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.entities.size() / (float) this.questEntry().amount();
-                ChatFormatting form = ChatFormatting.DARK_GREEN;
-                if (perc <= 0.35) {
-                    form = ChatFormatting.DARK_RED;
-                } else if (perc <= 0.7) {
-                    form = ChatFormatting.GOLD;
-                }
-                return Component.translatable(ConfigHandler.LANG.get(player, ENTITY_INTERACT_PROGRESS), this.entities.size(), this.questEntry().amount()).withStyle(form);
-            }
-
-            @Override
-            public Tag save() {
-                ListTag list = new ListTag();
-                this.entities.forEach(uuid -> list.add(NbtUtils.createUUID(uuid)));
-                return list;
-            }
-
-            @Override
-            public void load(Tag tag) {
-                try {
-                    ListTag list = (ListTag) tag;
-                    list.forEach(t -> this.entities.add(NbtUtils.loadUUID(t)));
-                } catch (ClassCastException ignored) {
-                }
-            }
-        };
+        }
     }
 
     public ProgressionTrackerImpl(E questEntry) {
