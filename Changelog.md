@@ -1,3 +1,9 @@
+Simple Quests 1.5.4
+================
+- Fix nullpointer with some predicates
+- Expand block interaction entries to allow interaction with blocks at the same position
+- Progression trackers changed to a registry system to be more expandable
+
 Simple Quests 1.5.3
 ================
 - Add category daily limit: 
