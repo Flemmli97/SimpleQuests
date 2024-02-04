@@ -45,7 +45,7 @@ import java.util.function.Predicate;
 
 public class QuestProgress {
 
-    private final List<String> entries = new ArrayList<>();
+    private final Set<String> entries = new HashSet<>();
 
     private final Map<ProgressionTrackerKey<?, ?>, Map<String, ProgressionTracker<?, ?>>> progressionTrackers = new HashMap<>();
 
@@ -208,7 +208,7 @@ public class QuestProgress {
     }
 
     public QuestCompletionState tryComplete(ServerPlayer player, String trigger) {
-        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.questEntries.keySet().containsAll(this.entries);
+        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
         if (completed && (!(this.getQuest() instanceof CompositeQuest))) {
             QuestBase next = this.getQuest().resolveToQuest(player, this.questIndex + 1);
             if (next != null) {
