@@ -276,27 +276,29 @@ public class QuestEntryMultiImpl {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "multi_block_interaction");
         public static final Codec<MultiBlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
-                        Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
+                instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
+                        Codec.BOOL.optionalFieldOf("allowDupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty()),
                         Codec.STRING.fieldOf("description").forGetter(d -> d.description),
                         Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
+
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
+                        Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
 
                         Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ITEM_PREDICATE_CODEC, Codec.unit(e))).listOf()
                                 .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
                         Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.BLOCK_PREDICATE_CODEC, Codec.unit(e))).listOf()
                                 .optionalFieldOf("blockPredicates").forGetter(d -> d.blockPredicates.isEmpty() ? Optional.empty() : Optional.of(d.blockPredicates)),
-                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
-                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
-                ).apply(instance, (use, consume, desc, taskDescription, item, pred, amount, player) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, desc, taskDescription, player.orElse(null))));
+                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
+                ).apply(instance, (consume, allowDupes, desc, taskDescription, player, use, item, pred, amount) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, allowDupes.orElse(false), desc, taskDescription, player.orElse(null))));
 
         private final List<Pair<ItemPredicate, String>> heldItems;
         private final List<Pair<BlockPredicate, String>> blockPredicates;
         private final NumberProvider amount;
-        private final boolean use, consume;
+        private final boolean use, consume, allowDupes;
         private final String taskDescription;
         private final EntityPredicate playerPredicate;
 
-        public MultiBlockInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<BlockPredicate, String>> blockPredicates, NumberProvider amount, boolean use, boolean consume, String description, String taskDescription, EntityPredicate playerPredicate) {
+        public MultiBlockInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<BlockPredicate, String>> blockPredicates, NumberProvider amount, boolean use, boolean consume, boolean allowDupes, String description, String taskDescription, EntityPredicate playerPredicate) {
             super(description);
             List<Pair<ItemPredicate, String>> held = heldItems.stream().filter(p -> p.getFirst() != ItemPredicate.ANY).toList();
             List<Pair<BlockPredicate, String>> block = blockPredicates.stream().filter(p -> p.getFirst() != BlockPredicate.ANY).toList();
@@ -307,6 +309,7 @@ public class QuestEntryMultiImpl {
             this.amount = amount;
             this.use = use;
             this.consume = consume;
+            this.allowDupes = allowDupes;
             this.taskDescription = taskDescription;
             this.playerPredicate = playerPredicate;
         }
@@ -325,7 +328,7 @@ public class QuestEntryMultiImpl {
                 val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
                 entity = this.blockPredicates.isEmpty() ? Pair.of(BlockPredicate.ANY, "") : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
             }
-            return new QuestEntryImpls.BlockInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.use, this.consume, this.taskDescription, val.getSecond(), entity.getSecond(), this.playerPredicate);
+            return new QuestEntryImpls.BlockInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.use, this.consume, this.allowDupes, this.taskDescription, val.getSecond(), entity.getSecond(), this.playerPredicate);
         }
     }
 

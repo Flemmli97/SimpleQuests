@@ -6,6 +6,7 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -160,24 +161,33 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
     public static final String BLOCK_INTERACT_PROGRESS = QuestEntryImpls.BlockInteractEntry.ID + ".progress";
 
     public static ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> createBlockInteractTracker(QuestEntryImpls.BlockInteractEntry entry) {
+        return createBlockInteractTracker(entry, false);
+    }
+
+    public static ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> createBlockInteractTracker(QuestEntryImpls.BlockInteractEntry entry, boolean allowDupe) {
         return new ProgressionTrackerImpl<>(entry) {
 
             private final Set<BlockPos> pos = new HashSet<>();
+            private int amount;
+            private boolean allowDupes = allowDupe;
 
             @Override
             public boolean isApplicable(BlockPos value) {
-                return !this.pos.contains(value);
+                return this.allowDupes || !this.pos.contains(value);
             }
 
             @Override
             public boolean apply(BlockPos value) {
-                this.pos.add(value);
-                return this.pos.size() >= this.questEntry().amount();
+                if (this.allowDupes || !this.pos.contains(value)) {
+                    this.pos.add(value);
+                    this.amount++;
+                }
+                return this.amount >= this.questEntry().amount();
             }
 
             @Override
             public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
-                float perc = this.pos.size() / (float) this.questEntry().amount();
+                float perc = this.amount / (float) this.questEntry().amount();
                 ChatFormatting form = ChatFormatting.DARK_GREEN;
                 if (perc <= 0.35) {
                     form = ChatFormatting.DARK_RED;
@@ -189,17 +199,22 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
 
             @Override
             public Tag save() {
+                CompoundTag tag = new CompoundTag();
                 ListTag list = new ListTag();
                 this.pos.forEach(pos -> list.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
                         .getOrThrow(false, SimpleQuests.LOGGER::error)));
+                tag.put("Pos", list);
+                tag.putBoolean("Dupes", this.allowDupes);
                 return list;
             }
 
             @Override
             public void load(Tag tag) {
                 try {
-                    ListTag list = (ListTag) tag;
+                    CompoundTag compoundTag = (CompoundTag) tag;
+                    ListTag list = compoundTag.getList("Pos", Tag.TAG_INT_ARRAY);
                     list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuests.LOGGER::error)));
+                    this.allowDupes = compoundTag.getBoolean("Dupes");
                 } catch (ClassCastException ignored) {
                 }
             }

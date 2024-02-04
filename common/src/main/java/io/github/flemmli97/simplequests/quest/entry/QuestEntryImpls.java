@@ -400,31 +400,37 @@ public class QuestEntryImpls {
      * @param use If the player should use (right click) or break the block
      */
     public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
-                                     boolean consumeItem, String description, String heldDescription,
+                                     boolean consumeItem, boolean allowDupes, String description,
+                                     String heldDescription,
                                      String blockDescription,
                                      EntityPredicate playerPredicate) implements QuestEntry {
 
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "block_interact");
         public static final Codec<BlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                        Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                instance.group(Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
                         Codec.STRING.optionalFieldOf("blockDescription").forGetter(d -> d.blockDescription.isEmpty() ? Optional.empty() : Optional.of(d.blockDescription)),
 
-                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.heldItem)),
                         JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.blockPredicate)),
+                        Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
+                        JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.heldItem)),
+
                         ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
                         Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
-                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
-                ).apply(instance, (consume, desc, heldDesc, blockDescription, item, block, amount, use, player) -> {
-                    if (item.isEmpty() && block.isEmpty())
+                        Codec.BOOL.optionalFieldOf("allowDupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty())
+                ).apply(instance, (heldDesc, blockDescription, block, consume, desc, player, item, amount, use, allowDupes) -> {
+                    ItemPredicate itemPredicate = item.orElse(ItemPredicate.ANY);
+                    BlockPredicate blockPredicate = block.orElse(BlockPredicate.ANY);
+                    if (itemPredicate == ItemPredicate.ANY && blockPredicate == BlockPredicate.ANY)
                         throw new IllegalStateException("Either item or block has to be defined");
-                    return new BlockInteractEntry(item.orElse(null), block.orElse(null), amount, use, consume, desc, heldDesc.orElse(""), blockDescription.orElse(""), player.orElse(null));
+                    return new BlockInteractEntry(item.orElse(null), block.orElse(null), amount, use, consume, allowDupes.orElse(false), desc, heldDesc.orElse(""), blockDescription.orElse(""), player.orElse(null));
                 }));
 
         public BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPredicate, int amount, boolean use,
                                   boolean consumeItem, String description) {
-            this(heldItem, blockPredicate, amount, use, consumeItem, description, "", "", null);
+            this(heldItem, blockPredicate, amount, use, false, consumeItem, description, "", "", null);
         }
 
         @Override
