@@ -64,7 +64,8 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         if (QuestsManager.instance().categories().size() == 1)
             QuestGui.openGui(player, QuestsManager.instance().categories().get(0), false, 0);
-        QuestCategoryGui.openGui(player);
+        else
+            QuestCategoryGui.openGui(player);
         return Command.SINGLE_SUCCESS;
     }
 
