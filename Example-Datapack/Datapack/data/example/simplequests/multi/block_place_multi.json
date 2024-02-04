@@ -15,7 +15,6 @@
   "submission_trigger": "",
   "entries": {
     "place": {
-      "taskDescription": "Place %1$s %3$sx",
       "itemPredicates": [
         {
           "description": "emerald",
@@ -34,6 +33,7 @@
       "use": true,
       "consume": false,
       "description": "Place the blocks from the quest",
+      "taskDescription": "Place %1$s %3$sx",
       "id": "simplequests:multi_block_interaction"
     }
   },

@@ -31,18 +31,21 @@ public class QuestEntryMultiImpl {
                 instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "predicates cant' be empty").fieldOf("predicates").forGetter(d -> d.predicate),
                         JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
                         Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
-                ).apply(instance, (pred, amount, consume, desc) -> new MultiItemEntry(pred, amount, desc, consume)));
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (pred, amount, consume, desc, player) -> new MultiItemEntry(pred, amount, desc, consume, player.orElse(null))));
 
         private final List<Either<ItemPredicate, Pair<ItemPredicate, String>>> predicate;
         private final NumberProvider amount;
         private final boolean consumeItems;
+        private final EntityPredicate playerPredicate;
 
-        public MultiItemEntry(List<Either<ItemPredicate, Pair<ItemPredicate, String>>> predicate, NumberProvider amount, String description, boolean consumeItems) {
+        public MultiItemEntry(List<Either<ItemPredicate, Pair<ItemPredicate, String>>> predicate, NumberProvider amount, String description, boolean consumeItems, EntityPredicate playerPredicate) {
             super(description);
             this.predicate = predicate;
             this.amount = amount;
             this.consumeItems = consumeItems;
+            this.playerPredicate = playerPredicate;
         }
 
         @Override
@@ -55,7 +58,7 @@ public class QuestEntryMultiImpl {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<ItemPredicate, Pair<ItemPredicate, String>> val = this.predicate.get(ctx.getRandom().nextInt(this.predicate.size()));
             return new QuestEntryImpls.ItemEntry(val.map(e -> e, Pair::getFirst),
-                    this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond), this.consumeItems);
+                    this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond), this.consumeItems, this.playerPredicate);
         }
     }
 
@@ -65,16 +68,19 @@ public class QuestEntryMultiImpl {
         public static final Codec<MultiKillEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.ENTITY_PREDICATE_CODEC, "predicates can't be empty").fieldOf("predicates").forGetter(d -> d.predicate),
                         JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
                 ).apply(instance, MultiKillEntry::new));
 
         private final List<Either<EntityPredicate, Pair<EntityPredicate, String>>> predicate;
         private final NumberProvider amount;
+        private final EntityPredicate playerPredicate;
 
-        public MultiKillEntry(List<Either<EntityPredicate, Pair<EntityPredicate, String>>> predicate, NumberProvider amount, String description) {
+        public MultiKillEntry(List<Either<EntityPredicate, Pair<EntityPredicate, String>>> predicate, NumberProvider amount, String description, Optional<EntityPredicate> player) {
             super(description);
             this.predicate = predicate;
             this.amount = amount;
+            this.playerPredicate = player.orElse(null);
         }
 
         @Override
@@ -87,7 +93,7 @@ public class QuestEntryMultiImpl {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<EntityPredicate, Pair<EntityPredicate, String>> val = this.predicate.get(ctx.getRandom().nextInt(this.predicate.size()));
             return new QuestEntryImpls.KillEntry(val.map(e -> e, Pair::getFirst),
-                    this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond));
+                    this.amount.getInt(ctx), val.map(e -> "", Pair::getSecond), this.playerPredicate);
         }
     }
 
@@ -96,14 +102,17 @@ public class QuestEntryMultiImpl {
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "multi_xp");
         public static final Codec<XPRangeEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
                 ).apply(instance, XPRangeEntry::new));
 
         private final NumberProvider amount;
+        private final EntityPredicate playerPredicate;
 
-        public XPRangeEntry(NumberProvider amount, String description) {
+        public XPRangeEntry(NumberProvider amount, String description, Optional<EntityPredicate> player) {
             super(description);
             this.amount = amount;
+            this.playerPredicate = player.orElse(null);
         }
 
         @Override
@@ -114,7 +123,7 @@ public class QuestEntryMultiImpl {
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
-            return new QuestEntryImpls.XPEntry(this.amount.getInt(ctx));
+            return new QuestEntryImpls.XPEntry(this.amount.getInt(ctx), this.playerPredicate);
         }
     }
 
@@ -124,16 +133,19 @@ public class QuestEntryMultiImpl {
         public static final Codec<MultiAdvancementEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.nonEmptyList(ResourceLocation.CODEC, "advancements list can't be empty").fieldOf("advancements").forGetter(d -> d.advancements),
                         Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
                 ).apply(instance, MultiAdvancementEntry::new));
 
         private final List<ResourceLocation> advancements;
         private final boolean reset;
+        private final EntityPredicate playerPredicate;
 
-        public MultiAdvancementEntry(List<ResourceLocation> advancements, boolean reset, String description) {
+        public MultiAdvancementEntry(List<ResourceLocation> advancements, boolean reset, String description, Optional<EntityPredicate> player) {
             super(description);
             this.advancements = advancements;
             this.reset = reset;
+            this.playerPredicate = player.orElse(null);
         }
 
         @Override
@@ -144,7 +156,7 @@ public class QuestEntryMultiImpl {
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
-            return new QuestEntryImpls.AdvancementEntry(this.advancements.get(ctx.getRandom().nextInt(this.advancements.size())), this.reset);
+            return new QuestEntryImpls.AdvancementEntry(this.advancements.get(ctx.getRandom().nextInt(this.advancements.size())), this.reset, this.playerPredicate);
         }
     }
 
@@ -154,16 +166,19 @@ public class QuestEntryMultiImpl {
         public static final Codec<MultiPositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.BLOCK_POS_CODEC, "positions can't be empty").fieldOf("positions").forGetter(d -> d.positions),
                         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
                 ).apply(instance, MultiPositionEntry::new));
 
         private final List<Either<BlockPos, Pair<BlockPos, String>>> positions;
         private final int minDist;
+        private final EntityPredicate playerPredicate;
 
-        public MultiPositionEntry(List<Either<BlockPos, Pair<BlockPos, String>>> positions, int minDist, String description) {
+        public MultiPositionEntry(List<Either<BlockPos, Pair<BlockPos, String>>> positions, int minDist, String description, Optional<EntityPredicate> player) {
             super(description);
             this.positions = positions;
             this.minDist = minDist;
+            this.playerPredicate = player.orElse(null);
         }
 
         @Override
@@ -175,7 +190,7 @@ public class QuestEntryMultiImpl {
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Either<BlockPos, Pair<BlockPos, String>> val = this.positions.get(ctx.getRandom().nextInt(this.positions.size()));
-            return new QuestEntryImpls.PositionEntry(val.map(e -> e, Pair::getFirst), this.minDist, val.map(e -> "", Pair::getSecond));
+            return new QuestEntryImpls.PositionEntry(val.map(e -> e, Pair::getFirst), this.minDist, val.map(e -> "", Pair::getSecond), this.playerPredicate);
         }
     }
 
@@ -184,14 +199,17 @@ public class QuestEntryMultiImpl {
         public static final ResourceLocation ID = new ResourceLocation(SimpleQuests.MODID, "multi_location");
         public static final Codec<MultiLocationEntry> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(JsonCodecs.descriptiveList(JsonCodecs.LOCATION_PREDICATE_CODEC, "location predicates can't be empty").fieldOf("locations").forGetter(d -> d.locations),
-                        Codec.STRING.fieldOf("description").forGetter(d -> d.description)
+                        Codec.STRING.fieldOf("description").forGetter(d -> d.description),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
                 ).apply(instance, MultiLocationEntry::new));
 
         private final List<Pair<LocationPredicate, String>> locations;
+        private final EntityPredicate playerPredicate;
 
-        public MultiLocationEntry(List<Pair<LocationPredicate, String>> locations, String description) {
+        public MultiLocationEntry(List<Pair<LocationPredicate, String>> locations, String description, Optional<EntityPredicate> player) {
             super(description);
             this.locations = locations;
+            this.playerPredicate = player.orElse(null);
         }
 
         @Override
@@ -203,7 +221,7 @@ public class QuestEntryMultiImpl {
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
             Pair<LocationPredicate, String> val = this.locations.get(ctx.getRandom().nextInt(this.locations.size()));
-            return new QuestEntryImpls.LocationEntry(val.getFirst(), val.getSecond());
+            return new QuestEntryImpls.LocationEntry(val.getFirst(), val.getSecond(), this.playerPredicate);
         }
     }
 
@@ -219,22 +237,25 @@ public class QuestEntryMultiImpl {
                                 .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
                         JsonCodecs.descriptiveList(JsonCodecs.ENTITY_PREDICATE_CODEC, "empty entity predicates")
                                 .optionalFieldOf("entityPredicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
-                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
-                ).apply(instance, (consume, desc, taskDescription, item, pred, amount) -> new MultiEntityInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, consume, desc, taskDescription)));
+                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (consume, desc, taskDescription, item, pred, amount, player) -> new MultiEntityInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, consume, desc, taskDescription, player.orElse(null))));
 
         private final List<Pair<ItemPredicate, String>> heldItems;
         private final List<Pair<EntityPredicate, String>> entityPredicates;
         private final NumberProvider amount;
         private final boolean consume;
         private final String taskDescription;
+        private final EntityPredicate playerPredicate;
 
-        public MultiEntityInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<EntityPredicate, String>> entityPredicates, NumberProvider amount, boolean consume, String description, String taskDescription) {
+        public MultiEntityInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<EntityPredicate, String>> entityPredicates, NumberProvider amount, boolean consume, String description, String taskDescription, EntityPredicate playerPredicate) {
             super(description);
             this.heldItems = heldItems;
             this.entityPredicates = entityPredicates;
             this.amount = amount;
             this.consume = consume;
             this.taskDescription = taskDescription;
+            this.playerPredicate = playerPredicate;
         }
 
         @Override
@@ -245,9 +266,9 @@ public class QuestEntryMultiImpl {
         @Override
         public QuestEntry resolve(ServerPlayer player, QuestBase base) {
             LootContext ctx = SimpleQuests.createContext(player, player, base.id);
-            Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
-            Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(EntityPredicate.ANY, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
-            return new QuestEntryImpls.EntityInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.consume, this.taskDescription, val.getSecond(), entity.getSecond());
+            Pair<ItemPredicate, String> val = this.heldItems.isEmpty() ? Pair.of(null, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
+            Pair<EntityPredicate, String> entity = this.entityPredicates.isEmpty() ? Pair.of(null, "") : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
+            return new QuestEntryImpls.EntityInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.consume, this.taskDescription, val.getSecond(), entity.getSecond(), this.playerPredicate);
         }
     }
 
@@ -264,16 +285,18 @@ public class QuestEntryMultiImpl {
                                 .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
                         Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.BLOCK_PREDICATE_CODEC, Codec.unit(e))).listOf()
                                 .optionalFieldOf("blockPredicates").forGetter(d -> d.blockPredicates.isEmpty() ? Optional.empty() : Optional.of(d.blockPredicates)),
-                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
-                ).apply(instance, (use, consume, desc, taskDescription, item, pred, amount) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, desc, taskDescription)));
+                        JsonCodecs.NUMER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (use, consume, desc, taskDescription, item, pred, amount, player) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, desc, taskDescription, player.orElse(null))));
 
         private final List<Pair<ItemPredicate, String>> heldItems;
         private final List<Pair<BlockPredicate, String>> blockPredicates;
         private final NumberProvider amount;
         private final boolean use, consume;
         private final String taskDescription;
+        private final EntityPredicate playerPredicate;
 
-        public MultiBlockInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<BlockPredicate, String>> blockPredicates, NumberProvider amount, boolean use, boolean consume, String description, String taskDescription) {
+        public MultiBlockInteractEntry(List<Pair<ItemPredicate, String>> heldItems, List<Pair<BlockPredicate, String>> blockPredicates, NumberProvider amount, boolean use, boolean consume, String description, String taskDescription, EntityPredicate playerPredicate) {
             super(description);
             List<Pair<ItemPredicate, String>> held = heldItems.stream().filter(p -> p.getFirst() != ItemPredicate.ANY).toList();
             List<Pair<BlockPredicate, String>> block = blockPredicates.stream().filter(p -> p.getFirst() != BlockPredicate.ANY).toList();
@@ -285,6 +308,7 @@ public class QuestEntryMultiImpl {
             this.use = use;
             this.consume = consume;
             this.taskDescription = taskDescription;
+            this.playerPredicate = playerPredicate;
         }
 
         @Override
@@ -301,7 +325,7 @@ public class QuestEntryMultiImpl {
                 val = this.heldItems.isEmpty() ? Pair.of(ItemPredicate.ANY, "") : this.heldItems.get(ctx.getRandom().nextInt(this.heldItems.size()));
                 entity = this.blockPredicates.isEmpty() ? Pair.of(BlockPredicate.ANY, "") : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
             }
-            return new QuestEntryImpls.BlockInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.use, this.consume, this.taskDescription, val.getSecond(), entity.getSecond());
+            return new QuestEntryImpls.BlockInteractEntry(val.getFirst(), entity.getFirst(), this.amount.getInt(ctx), this.use, this.consume, this.taskDescription, val.getSecond(), entity.getSecond(), this.playerPredicate);
         }
     }
 

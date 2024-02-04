@@ -16,14 +16,14 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "amount": 15,
+      "consumeItems": true,
       "predicate": {
         "items": [
           "minecraft:stone"
         ]
       },
       "description": "Give 15 stone",
-      "amount": 15,
-      "consumeItems": true,
       "id": "simplequests:item"
     }
   },

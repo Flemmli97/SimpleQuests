@@ -18,6 +18,8 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "consumeItems": true,
+      "description": "Give 10-15 cods or salmon",
       "predicates": [
         {
           "items": [
@@ -38,8 +40,6 @@
         "min": 10,
         "max": 15
       },
-      "consumeItems": true,
-      "description": "Give 10-15 cods or salmon",
       "id": "simplequests:multi_item"
     }
   },

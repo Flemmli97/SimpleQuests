@@ -1,0 +1,43 @@
+{
+  "task": "Example for a location quest using a location predicate. Player needs to sneak additionally",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:map",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 1,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "entries": {
+    "structure": {
+      "predicate": {
+        "structure": "minecraft:ocean_ruin_warm"
+      },
+      "description": "Find a warm ocean ruin",
+      "playerPredicate": {
+        "flags": {
+          "is_sneaking": true
+        }
+      },
+      "id": "simplequests:location"
+    },
+    "structure2": {
+      "predicate": {
+        "structure": "minecraft:ocean_ruin_cold"
+      },
+      "description": "Find a cold ocean ruin",
+      "playerPredicate": {
+        "flags": {
+          "is_sneaking": true
+        }
+      },
+      "id": "simplequests:location"
+    }
+  },
+  "type": "simplequests:quest"
+}
