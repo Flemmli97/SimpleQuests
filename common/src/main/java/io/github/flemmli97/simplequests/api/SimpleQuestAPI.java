@@ -37,9 +37,10 @@ public class SimpleQuestAPI {
      * @param clss       Class of a {@link QuestEntry} that should get this trigger
      * @param pred       Predicate for if the QuestEntry should be fullfilled
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
+     * @return The completed quests
      */
-    public static <T extends QuestEntry> void trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @NotNull String trigger) {
-        PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill, trigger);
+    public static <T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> trigger(ServerPlayer serverPlayer, Class<T> clss, QuestEntryPredicate<T> pred, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @NotNull String trigger) {
+        return PlayerData.get(serverPlayer).tryFullFill(clss, pred, onFullfill, trigger);
     }
 
     /**
