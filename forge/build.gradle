@@ -6,24 +6,16 @@ apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-archit
 
 loom {
     forge {
-        dataGen {
-            mod "simplequests"
-        }
         mixinConfigs = ["simplequests.mixins.json"]
     }
     runs {
         data {
+            data()
+            programArgs "--all", "--mod", "simplequests"
+            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
             property("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
         }
     }
-}
-
-configureLaunch.doLast {
-    def file = file(".gradle/loom-cache/launch.cfg");
-    def cfg = file.getText('UTF-8')
-    cfg = cfg.replaceAll(project(":forge").file("src/generated/resources").absolutePath,
-            project(":common").file("src/generated/resources").absolutePath)
-    file.write(cfg, 'UTF-8')
 }
 
 repositories {
