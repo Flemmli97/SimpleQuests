@@ -1,3 +1,9 @@
+Simple Quests 2.0.0
+================
+- Rework a lot of internal:
+  - Underlying system is now split into api and implementation
+  - Allows more modular handling of things
+
 Simple Quests 1.5.5
 ================
 - Implement amount multiplier for multi quest entries (if applicable).

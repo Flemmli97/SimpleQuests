@@ -1,6 +1,6 @@
 package io.github.flemmli97.simplequests.fabric.client;
 
-import io.github.flemmli97.simplequests.client.ClientHandler;
+import io.github.flemmli97.simpleimpl.client.ClientHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 

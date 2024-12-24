@@ -1,16 +1,16 @@
 package io.github.flemmli97.simplequests.forge;
 
-import io.github.flemmli97.simplequests.QuestCommand;
-import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
-import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simpleimpl.QuestCommand;
+import io.github.flemmli97.simplequests_api.SimpleQuests;
+import io.github.flemmli97.simpleimpl.config.ConfigHandler;
+import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.forge.client.ForgeClientHandler;
-import io.github.flemmli97.simplequests.network.PacketRegistrar;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.quest.QuestNumberProvider;
+import io.github.flemmli97.simpleimpl.network.PacketRegistrar;
+import io.github.flemmli97.simpleimpl.data.PlayerData;
+import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

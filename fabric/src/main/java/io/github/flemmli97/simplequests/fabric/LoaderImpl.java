@@ -1,15 +1,15 @@
 package io.github.flemmli97.simplequests.fabric;
 
 import dev.ftb.mods.ftbranks.api.FTBRanksAPI;
-import io.github.flemmli97.simplequests.LoaderHandler;
-import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simpleimpl.LoaderHandler;
+import io.github.flemmli97.simplequests_api.SimpleQuests;
+import io.github.flemmli97.simpleimpl.api.SimpleQuestAPI;
+import io.github.flemmli97.simpleimpl.config.ConfigHandler;
 import io.github.flemmli97.simplequests.fabric.client.FabricClientHandler;
-import io.github.flemmli97.simplequests.network.SQPacket;
-import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
-import io.github.flemmli97.simplequests.quest.types.Quest;
+import io.github.flemmli97.simpleimpl.network.SQPacket;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.impls.entries.QuestEntryImpls;
+import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;

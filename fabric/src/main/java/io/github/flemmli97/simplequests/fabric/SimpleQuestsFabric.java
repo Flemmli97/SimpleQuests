@@ -1,15 +1,15 @@
 package io.github.flemmli97.simplequests.fabric;
 
-import io.github.flemmli97.simplequests.QuestCommand;
-import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
-import io.github.flemmli97.simplequests.datapack.QuestEntryRegistry;
-import io.github.flemmli97.simplequests.network.PacketRegistrar;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.quest.QuestNumberProvider;
+import io.github.flemmli97.simpleimpl.QuestCommand;
+import io.github.flemmli97.simplequests_api.SimpleQuests;
+import io.github.flemmli97.simpleimpl.api.SimpleQuestAPI;
+import io.github.flemmli97.simpleimpl.config.ConfigHandler;
+import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
+import io.github.flemmli97.simpleimpl.network.PacketRegistrar;
+import io.github.flemmli97.simpleimpl.data.PlayerData;
+import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;

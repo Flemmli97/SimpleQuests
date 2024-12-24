@@ -3,7 +3,8 @@ package io.github.flemmli97.simplequests.forge.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuests;
-import io.github.flemmli97.simpleimpl.config.LangManager;
+import io.github.flemmli97.simplequests_api.impls.entries.QuestEntryImpls;
+import io.github.flemmli97.simplequests_api.player.ProgressionTrackerImpl;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -17,20 +18,36 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class LangGen implements DataProvider {
+public class LangAPIGen implements DataProvider {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private final Map<String, String> data = new LinkedHashMap<>();
     private final DataGenerator gen;
     private final String locale;
 
-    public LangGen(DataGenerator gen) {
+    public LangAPIGen(DataGenerator gen) {
         this.gen = gen;
         this.locale = "en_us";
     }
 
     protected void addTranslations() {
-        LangManager.getDefaultTranslation().forEach(this::add);
+        this.add(QuestEntryImpls.ItemEntry.ID + ".single", "Give %1$s x%2$s");
+        this.add(QuestEntryImpls.ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
+        this.add(QuestEntryImpls.ItemEntry.ID + ".multi", "Provide any of the following x%2$s: %1$s");
+        this.add(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
+        this.add(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
+        this.add(QuestEntryImpls.KillEntry.ID.toString(), "Kill %s x%2$s");
+        this.add(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
+        this.add(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
+        this.add(QuestEntryImpls.AdvancementEntry.ID.toString(), "Advancement %s");
+        this.add(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+
+        this.add("simplequest.quest.progress", "%1$s - %2$s");
+        this.add(ProgressionTrackerImpl.KillTracker.KILL_PROGRESS, "Killed: %1$s/%2$s");
+        this.add(ProgressionTrackerImpl.CraftingTracker.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
+        this.add(ProgressionTrackerImpl.BlockTracker.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");
+        this.add(ProgressionTrackerImpl.EntityTracker.ENTITY_INTERACT_PROGRESS, "%1$s/%2$s");
+        this.add(ProgressionTrackerImpl.FishingTracker.FISHING_PROGRESS, "%1$s/%2$s");
     }
 
     @Override

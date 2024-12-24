@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests.fabric;
 
-import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.SimpleQuests;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;

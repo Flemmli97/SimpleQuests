@@ -4,12 +4,7 @@
   "package": "io.github.flemmli97.simplequests.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "ServerPlayerMixin",
-    "AbstractContainerAccessor",
-    "EntityPredicateAccessor",
-    "ItemPredicateAccessor",
-    "ItemStackMixin",
-    "FishingRodHookedMixin"
+    "io.github.flemmli97.simplequests.impl.mixin.ServerPlayerMixin", "io.github.flemmli97.simplequests.impl.mixin.AbstractContainerAccessor", "io.github.flemmli97.simplequests_api.mixin.EntityPredicateAccessor", "io.github.flemmli97.simplequests_api.mixin.ItemPredicateAccessor", "io.github.flemmli97.simplequests.impl.mixin.ItemStackMixin", "io.github.flemmli97.simplequests.impl.mixin.FishingRodHookedMixin"
   ],
   "server": [
   ],
