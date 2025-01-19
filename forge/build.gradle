@@ -5,6 +5,7 @@ loom {
         data {
             data()
             programArgs "--all", "--mod", "simplequests"
+            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
             property("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
         }
     }
@@ -19,10 +20,16 @@ repositories {
         name = "FTB"
         url = "https://maven.saps.dev/minecraft"
     }
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
 }
 
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
+
+    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-forge")
 }
 
 shadowJar {

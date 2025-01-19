@@ -2,7 +2,6 @@ package io.github.flemmli97.simplequests.gui;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -60,7 +59,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
 
             @Override
             public Component getDisplayName() {
-                return Component.translatable(ConfigHandler.LANG.get(player, "simplequests.gui.composite.quest"));
+                return Component.translatable("simplequests.gui.composite.quest");
             }
         };
         player.openMenu(fac);
@@ -101,7 +100,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             int mod = i % 9;
             if (i == 0) {
                 ItemStack stack = new ItemStack(Items.ARROW);
-                stack.setHoverName(Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.setHoverName(Component.translatable("simplequests.gui.button.main").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, stack);
             } else if ((additionalData.rows > 2 && (i < 9 || i > this.size - 1)) || mod == 0 || mod == 8)
                 inv.updateStack(i, QuestGui.emptyFiller());

@@ -1,7 +1,6 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.QuestProgress;
@@ -57,7 +56,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return Component.translatable(ConfigHandler.LANG.get(player, "simplequests.gui.quest.current"));
+                return Component.translatable("simplequests.gui.quest.current");
             }
         };
         player.openMenu(fac);
@@ -78,7 +77,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                     if (comp == null)
                         lore.add(StringTag.valueOf(Component.Serializer.toJson(translation)));
                     else
-                        lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.translatable(ConfigHandler.LANG.get(player, "simplequest.quest.progress"), translation, comp).setStyle(comp.getStyle().withItalic(false)))));
+                        lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.translatable("simplequest.quest.progress", translation, comp).setStyle(comp.getStyle().withItalic(false)))));
                 });
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putString("Quest", quest.id.toString());
@@ -116,7 +115,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 inv.updateStack(i, stack);
             } else if (i == 8 && page < this.maxPages) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.setHoverName(Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                close.setHoverName(Component.translatable("simplequests.gui.next").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -141,14 +140,14 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 ItemStack stack = emptyFiller();
                 if (this.page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.translatable("simplequests.gui.previous").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.setHoverName(Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.setHoverName(Component.translatable("simplequests.gui.next").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)

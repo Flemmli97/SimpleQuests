@@ -2,7 +2,6 @@ package io.github.flemmli97.simplequests.player;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
 import net.minecraft.ChatFormatting;
@@ -55,7 +54,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             } else if (perc <= 0.7) {
                 form = ChatFormatting.GOLD;
             }
-            return Component.translatable(ConfigHandler.LANG.get(player, FISHING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+            return Component.translatable(FISHING_PROGRESS, this.value, this.questEntry().amount()).withStyle(form);
         }
 
         @Override
@@ -103,7 +102,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             } else if (perc <= 0.7) {
                 form = ChatFormatting.GOLD;
             }
-            return Component.translatable(ConfigHandler.LANG.get(player, KILL_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+            return Component.translatable(KILL_PROGRESS, this.value, this.questEntry().amount()).withStyle(form);
         }
 
         @Override
@@ -151,7 +150,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             } else if (perc <= 0.7) {
                 form = ChatFormatting.GOLD;
             }
-            return Component.translatable(ConfigHandler.LANG.get(player, CRAFTING_PROGRESS), this.value, this.questEntry().amount()).withStyle(form);
+            return Component.translatable(CRAFTING_PROGRESS, this.value, this.questEntry().amount()).withStyle(form);
         }
 
         @Override
@@ -205,7 +204,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             } else if (perc <= 0.7) {
                 form = ChatFormatting.GOLD;
             }
-            return Component.translatable(ConfigHandler.LANG.get(player, BLOCK_INTERACT_PROGRESS), this.pos.size(), this.questEntry().amount()).withStyle(form);
+            return Component.translatable(BLOCK_INTERACT_PROGRESS, this.pos.size(), this.questEntry().amount()).withStyle(form);
         }
 
         @Override
@@ -257,7 +256,7 @@ public abstract class ProgressionTrackerImpl<T, E extends QuestEntry> implements
             } else if (perc <= 0.7) {
                 form = ChatFormatting.GOLD;
             }
-            return Component.translatable(ConfigHandler.LANG.get(player, ENTITY_INTERACT_PROGRESS), this.entities.size(), this.questEntry().amount()).withStyle(form);
+            return Component.translatable(ENTITY_INTERACT_PROGRESS, this.entities.size(), this.questEntry().amount()).withStyle(form);
         }
 
         @Override

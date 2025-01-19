@@ -10,10 +10,16 @@ repositories {
         name = "FTB"
         url = "https://maven.saps.dev/minecraft"
     }
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
 }
 
 dependencies {
     modImplementation "me.lucko:fabric-permissions-api:${rootProject.fabric_permissions_api}"
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
+
+    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
 }
