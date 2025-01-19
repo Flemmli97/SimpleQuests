@@ -26,8 +26,8 @@
           "minecraft:name_tag"
         ]
       },
-      "id": "simplequests:entity_interact"
+      "id": "simplequests_api:entity_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

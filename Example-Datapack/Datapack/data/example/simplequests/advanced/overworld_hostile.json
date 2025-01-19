@@ -23,7 +23,7 @@
         "type": "minecraft:zombie"
       },
       "amount": 10,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "zombies_baby": {
       "predicate": {
@@ -33,26 +33,26 @@
         }
       },
       "amount": 3,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "skeleton": {
       "predicate": {
         "type": "minecraft:skeleton"
       },
       "amount": 10,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "spiders": {
       "predicate": {
         "type": "minecraft:spider"
       },
       "amount": 5,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "xp": {
       "amount": 5,
-      "id": "simplequests:xp"
+      "id": "simplequests_api:xp"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

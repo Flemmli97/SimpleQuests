@@ -16,5 +16,5 @@
     "example:hidden/sequential_a",
     "example:hidden/sequential_b"
   ],
-  "type": "simplequests:sequential_quest"
+  "type": "simplequests_api:sequential_quest"
 }

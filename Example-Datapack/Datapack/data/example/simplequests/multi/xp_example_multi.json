@@ -21,8 +21,8 @@
         "max": 10
       },
       "description": "Submit xp to this quest",
-      "id": "simplequests:multi_xp"
+      "id": "simplequests_api:multi_xp"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

@@ -34,8 +34,8 @@
       "consume": false,
       "description": "Place the blocks from the quest",
       "taskDescription": "Place %1$s %3$sx",
-      "id": "simplequests:multi_block_interaction"
+      "id": "simplequests_api:multi_block_interaction"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

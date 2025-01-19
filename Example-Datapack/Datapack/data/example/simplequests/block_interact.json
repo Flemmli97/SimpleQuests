@@ -24,8 +24,8 @@
       },
       "consumeItem": false,
       "description": "Interact with chest x3",
-      "id": "simplequests:block_interact"
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

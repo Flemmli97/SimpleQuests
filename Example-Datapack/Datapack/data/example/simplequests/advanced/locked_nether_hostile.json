@@ -19,27 +19,27 @@
         "type": "minecraft:zombified_piglin"
       },
       "amount": 15,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "blaze": {
       "predicate": {
         "type": "minecraft:blaze"
       },
       "amount": 5,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "wither_skeleton": {
       "predicate": {
         "type": "minecraft:wither_skeleton"
       },
       "amount": 5,
-      "id": "simplequests:entity"
+      "id": "simplequests_api:entity"
     },
     "fortress": {
       "advancement": "minecraft:nether/find_fortress",
       "reset": false,
-      "id": "simplequests:advancement"
+      "id": "simplequests_api:advancement"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

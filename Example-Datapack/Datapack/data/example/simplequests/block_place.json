@@ -24,8 +24,8 @@
       },
       "consumeItem": false,
       "description": "Place 3 emerald blocks",
-      "id": "simplequests:block_interact"
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

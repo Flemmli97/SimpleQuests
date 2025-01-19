@@ -1,6 +1,5 @@
 package io.github.flemmli97.simplequests.gui;
 
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -35,7 +34,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
             @Override
             public Component getDisplayName() {
-                return new TranslatableComponent(ConfigHandler.LANG.get(player, guiKey));
+                return new TranslatableComponent(guiKey);
             }
         };
         player.openMenu(fac);
@@ -50,12 +49,12 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
             switch (i) {
                 case 3 -> {
                     ItemStack yes = new ItemStack(Items.GREEN_WOOL);
-                    yes.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.yes")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    yes.setHoverName(new TranslatableComponent("simplequests.gui.yes").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, yes);
                 }
                 case 5 -> {
                     ItemStack no = new ItemStack(Items.RED_WOOL);
-                    no.setHoverName(new TranslatableComponent(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.no")).withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
+                    no.setHoverName(new TranslatableComponent("simplequests.gui.no").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GREEN)));
                     inv.updateStack(i, no);
                 }
                 default -> inv.updateStack(i, QuestGui.emptyFiller());

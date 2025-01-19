@@ -22,8 +22,8 @@
       },
       "amount": 3,
       "description": "Craft at 8 sticks",
-      "id": "simplequests:crafting"
+      "id": "simplequests_api:crafting"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

@@ -47,10 +47,10 @@ public class LangAPIGen implements DataProvider {
         this.add(KillEntry.ID.toString(), "Kill %s x%2$s");
         this.add(KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
         this.add(XPEntry.ID.toString(), "Submit Experience: %s lvl");
+        this.add("simplequests_api.missing.advancement", "Advancement with id %s missing");
         this.add(AdvancementEntry.ID.toString(), "Advancement %s");
         this.add(PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
 
-        this.add("simplequest.quest.progress", "%1$s - %2$s");
         this.add(KillTracker.KILL_PROGRESS, "Killed: %1$s/%2$s");
         this.add(CraftingTracker.CRAFTING_PROGRESS, "Crafted: %1$s/%2$s");
         this.add(BlockTracker.BLOCK_INTERACT_PROGRESS, "%1$s/%2$s");

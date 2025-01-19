@@ -32,8 +32,8 @@
       ],
       "minDist": 15,
       "description": "Go to the position from this quest",
-      "id": "simplequests:multi_position"
+      "id": "simplequests_api:multi_position"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

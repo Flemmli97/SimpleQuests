@@ -50,7 +50,7 @@ public record AdvancementEntry(ResourceLocation advancement, boolean reset,
         Advancement advancement = player.getServer().getAdvancements().getAdvancement(this.advancement());
         Component adv;
         if (advancement == null)
-            adv = new TranslatableComponent("simplequests.missing.advancement", this.advancement());
+            adv = new TranslatableComponent("simplequests_api.missing.advancement", this.advancement());
         else
             adv = advancement.getChatComponent();
         return new TranslatableComponent(this.getId().toString(), adv);

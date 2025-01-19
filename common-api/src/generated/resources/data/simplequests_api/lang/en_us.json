@@ -1,0 +1,18 @@
+{
+  "simplequests_api:item.single": "Give %1$s x%2$s",
+  "simplequests_api:item.single.keep": "Have %1$s x%2$s",
+  "simplequests_api:item.multi": "Provide any of the following x%2$s: %1$s",
+  "simplequests_api:item.multi.keep": "Have any of the following x%2$s: %1$s",
+  "simplequests_api:item.empty": "<Empty tag/items>",
+  "simplequests_api:entity": "Kill %s x%2$s",
+  "simplequests_api:entity.tag": "Kill entities in the tag %s x%2$s",
+  "simplequests_api:xp": "Submit Experience: %s lvl",
+  "simplequests.missing.advancement": "Advancement with id %s missing",
+  "simplequests_api:advancement": "Advancement %s",
+  "simplequests_api:position": "Go to [x:%1$s;y:%2$s;z:%3$s]",
+  "simplequests_api:entity.progress": "Killed: %1$s/%2$s",
+  "simplequests_api:crafting.progress": "Crafted: %1$s/%2$s",
+  "simplequests_api:block_interact.progress": "%1$s/%2$s",
+  "simplequests_api:entity_interact.progress": "%1$s/%2$s",
+  "simplequests_api:fishing.progress": "%1$s/%2$s"
+}

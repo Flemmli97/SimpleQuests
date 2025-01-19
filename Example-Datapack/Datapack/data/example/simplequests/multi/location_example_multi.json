@@ -30,8 +30,8 @@
         }
       ],
       "description": "Find a warm or cold ocean ruin",
-      "id": "simplequests:multi_location"
+      "id": "simplequests_api:multi_location"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

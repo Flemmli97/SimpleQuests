@@ -40,8 +40,8 @@
       },
       "description": "Craft some items",
       "taskDescription": "Craft %1$s %3$sx",
-      "id": "simplequests:multi_fishing"
+      "id": "simplequests_api:multi_fishing"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

@@ -16,8 +16,8 @@
   "entries": {
     "xp": {
       "amount": 5,
-      "id": "simplequests:xp"
+      "id": "simplequests_api:xp"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

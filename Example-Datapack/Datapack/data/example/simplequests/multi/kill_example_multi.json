@@ -35,8 +35,8 @@
         "max": 8
       },
       "description": "Task: 5-8 cows or cows in a plains biome",
-      "id": "simplequests:multi_kill"
+      "id": "simplequests_api:multi_kill"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

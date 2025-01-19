@@ -36,6 +36,14 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+    developmentFabric.extendsFrom api
+}
+
+repositories {
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
 }
 
 dependencies {
@@ -44,6 +52,8 @@ dependencies {
 
     api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common-api", configuration: "transformProductionFabric")) { transitive false }
+
+    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
 }
 
 processResources {

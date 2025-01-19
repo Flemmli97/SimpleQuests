@@ -32,8 +32,8 @@
         ]
       },
       "description": "Give 15 cods",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

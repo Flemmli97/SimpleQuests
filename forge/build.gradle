@@ -24,12 +24,28 @@ repositories {
         name = "FTB"
         url = "https://maven.saps.dev/minecraft"
     }
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
+}
+
+configurations {
+    apiLib
+//    runtimeClasspath.extendsFrom apiLib
+    developmentForge.extendsFrom apiLib
 }
 
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
 
-    implementation include(project(":forge-api"))
+//    compileOnly(include(project(path: ":forge-api")))
+//
+//    developmentForge(project(path: ":common-api")) { transitive = false}
+//    implementation(project(path: ":forge-api", configuration: "namedElements"))
+    apiLib(project(path: ":common-api", configuration: "namedElements")) { transitive = false }
+    apiLib(project(path: ":forge-api", configuration: "namedElements")) { transitive = false }
+    compileOnly(include(project(path: ":forge-api")))
 }
 
 shadowJar {

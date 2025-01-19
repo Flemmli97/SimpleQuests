@@ -14,5 +14,5 @@
     "example:hidden/selection_a",
     "example:hidden/selection_b"
   ],
-  "type": "simplequests:composite_quest"
+  "type": "simplequests_api:composite_quest"
 }

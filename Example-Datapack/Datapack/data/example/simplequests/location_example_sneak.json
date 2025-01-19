@@ -24,7 +24,7 @@
           "is_sneaking": true
         }
       },
-      "id": "simplequests:location"
+      "id": "simplequests_api:location"
     },
     "structure2": {
       "predicate": {
@@ -36,8 +36,8 @@
           "is_sneaking": true
         }
       },
-      "id": "simplequests:location"
+      "id": "simplequests_api:location"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

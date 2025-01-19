@@ -32,8 +32,8 @@
         ]
       },
       "description": "Give 1 diamond sword with sharp 2 or 3",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

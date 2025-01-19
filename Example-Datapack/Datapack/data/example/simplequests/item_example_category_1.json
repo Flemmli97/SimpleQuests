@@ -24,8 +24,8 @@
         ]
       },
       "description": "Give 15 stone",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

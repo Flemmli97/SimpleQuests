@@ -19,15 +19,15 @@
         "feature": "minecraft:ocean_ruin_warm"
       },
       "description": "Find a warm ocean ruin",
-      "id": "simplequests:location"
+      "id": "simplequests_api:location"
     },
     "structure2": {
       "predicate": {
         "feature": "minecraft:ocean_ruin_cold"
       },
       "description": "Find a cold ocean ruin",
-      "id": "simplequests:location"
+      "id": "simplequests_api:location"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

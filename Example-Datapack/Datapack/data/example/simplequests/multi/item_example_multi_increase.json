@@ -31,7 +31,7 @@
         }
       ],
       "amount": {
-        "type": "simplequests:context_multiplier",
+        "type": "simplequests_api:context_multiplier",
         "multiplier": 1,
         "max": 10,
         "value": {
@@ -40,8 +40,8 @@
           "max": 15
         }
       },
-      "id": "simplequests:multi_item"
+      "id": "simplequests_api:multi_item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

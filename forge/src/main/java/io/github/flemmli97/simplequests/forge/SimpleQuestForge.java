@@ -54,7 +54,6 @@ public class SimpleQuestForge {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "*", (s1, s2) -> true));
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(SimpleQuestForge::commonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(GlobalLootModifierSerializer.class, SimpleQuestForge::registry);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
@@ -63,15 +62,8 @@ public class SimpleQuestForge {
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::breakBlock);
         if (FMLEnvironment.dist == Dist.CLIENT)
             MinecraftForge.EVENT_BUS.addListener(ForgeClientHandler::login);
-        QuestBaseRegistry.register();
-        QuestEntryRegistry.register();
-        ProgressionTrackerRegistry.register();
         ConfigHandler.init();
         SimpleQuests.FTB_RANKS = ModList.get().isLoaded("ftbranks");
-    }
-
-    public static void registry(RegistryEvent.Register<GlobalLootModifierSerializer<?>> event) {
-        QuestNumberProvider.init();
     }
 
     public static void commonSetup(FMLCommonSetupEvent event) {

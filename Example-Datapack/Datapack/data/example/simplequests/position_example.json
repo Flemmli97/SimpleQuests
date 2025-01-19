@@ -21,8 +21,8 @@
         "z": 0
       },
       "minDist": 15,
-      "id": "simplequests:position"
+      "id": "simplequests_api:position"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

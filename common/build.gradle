@@ -1,7 +1,7 @@
 apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-v1/common.gradle"
 
 dependencies {
-    implementation project(":common-api")
+    implementation (project(":common-api")) { transitive false }
 }
 
 sourceSets.main.resources {

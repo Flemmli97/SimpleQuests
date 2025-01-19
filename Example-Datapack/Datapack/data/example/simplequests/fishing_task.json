@@ -26,8 +26,8 @@
       },
       "amount": 5,
       "description": "Fish 5 cods",
-      "id": "simplequests:fishing"
+      "id": "simplequests_api:fishing"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

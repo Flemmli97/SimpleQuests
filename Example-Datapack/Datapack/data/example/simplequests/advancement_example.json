@@ -20,8 +20,8 @@
     "trade": {
       "advancement": "minecraft:adventure/trade",
       "reset": true,
-      "id": "simplequests:advancement"
+      "id": "simplequests_api:advancement"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }
