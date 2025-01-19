@@ -2,8 +2,8 @@ package io.github.flemmli97.simplequests.forge.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.flemmli97.simplequests_api.SimpleQuests;
-import io.github.flemmli97.simpleimpl.config.LangManager;
+import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.config.LangManager;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;

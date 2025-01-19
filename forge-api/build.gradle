@@ -1,0 +1,122 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "group": "com.github.johnrengelman", "name": "shadow", "version": "8.+"
+    }
+}
+
+apply plugin: com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+
+archivesBaseName = rootProject.api_base_name
+version = project.minecraft_version + "-" + rootProject.api_version
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+loom {
+    forge {
+        mixinConfigs = ["simplequests_api.mixins.json"]
+    }
+    forge {
+        runs {
+            client {
+                vmArgs "-Dmixin.debug.export=true"
+            }
+            data {
+                data()
+                programArgs "--all", "--mod", "simplsimplequests_api"
+                programArgs "--output", project(":common-api").file("src/generated/resources").absolutePath
+            }
+        }
+    }
+}
+
+ext {
+    mod_meta = ["version": project.version, "loader_version": loader_version, "mcversion": minecraft_version, "forge_version": forge_version]
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common-api", configuration: "transformProductionForge")) { transitive = false }
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/mods.toml") {
+        expand mod_meta
+    }
+    exclude '.cache'
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set("forge")
+}
+
+jar {
+    archiveClassifier.set("dev")
+}
+
+sourcesJar {
+    def commonSources = project(":common-api").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+    archiveClassifier.set("forge-sources")
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(remapJar) {
+                classifier null
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                classifier "sources"
+                builtBy remapSourcesJar
+            }
+            artifactId project.archives_base_name
+            version project.version + "-forge"
+        }
+    }
+
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
+            }
+        }
+    }
+}

@@ -1,15 +1,11 @@
 package io.github.flemmli97.simplequests.fabric;
 
-import io.github.flemmli97.simpleimpl.QuestCommand;
-import io.github.flemmli97.simplequests_api.SimpleQuests;
-import io.github.flemmli97.simpleimpl.api.SimpleQuestAPI;
-import io.github.flemmli97.simpleimpl.config.ConfigHandler;
-import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
-import io.github.flemmli97.simpleimpl.network.PacketRegistrar;
-import io.github.flemmli97.simpleimpl.data.PlayerData;
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
+import io.github.flemmli97.simplequests.QuestCommand;
+import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
+import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.data.PlayerData;
+import io.github.flemmli97.simplequests.network.PacketRegistrar;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
@@ -18,12 +14,10 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,11 +39,7 @@ public class SimpleQuestsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new Reloader());
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> QuestCommand.register(dispatcher)));
-        QuestBaseRegistry.register();
-        QuestEntryRegistry.register();
-        ProgressionTrackerRegistry.register();
         ConfigHandler.init();
         SimpleQuests.PERMISSION_API = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
         SimpleQuests.FTB_RANKS = FabricLoader.getInstance().isModLoaded("ftbranks");
@@ -74,7 +64,6 @@ public class SimpleQuestsFabric implements ModInitializer {
                 ServerPlayNetworking.registerGlobalReceiver(id, handlerServer(decoder, handler));
             }
         }, 0);
-        QuestNumberProvider.init();
     }
 
     public static void onDeath(LivingEntity entity, DamageSource source) {

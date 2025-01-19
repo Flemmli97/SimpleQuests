@@ -1,5 +1,9 @@
 apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-v1/common.gradle"
 
+dependencies {
+    implementation project(":common-api")
+}
+
 sourceSets.main.resources {
     srcDir "src/generated/resources"
 }

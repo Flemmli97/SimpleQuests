@@ -15,5 +15,8 @@ pluginManagement {
 include("common")
 include("fabric")
 include("forge")
+include("common-api")
+include("fabric-api")
+include("forge-api")
 
 rootProject.name = "Simple Quests"

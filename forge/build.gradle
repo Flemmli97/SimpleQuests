@@ -28,6 +28,8 @@ repositories {
 
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
+
+    implementation include(project(":forge-api"))
 }
 
 shadowJar {

@@ -1,0 +1,22 @@
+modLoader="javafml"
+loaderVersion="[${loader_version},)"
+license="MIT"
+issueTrackerURL="https://github.com/Flemmli97/SimpleQuests/issues"
+[[mods]]
+modId="simplequests_api"
+version="${version}"
+displayName="Simple Quests API"
+authors="Flemmli97"
+description='''API handling questing'''
+[[dependencies.simplequests_api]]
+modId="minecraft"
+mandatory=true
+versionRange="[${mcversion},)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.simplequests_api]]
+modId="forge"
+mandatory=true
+versionRange="[${forge_version},)"
+ordering="NONE"
+side="BOTH"

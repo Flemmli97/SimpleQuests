@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests.forge;
 
-import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.Event;
 

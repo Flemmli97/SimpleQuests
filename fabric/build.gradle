@@ -20,4 +20,6 @@ dependencies {
     modImplementation "me.lucko:fabric-permissions-api:${rootProject.fabric_permissions_api}"
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
+
+    implementation include(project(":fabric-api"))
 }

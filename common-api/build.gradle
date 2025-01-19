@@ -1,0 +1,47 @@
+archivesBaseName = rootProject.api_base_name
+version = project.minecraft_version + "-" + rootProject.api_version
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+}
+
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(jar) {
+                classifier null
+                builtBy jar
+            }
+            artifact(sourcesJar) {
+                classifier "sources"
+                builtBy remapSourcesJar
+            }
+            artifactId project.archives_base_name
+            version project.version + "-common"
+        }
+    }
+
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
+            }
+        }
+    }
+}

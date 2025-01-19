@@ -1,29 +1,21 @@
 package io.github.flemmli97.simplequests.forge;
 
 import dev.ftb.mods.ftbranks.api.FTBRanksAPI;
-import io.github.flemmli97.simpleimpl.LoaderHandler;
-import io.github.flemmli97.simplequests_api.SimpleQuests;
-import io.github.flemmli97.simpleimpl.api.SimpleQuestAPI;
-import io.github.flemmli97.simpleimpl.config.ConfigHandler;
-import io.github.flemmli97.simpleimpl.network.SQPacket;
-import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.impls.entries.QuestEntryImpls;
+import io.github.flemmli97.simplequests.LoaderHandler;
+import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
+import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests.network.SQPacket;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
-import net.minecraft.ChatFormatting;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.NetworkHooks;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class LoaderImpl implements LoaderHandler {
@@ -52,41 +44,6 @@ public class LoaderImpl implements LoaderHandler {
             return FTBRanksAPI.getPermissionValue(player, perm).asBoolean().orElse(player.hasPermissions(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel));
         }
         return player.hasPermissions(!adminCmd ? ConfigHandler.CONFIG.mainPermLevel : ConfigHandler.CONFIG.opPermLevel);
-    }
-
-    private static final int WRAP_AMOUNT = 4;
-
-    @Override
-    public List<MutableComponent> wrapForGui(ServerPlayer player, QuestEntryImpls.ItemEntry entry) {
-        if (!entry.description().isEmpty())
-            return List.of(new TranslatableComponent(entry.description()));
-        //Forge clients do it already
-        List<MutableComponent> all = QuestEntryImpls.ItemEntry.itemComponents(entry.predicate());
-        if (all.size() < WRAP_AMOUNT || !NetworkHooks.isVanillaConnection(player.connection.connection))
-            return List.of(entry.translation(player));
-        List<MutableComponent> list = new ArrayList<>();
-        MutableComponent items = null;
-        int i = 0;
-        for (MutableComponent comp : all) {
-            if (items == null) {
-                if (list.size() == 0)
-                    items = new TextComponent("[").append(comp);
-                else
-                    items = comp;
-            } else
-                items.append(new TextComponent(", ")).append(comp);
-            i++;
-            if ((list.size() == 0 && i >= WRAP_AMOUNT - 1) || i >= WRAP_AMOUNT) {
-                if (list.size() == 0) {
-                    list.add(new TranslatableComponent(ConfigHandler.LANG.get(player, entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
-                } else
-                    list.add(items.withStyle(ChatFormatting.AQUA));
-                i = 0;
-                items = null;
-            }
-        }
-        list.get(list.size() - 1).append(new TextComponent("]"));
-        return list;
     }
 
     @Override
