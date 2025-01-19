@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests.CodecHelper;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestEntry;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.player.PlayerData;
 import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
 import io.github.flemmli97.simplequests.player.QuestProgress;
@@ -105,7 +104,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            Function<String, String> key = s -> !this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString() + s);
+            Function<String, String> key = s -> !this.description.isEmpty() ? this.description : this.getId().toString() + s;
             List<MutableComponent> formattedItems = itemComponents(this.predicate);
             if (formattedItems.isEmpty())
                 return Component.translatable(key.apply(".empty"));
@@ -156,10 +155,10 @@ public class QuestEntryImpls {
         public MutableComponent translation(ServerPlayer player) {
             return this.predicate.entityType().map(t -> t.types().unwrapKey().map(key ->
                                     Component.translatable(!this.description.isEmpty() ? this.description :
-                                            ConfigHandler.LANG.get(player, this.getId().toString() + ".tag"), Component.literal("#" + key.location()).withStyle(ChatFormatting.AQUA), this.amount))
+                                            this.getId().toString() + ".tag", Component.literal("#" + key.location()).withStyle(ChatFormatting.AQUA), this.amount))
                             .orElse(
                                     Component.translatable(!this.description.isEmpty() ? this.description :
-                                            ConfigHandler.LANG.get(player, this.getId().toString()), fromTypes(t.types()).withStyle(ChatFormatting.AQUA), this.amount)))
+                                            this.getId().toString(), fromTypes(t.types()).withStyle(ChatFormatting.AQUA), this.amount)))
                     .orElse(Component.literal("MISSINGNO"));
         }
 
@@ -216,7 +215,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return Component.translatable(ConfigHandler.LANG.get(player, this.getId().toString()), this.amount);
+            return Component.translatable(this.getId().toString(), this.amount);
         }
     }
 
@@ -253,10 +252,10 @@ public class QuestEntryImpls {
             AdvancementHolder advancement = player.getServer().getAdvancements().get(this.advancement());
             Component adv;
             if (advancement == null)
-                adv = Component.translatable(ConfigHandler.LANG.get(player, "simplequests.missing.advancement"), this.advancement());
+                adv = Component.translatable("simplequests.missing.advancement", this.advancement());
             else
                 adv = Advancement.name(advancement);
-            return Component.translatable(ConfigHandler.LANG.get(player, this.getId().toString()), adv);
+            return Component.translatable(this.getId().toString(), adv);
         }
     }
 
@@ -283,7 +282,7 @@ public class QuestEntryImpls {
 
         @Override
         public MutableComponent translation(ServerPlayer player) {
-            return Component.translatable(!this.description.isEmpty() ? this.description : ConfigHandler.LANG.get(player, this.getId().toString()), this.pos.getX(), this.pos.getY(), this.pos.getZ());
+            return Component.translatable(!this.description.isEmpty() ? this.description : this.getId().toString(), this.pos.getX(), this.pos.getY(), this.pos.getZ());
         }
 
         @Override

@@ -21,10 +21,7 @@
         "items": "minecraft:diamond_pickaxe"
       },
       "block": {
-        "blocks": [
-          "minecraft:diamond_ore",
-          "minecraft:diamond_block"
-        ]
+        "blocks": "minecraft:diamond_ore"
       },
       "consumeItem": false,
       "description": "Mine diamond ore x3",

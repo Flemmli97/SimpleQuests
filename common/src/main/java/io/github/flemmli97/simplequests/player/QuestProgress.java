@@ -7,7 +7,6 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.api.QuestCompletionState;
 import io.github.flemmli97.simplequests.api.QuestEntry;
 import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests.datapack.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests.datapack.QuestBaseRegistry;
@@ -86,7 +85,7 @@ public class QuestProgress {
             ProgressionTracker<UUID, QuestEntryImpls.EntityInteractEntry> interacted = prog.getOrCreateTracker(ProgressionTrackerImpl.EntityTracker.KEY, entry, name);
             if (!interacted.isApplicable(entity.getUUID())) {
                 if (!prog.getQuest().category.isSilent)
-                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.dupe")).withStyle(ChatFormatting.DARK_RED));
+                    player.sendSystemMessage(Component.translatable("simplequests.interaction.dupe").withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, entity)) {
@@ -101,7 +100,7 @@ public class QuestProgress {
             ProgressionTracker<BlockPos, QuestEntryImpls.BlockInteractEntry> interacted = prog.getOrCreateTracker(ProgressionTrackerImpl.BlockTracker.KEY, entry, name);
             if (!interacted.isApplicable(pos)) {
                 if (!prog.getQuest().category.isSilent)
-                    player.sendSystemMessage(Component.translatable(ConfigHandler.LANG.get(player, "simplequests.interaction.block.dupe." + entry.use())).withStyle(ChatFormatting.DARK_RED));
+                    player.sendSystemMessage(Component.translatable("simplequests.interaction.block.dupe." + entry.use()).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             if (entry.check(player, pos, use)) {

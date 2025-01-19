@@ -1,7 +1,6 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests.player.PlayerData;
@@ -82,7 +81,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
             @Override
             public Component getDisplayName() {
                 return category == null || category == QuestCategory.DEFAULT_CATEGORY ?
-                        Component.translatable(ConfigHandler.LANG.get(player, "simplequests.gui.main")) : category.getName();
+                        Component.translatable("simplequests.gui.main") : category.getName();
             }
         };
         player.openMenu(fac);
@@ -103,14 +102,14 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 stack.set(DataComponents.ENCHANTMENTS, stack.get(DataComponents.ENCHANTMENTS).withTooltip(false));
         }
         if (type == PlayerData.AcceptType.DELAY) {
-            lore.add(Component.translatable(ConfigHandler.LANG.get(player, type.langKey()), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
+            lore.add(Component.translatable(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
             this.updateList.put(i, quest);
         }
         for (MutableComponent comp : quest.getFormattedGuiTasks(player))
             lore.add(comp.setStyle(comp.getStyle().withItalic(false)));
         MutableComponent requirement = switch (type) {
             case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
-                    Component.translatable(ConfigHandler.LANG.get(player, type.langKey())).withStyle(ChatFormatting.DARK_RED);
+                    Component.translatable(type.langKey()).withStyle(ChatFormatting.DARK_RED);
             default -> null;
         };
         if (requirement != null)
@@ -159,16 +158,16 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 ItemStack stack = emptyFiller();
                 if (page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.previous").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 inv.updateStack(i, stack);
             } else if (i == 8 && page < this.maxPages) {
                 ItemStack close = new ItemStack(Items.ARROW);
-                close.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                close.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.next").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, close);
             } else if (data.canGoBack() && i == 45) {
                 ItemStack stack = new ItemStack(Items.TNT);
-                stack.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(serverPlayer, "simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.button.main").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 inv.updateStack(i, stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 inv.updateStack(i, emptyFiller());
@@ -193,19 +192,19 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 ItemStack stack = emptyFiller();
                 if (this.page > 0) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.gui.previous")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.previous").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (i == 8) {
                 ItemStack stack = emptyFiller();
                 if (this.page < this.maxPages) {
                     stack = new ItemStack(Items.ARROW);
-                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.gui.next")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                    stack.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.next").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 }
                 this.slots.get(i).set(stack);
             } else if (this.canGoBack && i == 45) {
                 ItemStack stack = new ItemStack(Items.TNT);
-                stack.set(DataComponents.CUSTOM_NAME, Component.translatable(ConfigHandler.LANG.get(this.player, "simplequests.gui.button.main")).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
+                stack.set(DataComponents.CUSTOM_NAME, Component.translatable("simplequests.gui.button.main").setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.WHITE)));
                 this.slots.get(i).set(stack);
             } else if (i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8)
                 this.slots.get(i).set(emptyFiller());
@@ -317,7 +316,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
             String delay = data.formattedCooldown(q);
             stack.update(DataComponents.LORE, ItemLore.EMPTY, l -> {
                 List<Component> lore = new ArrayList<>(l.lines());
-                lore.set(0, Component.translatable(ConfigHandler.LANG.get(this.player, PlayerData.AcceptType.DELAY.langKey()), delay).withStyle(ChatFormatting.DARK_RED));
+                lore.set(0, Component.translatable(PlayerData.AcceptType.DELAY.langKey(), delay).withStyle(ChatFormatting.DARK_RED));
                 return new ItemLore(lore);
             });
             if (delay.equals("0s"))

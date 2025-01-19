@@ -81,7 +81,7 @@ public class LoaderImpl implements LoaderHandler {
             i++;
             if ((list.size() == 0 && i >= WRAP_AMOUNT - 1) || i >= WRAP_AMOUNT) {
                 if (list.size() == 0) {
-                    list.add(Component.translatable(ConfigHandler.LANG.get(player, entry.getId().toString() + ".multi"), items.withStyle(ChatFormatting.AQUA), entry.amount()));
+                    list.add(Component.translatable(entry.getId().toString() + ".multi", items.withStyle(ChatFormatting.AQUA), entry.amount()));
                 } else
                     list.add(items.withStyle(ChatFormatting.AQUA));
                 i = 0;
