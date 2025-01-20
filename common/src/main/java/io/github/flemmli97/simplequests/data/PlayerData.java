@@ -3,8 +3,8 @@ package io.github.flemmli97.simplequests.data;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests_api.api.PlayerQuestData;
-import io.github.flemmli97.simplequests_api.api.QuestCompletionState;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.progression.BlockTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
@@ -109,22 +109,22 @@ public class PlayerData implements PlayerQuestData {
         return true;
     }
 
-    public Map<ResourceLocation, QuestCompletionState> submit(String trigger, boolean sendFailMessage) {
+    public Map<ResourceLocation, QuestState> submit(String trigger, boolean sendFailMessage) {
         if (this.currentQuests.isEmpty()) {
             if (sendFailMessage)
                 this.player.sendMessage(new TranslatableComponent("simplequests.current.no").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             return Map.of();
         }
-        Map<ResourceLocation, QuestCompletionState> completion = new HashMap<>();
+        Map<ResourceLocation, QuestState> completion = new HashMap<>();
         List<QuestProgress> completed = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
             switch (prog.submit(this, trigger)) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
-                    completion.put(prog.getQuest().id, QuestCompletionState.COMPLETE);
+                    completion.put(prog.getQuest().id, QuestState.COMPLETE);
                 }
-                case PARTIAL_COMPLETE -> completion.put(prog.getQuest().id, QuestCompletionState.PARTIAL);
+                case PARTIAL_COMPLETE -> completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
                 case PARTIAL ->
                         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 case NOTHING -> {
@@ -137,26 +137,26 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
+    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
         return this.tryFullFill(tracker, with, onFullfill, "");
     }
 
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestCompletionState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
+    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
-        Map<ResourceLocation, QuestCompletionState> completion = new HashMap<>();
+        Map<ResourceLocation, QuestState> completion = new HashMap<>();
         this.currentQuests.forEach(prog -> {
-            Set<Pair<String, T>> fulfilled = prog.tryFullFill2(this.player, tracker, with);
+            Set<Pair<String, T>> fulfilled = prog.tryFullFill(this.player, tracker, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(p -> onFullfill.accept(prog, p));
             }
-            QuestCompletionState state = prog.tryComplete(this, trigger);
-            if (state == QuestCompletionState.COMPLETE) {
+            QuestState state = prog.tryComplete(this, trigger);
+            if (state == QuestState.COMPLETE) {
                 this.completeQuest(prog);
                 completed.add(prog);
-                completion.put(prog.getQuest().id, QuestCompletionState.COMPLETE);
-            } else if (state == QuestCompletionState.PARTIAL) {
-                completion.put(prog.getQuest().id, QuestCompletionState.PARTIAL);
+                completion.put(prog.getQuest().id, QuestState.COMPLETE);
+            } else if (state == QuestState.PARTIAL_COMPLETE) {
+                completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
             }
         });
         this.currentQuests.removeAll(completed);
@@ -342,7 +342,7 @@ public class PlayerData implements PlayerQuestData {
                         this.player.sendMessage(new TranslatableComponent("simplequests.task", e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
                 });
             }
-            if (prog.tryComplete(this, trigger) == QuestCompletionState.COMPLETE) {
+            if (prog.tryComplete(this, trigger) == QuestState.COMPLETE) {
                 this.completeQuest(prog);
                 completed.add(prog);
                 return true;

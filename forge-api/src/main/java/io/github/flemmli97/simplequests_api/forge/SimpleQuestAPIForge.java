@@ -2,7 +2,7 @@ package io.github.flemmli97.simplequests_api.forge;
 
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
+import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;

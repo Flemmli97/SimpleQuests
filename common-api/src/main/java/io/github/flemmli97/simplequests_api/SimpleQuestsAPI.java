@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api;
 
-import io.github.flemmli97.simplequests_api.api.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.impls.entries.single.ItemEntry;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;

@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.impls.entries.multi;
 
-import io.github.flemmli97.simplequests_api.api.PlayerQuestData;
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;

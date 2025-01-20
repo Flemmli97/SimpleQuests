@@ -1,6 +1,6 @@
 package io.github.flemmli97.simplequests_api.fabric;
 
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
+import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;

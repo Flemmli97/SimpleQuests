@@ -154,7 +154,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         return null;
     }
 
-    public Map<ResourceLocation, QuestBase> getQuestsForCategoryID(ResourceLocation res) {
+    public Map<ResourceLocation, QuestBase> getQuestsForCategory(ResourceLocation res) {
         QuestCategory category = this.getQuestCategory(res);
         if (category == null)
             throw new IllegalArgumentException("No such category for " + res);

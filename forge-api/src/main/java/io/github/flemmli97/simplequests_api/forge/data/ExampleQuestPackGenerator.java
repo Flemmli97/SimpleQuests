@@ -29,7 +29,7 @@ import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.impls.quests.SequentialQuest;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
+import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;

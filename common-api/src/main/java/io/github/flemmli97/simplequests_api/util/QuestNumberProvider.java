@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.quest.util;
+package io.github.flemmli97.simplequests_api.util;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;

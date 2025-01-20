@@ -1,6 +1,5 @@
-package io.github.flemmli97.simplequests_api.api;
+package io.github.flemmli97.simplequests_api.player;
 
-import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;

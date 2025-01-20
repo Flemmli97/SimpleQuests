@@ -1,6 +1,6 @@
 package io.github.flemmli97.simplequests_api.quest;
 
-import io.github.flemmli97.simplequests_api.api.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;

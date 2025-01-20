@@ -4,18 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
-import io.github.flemmli97.simplequests_api.JsonCodecs;
-import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.api.PlayerQuestData;
-import io.github.flemmli97.simplequests_api.api.QuestCompletionState;
-import io.github.flemmli97.simplequests_api.api.QuestEntryPredicate;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
+import io.github.flemmli97.simplequests_api.util.JsonCodecs;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
+import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -113,31 +111,14 @@ public class QuestProgress {
         }
         return switch (this.tryComplete(data, trigger)) {
             case COMPLETE -> SubmitType.COMPLETE;
-            case PARTIAL -> SubmitType.PARTIAL_COMPLETE;
+            case PARTIAL_COMPLETE -> SubmitType.PARTIAL_COMPLETE;
             case NO -> any ? SubmitType.PARTIAL : SubmitType.NOTHING;
 
         };
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends QuestEntry> Set<Pair<String, T>> tryFullFill(Class<T> clss, QuestEntryPredicate<T> pred) {
-        Set<Pair<String, T>> fullfilled = new HashSet<>();
-        for (Map.Entry<String, QuestEntry> e : this.questEntries.entrySet()) {
-            if (this.entries.contains(e.getKey()))
-                continue;
-            if (clss.isInstance(e.getValue())) {
-                T entry = (T) e.getValue();
-                if (pred.matches(e.getKey(), entry, this)) {
-                    fullfilled.add(Pair.of(e.getKey(), entry));
-                    this.entries.add(e.getKey());
-                }
-            }
-        }
-        return fullfilled;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V, T extends QuestEntry> Set<Pair<String, T>> tryFullFill2(ServerPlayer player, ProgressionTrackerKey<V, T> key, V with) {
+    public <V, T extends QuestEntry> Set<Pair<String, T>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, T> key, V with) {
         Set<Pair<String, T>> fullfilled = new HashSet<>();
         for (Map.Entry<String, QuestEntry> e : this.questEntries.entrySet()) {
             if (this.entries.contains(e.getKey()))
@@ -154,7 +135,7 @@ public class QuestProgress {
         return fullfilled;
     }
 
-    public QuestCompletionState tryComplete(PlayerQuestData data, String trigger) {
+    public QuestState tryComplete(PlayerQuestData data, String trigger) {
         ServerPlayer player = data.getPlayer();
         boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
         if (completed && (!(this.getQuest() instanceof CompositeQuest))) {
@@ -167,10 +148,10 @@ public class QuestProgress {
                 this.setup(data);
                 if (!this.tickables.isEmpty())
                     data.addTickableProgress(this);
-                return QuestCompletionState.PARTIAL;
+                return QuestState.PARTIAL_COMPLETE;
             }
         }
-        return completed ? QuestCompletionState.COMPLETE : QuestCompletionState.NO;
+        return completed ? QuestState.COMPLETE : QuestState.NO;
     }
 
     public List<String> finishedTasks() {

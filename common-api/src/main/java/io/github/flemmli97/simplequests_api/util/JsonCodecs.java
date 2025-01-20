@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api;
+package io.github.flemmli97.simplequests_api.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
