@@ -37,6 +37,10 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
     developmentFabric.extendsFrom api
+    shadowArtifact {
+        canBeConsumed = true
+        canBeResolved = false
+    }
 }
 
 repositories {
@@ -85,6 +89,10 @@ sourcesJar {
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
     archiveClassifier.set("fabric-sources")
+}
+
+artifacts {
+    shadowArtifact(shadowJar)
 }
 
 components.java {

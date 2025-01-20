@@ -26,7 +26,5 @@ dependencies {
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
 
-    runtimeOnly(project(path: ":common-api", configuration: "namedElements")) { transitive = false }
-    runtimeOnly(project(path: ":fabric-api", configuration: "namedElements")) { transitive = false }
-    compileOnly(include(project(path: ":fabric-api")))
+    implementation(include(project(path: ":fabric-api", configuration: "shadowArtifact")))
 }

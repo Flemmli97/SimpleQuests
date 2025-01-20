@@ -30,22 +30,10 @@ repositories {
     }
 }
 
-configurations {
-    apiLib
-//    runtimeClasspath.extendsFrom apiLib
-    developmentForge.extendsFrom apiLib
-}
-
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
 
-//    compileOnly(include(project(path: ":forge-api")))
-//
-//    developmentForge(project(path: ":common-api")) { transitive = false}
-//    implementation(project(path: ":forge-api", configuration: "namedElements"))
-    apiLib(project(path: ":common-api", configuration: "namedElements")) { transitive = false }
-    apiLib(project(path: ":forge-api", configuration: "namedElements")) { transitive = false }
-    compileOnly(include(project(path: ":forge-api")))
+    implementation(include(project(path: ":forge-api", configuration: "shadowArtifact")))
 }
 
 shadowJar {

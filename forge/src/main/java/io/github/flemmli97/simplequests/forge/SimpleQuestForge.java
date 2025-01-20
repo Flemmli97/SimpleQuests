@@ -6,20 +6,12 @@ import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.forge.client.ForgeClientHandler;
 import io.github.flemmli97.simplequests.network.PacketRegistrar;
-import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.quest.util.QuestNumberProvider;
-import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -54,7 +46,6 @@ public class SimpleQuestForge {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "*", (s1, s2) -> true));
         SimpleQuests.updateLoaderImpl(new LoaderImpl());
         FMLJavaModLoadingContext.get().getModEventBus().addListener(SimpleQuestForge::commonSetup);
-        MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::addReload);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::command);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::kill);
         MinecraftForge.EVENT_BUS.addListener(SimpleQuestForge::interactSpecific);
@@ -73,10 +64,6 @@ public class SimpleQuestForge {
                 DISPATCHER.registerMessage(index, clss, encoder, decoder, handlerServer(handler), Optional.of(NetworkDirection.PLAY_TO_SERVER));
             }
         }, 0);
-    }
-
-    public static void addReload(AddReloadListenerEvent event) {
-        event.addListener(QuestsManager.instance());
     }
 
     public static void command(RegisterCommandsEvent event) {
