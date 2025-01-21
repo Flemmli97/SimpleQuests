@@ -37,7 +37,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.finish", "Finished quest [%s]");
         this.add("simplequests.current.no", "No active quest");
         this.add("simplequests.reset", "Reset current quest [%s]");
-        this.add("simplequests.reset.confirm", "Are you sure. Submitted items will not be refunded? Type again to confirm");
+        this.add("simplequests.reset.confirm", "Are you sure? Submitted items will not be refunded! Type again to confirm");
         this.add("simplequests.reset.notfound", "No active quest with id %s");
         this.add("simplequests.reset.cooldown", "Reset quest cooldowns for %s");
         this.add("simplequests.reset.all", "Reset all progress for %s");
@@ -45,13 +45,13 @@ public class LangGen implements DataProvider {
         this.add("simplequests.unlock.fail", "No such quest %s");
 
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
-        this.add("simplequests.quest.is_selection", "Quest with id %s is a selection quest!");
+        this.add("simplequests.quest.is_selection", "Quest with id %s is a selection-quest!");
         this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
-        this.add("simplequests.quest.composite.resolve.none", "Selectionquest with id %1$s has no selectable quest with %2$s!");
+        this.add("simplequests.quest.composite.resolve.none", "Selection-quest with id %1$s has no selectable quest with %2$s!");
         this.add("simplequests.quest.category.noexist", "No quest category exists with id %s");
         this.add("simplequests.task", "Finished task %s");
 
-        this.add("simplequests.interaction.dupe", "You already interacted with this predicate");
+        this.add("simplequests.interaction.dupe", "You already interacted with this!");
         this.add("simplequests.interaction.block.dupe.true", "You already interacted with this block");
         this.add("simplequests.interaction.block.dupe.false", "You already broke this block");
 

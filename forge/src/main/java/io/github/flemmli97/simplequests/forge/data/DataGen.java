@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @Mod.EventBusSubscriber(modid = SimpleQuests.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ExampleQuestPackGenerator {
+public class DataGen {
 
     @SubscribeEvent
     public static void data(GatherDataEvent event) {
