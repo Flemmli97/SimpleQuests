@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.player;
 
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
-import io.github.flemmli97.simplequests_api.quest.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import net.minecraft.resources.ResourceLocation;
 
 /**

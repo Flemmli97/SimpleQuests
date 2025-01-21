@@ -24,8 +24,8 @@ import io.github.flemmli97.simplequests_api.impls.entries.single.KillEntry;
 import io.github.flemmli97.simplequests_api.impls.entries.single.LocationEntry;
 import io.github.flemmli97.simplequests_api.impls.entries.single.PositionEntry;
 import io.github.flemmli97.simplequests_api.impls.entries.single.XPEntry;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
-import io.github.flemmli97.simplequests_api.quest.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;

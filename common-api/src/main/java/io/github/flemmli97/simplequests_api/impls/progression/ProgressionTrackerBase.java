@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.impls.progression;
 
 import io.github.flemmli97.simplequests_api.player.ProgressionTracker;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
 
 public abstract class ProgressionTrackerBase<T, E extends QuestEntry> implements ProgressionTracker<T, E> {
 

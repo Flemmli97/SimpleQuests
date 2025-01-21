@@ -4,22 +4,17 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.progression.BlockTracker;
-import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
-import io.github.flemmli97.simplequests_api.impls.progression.FishingTracker;
-import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -29,15 +24,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,11 +61,6 @@ public class PlayerData implements PlayerQuestData {
     private final Map<ResourceLocation, Integer> finishedQuestsTracker = new HashMap<>();
 
     private int interactionCooldown;
-
-    /**
-     * Indicator that client has the mod installed
-     */
-    public boolean hasClient;
 
     public static PlayerData get(ServerPlayer player) {
         return ((SimpleQuestDataGet) player).simpleQuestPlayerData();
@@ -137,15 +124,16 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
-        return this.tryFullFill(tracker, with, onFullfill, "");
-    }
-
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> tryFullFill(ProgressionTrackerKey<V, T> tracker, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
+    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, T> key, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
+        if (key.equals(EntityTracker.KEY)) {
+            if (this.interactionCooldown > 0)
+                return Map.of();
+            this.interactionCooldown = 2;
+        }
         List<QuestProgress> completed = new ArrayList<>();
         Map<ResourceLocation, QuestState> completion = new HashMap<>();
         this.currentQuests.forEach(prog -> {
-            Set<Pair<String, T>> fulfilled = prog.tryFullFill(this.player, tracker, with);
+            Set<Pair<String, T>> fulfilled = prog.tryFullFill(this.player, key, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(p -> onFullfill.accept(prog, p));
@@ -163,47 +151,12 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public void onKill(LivingEntity entity) {
-        this.tryFullFill(KillTracker.KEY, entity,
-                (prog, p) -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.kill", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                });
-    }
-
-    public void onFished(Collection<ItemStack> loot) {
-        this.tryFullFill(FishingTracker.KEY, loot,
-                (prog, p) -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.kill", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                });
-    }
-
-    public void onInteractWith(Entity entity) {
-        if (this.interactionCooldown > 0)
-            return;
-        this.interactionCooldown = 2;
-        this.tryFullFill(EntityTracker.KEY, entity,
-                (prog, p) -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                });
-    }
-
-    public void onBlockInteract(BlockPos pos, boolean use) {
-        this.tryFullFill(BlockTracker.KEY, Pair.of(pos, use),
-                (prog, p) -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                });
-    }
-
-    public void onItemCrafted(ItemStack stack, int amount, String trigger) {
-        this.tryFullFill(CraftingTracker.KEY, Pair.of(stack, amount),
-                (prog, p) -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                }, trigger);
+    @Override
+    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, T> key, V with, @NotNull String trigger) {
+        return this.trigger(key, with, (prog, p) -> {
+            if (!prog.getQuest().category.isSilent)
+                this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+        }, trigger);
     }
 
     private void completeQuest(QuestProgress prog) {
@@ -466,7 +419,6 @@ public class PlayerData implements PlayerQuestData {
         this.dailyQuestsCategoryTracker.clear();
         this.dailyQuestsCategoryTracker.putAll(data.dailyQuestsCategoryTracker);
         this.finishedQuestsTracker.putAll(data.finishedQuestsTracker);
-        this.hasClient = data.hasClient;
     }
 
     public void resetAll() {

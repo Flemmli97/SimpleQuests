@@ -15,7 +15,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SimpleQuestsAPI {
@@ -23,8 +26,6 @@ public class SimpleQuestsAPI {
     public static final String MODID = "simplequests_api";
 
     public static final Logger LOGGER = LogManager.getLogger("simplequests_api");
-
-    public static GuiWrapper GUI_WRAPPER;
 
     public static LootContext createContext(PlayerQuestData data, @Nullable ResourceLocation quest) {
         ServerPlayer player = data.getPlayer();
@@ -39,7 +40,7 @@ public class SimpleQuestsAPI {
         if (!entry.description().isEmpty())
             return List.of(new TranslatableComponent(entry.description()));
         List<MutableComponent> all = ItemEntry.itemComponents(entry.predicate());
-        if (all.size() < WRAP_AMOUNT || GUI_WRAPPER == null || !GUI_WRAPPER.shouldWrap(player, entry))
+        if (all.size() < WRAP_AMOUNT || !APIPlatform.INSTANCE.shouldWrap(player, entry))
             return List.of(entry.translation(player));
         List<MutableComponent> list = new ArrayList<>();
         MutableComponent items = null;
@@ -66,7 +67,31 @@ public class SimpleQuestsAPI {
         return list;
     }
 
-    public interface GuiWrapper {
-        boolean shouldWrap(ServerPlayer player, ItemEntry entry);
+    @SuppressWarnings("unchecked")
+    public static <T> T getPlatformInstance(Class<T> abstractClss, String... impls) {
+        if (impls == null || impls.length == 0)
+            throw new IllegalStateException("Couldn't create an instance of " + abstractClss + ". No implementations provided!");
+        Class<?> clss = null;
+        int i = 0;
+        while (clss == null && i < impls.length) {
+            try {
+                clss = Class.forName(impls[i]);
+            } catch (ClassNotFoundException ignored) {
+            }
+            i++;
+        }
+        if (clss == null)
+            SimpleQuestsAPI.LOGGER.fatal("No Implementation of {} found with given paths {}", abstractClss, Arrays.toString(impls));
+        else if (abstractClss.isAssignableFrom(clss)) {
+            try {
+                Constructor<T> constructor = (Constructor<T>) clss.getDeclaredConstructor();
+                return constructor.newInstance();
+            } catch (NoSuchMethodException e) {
+                SimpleQuestsAPI.LOGGER.fatal("Implementation of {} needs to provide an no arg constructor", clss);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        throw new IllegalStateException("Couldn't create an instance of " + abstractClss);
     }
 }

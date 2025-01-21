@@ -1,6 +1,8 @@
-package io.github.flemmli97.simplequests.mixin;
+package io.github.flemmli97.simplequests_api.mixin;
 
-import io.github.flemmli97.simplequests.api.SimpleQuestAPI;
+import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
+import io.github.flemmli97.simplequests_api.registry.PlayerQuestDataRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +18,6 @@ public abstract class ItemStackMixin {
     @Inject(method = "onCraftedBy", at = @At("HEAD"))
     private void onItemCrafted(Level level, Player player, int amount, CallbackInfo info) {
         if (player instanceof ServerPlayer serverPlayer)
-            SimpleQuestAPI.itemCrafted(serverPlayer, (ItemStack) (Object) this, amount, "");
+            PlayerQuestDataRegistry.applyAll(serverPlayer, d -> d.trigger(CraftingTracker.KEY, Pair.of((ItemStack) (Object) this, amount), ""));
     }
 }

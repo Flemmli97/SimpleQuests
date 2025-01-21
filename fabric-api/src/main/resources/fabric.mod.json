@@ -19,7 +19,8 @@
     ]
   },
   "mixins": [
-    "simplequests_api.mixins.json"
+    "simplequests_api.mixins.json",
+    "simplequests_api.fabric.mixins.json"
   ],
   "depends": {
     "fabric": ">=${fabric_version}",

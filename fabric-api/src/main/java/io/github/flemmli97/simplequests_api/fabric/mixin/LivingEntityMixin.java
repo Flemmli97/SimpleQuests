@@ -1,6 +1,6 @@
-package io.github.flemmli97.simplequests.fabric.mixin;
+package io.github.flemmli97.simplequests_api.fabric.mixin;
 
-import io.github.flemmli97.simplequests.fabric.SimpleQuestsFabric;
+import io.github.flemmli97.simplequests_api.CommonEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,6 +14,6 @@ public class LivingEntityMixin {
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void die(DamageSource source, CallbackInfo info) {
-        SimpleQuestsFabric.onDeath((LivingEntity) (Object) this, source);
+        CommonEvents.onDeath((LivingEntity) (Object) this);
     }
 }

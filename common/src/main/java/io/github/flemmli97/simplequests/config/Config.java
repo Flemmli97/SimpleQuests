@@ -1,6 +1,6 @@
 package io.github.flemmli97.simplequests.config;
 
-import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.LoaderHandler;
 
 import java.io.File;
 import java.io.FileReader;
@@ -21,7 +21,7 @@ public class Config {
     public int dailyQuestAmount = -1;
 
     public Config() {
-        File configDir = SimpleQuests.getHandler().getConfigPath().resolve("simplequests").toFile();
+        File configDir = LoaderHandler.INSTANCE.getConfigPath().resolve("simplequests").toFile();
         try {
             if (!configDir.exists())
                 configDir.mkdirs();

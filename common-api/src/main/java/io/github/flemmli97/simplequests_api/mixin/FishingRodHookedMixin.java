@@ -1,6 +1,7 @@
-package io.github.flemmli97.simplequests.mixin;
+package io.github.flemmli97.simplequests_api.mixin;
 
-import io.github.flemmli97.simplequests.data.PlayerData;
+import io.github.flemmli97.simplequests_api.impls.progression.FishingTracker;
+import io.github.flemmli97.simplequests_api.registry.PlayerQuestDataRegistry;
 import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -17,6 +18,6 @@ public abstract class FishingRodHookedMixin {
 
     @Inject(method = "trigger", at = @At("HEAD"))
     private void onRodHookedTrigger(ServerPlayer player, ItemStack rod, FishingHook entity, Collection<ItemStack> stacks, CallbackInfo info) {
-        PlayerData.get(player).onFished(stacks);
+        PlayerQuestDataRegistry.applyAll(player, d -> d.trigger(FishingTracker.KEY, stacks, ""));
     }
 }

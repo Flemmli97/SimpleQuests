@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.quest;
+package io.github.flemmli97.simplequests_api.quest.entry;
 
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;

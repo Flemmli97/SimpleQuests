@@ -8,7 +8,7 @@ import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
 import io.github.flemmli97.simplequests_api.player.ProgressionTracker;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 

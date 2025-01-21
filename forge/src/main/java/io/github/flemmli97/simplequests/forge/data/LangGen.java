@@ -44,7 +44,6 @@ public class LangGen implements DataProvider {
         this.add("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
         this.add("simplequests.unlock.fail", "No such quest %s");
 
-        this.add("simplequests.kill", "Finished kill task %s");
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
         this.add("simplequests.quest.is_selection", "Quest with id %s is a selection quest!");
         this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
