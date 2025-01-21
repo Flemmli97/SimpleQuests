@@ -2,7 +2,6 @@ package io.github.flemmli97.simplequests_api.impls.entries.multi;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.entries.single.AdvancementEntry;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
@@ -10,6 +9,7 @@ import io.github.flemmli97.simplequests_api.quest.MultiQuestEntryBase;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;

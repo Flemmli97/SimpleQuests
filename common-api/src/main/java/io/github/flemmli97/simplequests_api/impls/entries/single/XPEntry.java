@@ -2,10 +2,10 @@ package io.github.flemmli97.simplequests_api.impls.entries.single;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;

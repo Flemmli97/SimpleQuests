@@ -2,13 +2,13 @@ package io.github.flemmli97.simplequests_api.impls.entries.single;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
 import io.github.flemmli97.simplequests_api.mixin.EntityPredicateAccessor;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.critereon.EntityPredicate;
