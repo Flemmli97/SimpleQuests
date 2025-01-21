@@ -33,8 +33,10 @@ repositories {
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
 
+    // Jar-Jar only in the remapped jar but we cant use that
     modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-forge"
-    implementation(include(project(path: ":forge-api", configuration: "shadowArtifact")))
+    compileOnly(include(project(path: ":forge-api")))
+    runtimeOnly(project(path: ":forge-api", configuration: "shadowArtifact"))
 }
 
 shadowJar {

@@ -26,6 +26,8 @@ dependencies {
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
 
+    // Jar-Jar only in the remapped jar but we cant use that
     modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-fabric"
-    implementation(include(project(path: ":fabric-api", configuration: "shadowArtifact")))
+    compileOnly(include(project(path: ":fabric-api")))
+    runtimeOnly(project(path: ":fabric-api", configuration: "shadowArtifact"))
 }
