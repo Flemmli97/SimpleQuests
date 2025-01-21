@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Quest containing multiple quests that need to be fininshed
+ */
 public class SequentialQuest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "sequential_quest");
@@ -61,7 +64,8 @@ public class SequentialQuest extends QuestBase {
         return obj;
     }
 
-    public List<ResourceLocation> getQuests() {
+    @Override
+    public List<ResourceLocation> getSubQuests() {
         return this.quests;
     }
 

@@ -4,16 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
-import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.QuestEntry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -235,7 +235,7 @@ public class QuestProgress {
                 throw new IllegalStateException();
             }
         } else {
-            this.base = QuestsManager.instance().getActualQuests(new ResourceLocation(tag.getString("Quest")));
+            this.base = QuestsManager.instance().getActualQuest(new ResourceLocation(tag.getString("Quest")), null);
             if (this.base == null) {
                 SimpleQuestsAPI.LOGGER.error("Cant find quest with id {}. Skipping", tag.getString("Quest"));
                 throw new IllegalStateException();

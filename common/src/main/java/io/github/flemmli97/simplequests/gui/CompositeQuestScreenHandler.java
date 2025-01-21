@@ -44,7 +44,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     private int page;
 
     private CompositeQuestScreenHandler(int syncId, Inventory playerInventory, CompositeQuest quest, QuestCategory category, boolean canGoBack, int page) {
-        super(syncId, playerInventory, (quest.getCompositeQuests().size() / 7) + 1, new GuiData(quest, category, (quest.getCompositeQuests().size() / 7) + 1, page, canGoBack));
+        super(syncId, playerInventory, (quest.getSubQuests().size() / 7) + 1, new GuiData(quest, category, (quest.getSubQuests().size() / 7) + 1, page, canGoBack));
         this.quest = quest;
         this.category = category;
         this.canGoBack = canGoBack;
@@ -87,8 +87,8 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     protected void fillInventoryWith(Player player, SeparateInv inv, GuiData additionalData) {
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, Quest> questMap = additionalData.quest.getCompositeQuests()
-                .stream().map(r -> Pair.of(r, QuestsManager.instance().getAllQuests().get(r)))
+        Map<ResourceLocation, Quest> questMap = additionalData.quest.getSubQuests()
+                .stream().map(r -> Pair.of(r, QuestsManager.instance().getQuest(r)))
                 .filter(p -> p.getSecond() instanceof Quest).collect(Collectors.toMap(
                         Pair::getFirst,
                         e -> (Quest) e.getSecond(),

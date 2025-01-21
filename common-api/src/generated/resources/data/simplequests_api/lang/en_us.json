@@ -7,7 +7,7 @@
   "simplequests_api:entity": "Kill %s x%2$s",
   "simplequests_api:entity.tag": "Kill entities in the tag %s x%2$s",
   "simplequests_api:xp": "Submit Experience: %s lvl",
-  "simplequests.missing.advancement": "Advancement with id %s missing",
+  "simplequests_api.missing.advancement": "Advancement with id %s missing",
   "simplequests_api:advancement": "Advancement %s",
   "simplequests_api:position": "Go to [x:%1$s;y:%2$s;z:%3$s]",
   "simplequests_api:entity.progress": "Killed: %1$s/%2$s",

@@ -26,5 +26,6 @@ dependencies {
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
 
+    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-fabric"
     implementation(include(project(path: ":fabric-api", configuration: "shadowArtifact")))
 }

@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests_api.fabric;
 
-import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
+import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.server.packs.PackType;

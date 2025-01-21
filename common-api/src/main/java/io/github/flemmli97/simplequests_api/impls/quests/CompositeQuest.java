@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A quest containing multiple quests which can be selected
+ */
 public class CompositeQuest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "composite_quest");
@@ -52,7 +55,8 @@ public class CompositeQuest extends QuestBase {
         return obj;
     }
 
-    public List<ResourceLocation> getCompositeQuests() {
+    @Override
+    public List<ResourceLocation> getSubQuests() {
         return this.compositeQuests;
     }
 

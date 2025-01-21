@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests_api.quest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.util.ParseHelper;
 import net.minecraft.ChatFormatting;
@@ -183,6 +184,14 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return this.unlockCondition.matches(player, player);
     }
 
+    public Visibility getVisibility() {
+        if (QuestsManager.instance().isSubQuest(this.id))
+            return Visibility.NEVER;
+        if (this.visibility == Visibility.DEFAULT && !this.category.isVisible)
+            return Visibility.NEVER;
+        return this.visibility;
+    }
+
     public final MutableComponent getTask(ServerPlayer player) {
         return this.getTask(player, -1);
     }
@@ -240,6 +249,10 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public ItemStack getIcon() {
         return this.icon.copy();
+    }
+
+    public List<ResourceLocation> getSubQuests() {
+        return List.of();
     }
 
     /**

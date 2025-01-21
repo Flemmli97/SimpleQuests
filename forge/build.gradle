@@ -33,6 +33,7 @@ repositories {
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
 
+    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-forge"
     implementation(include(project(path: ":forge-api", configuration: "shadowArtifact")))
 }
 

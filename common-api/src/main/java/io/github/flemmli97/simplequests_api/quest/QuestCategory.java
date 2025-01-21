@@ -13,6 +13,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.List;
 public class QuestCategory implements Comparable<QuestCategory> {
 
     public static final QuestCategory DEFAULT_CATEGORY = new QuestCategory(new ResourceLocation(SimpleQuestsAPI.MODID, "default_category"),
-            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, -1, true, true, false);
+            "Main", List.of(), new ItemStack(Items.WRITTEN_BOOK), false, -1, -1, -1, List.of(), true, false);
 
     public final ResourceLocation id;
     private final String name;
@@ -30,9 +31,11 @@ public class QuestCategory implements Comparable<QuestCategory> {
     private final int maxConcurrentQuests;
     public final int sortingId;
     public final int maxDaily;
-    public final boolean canBeSelected, isVisible, isSilent;
+    public final boolean isVisible, isSilent;
 
-    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, boolean sameCategoryOnly, int maxConcurrentQuests, int sortingID, int maxDaily, boolean canBeSelected, boolean isVisible, boolean isSilent) {
+    private final List<ResourceLocation> requiredContext;
+
+    private QuestCategory(ResourceLocation id, String name, List<String> description, ItemStack icon, boolean sameCategoryOnly, int maxConcurrentQuests, int sortingID, int maxDaily, List<ResourceLocation> requiredContext, boolean isVisible, boolean isSilent) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,9 +44,26 @@ public class QuestCategory implements Comparable<QuestCategory> {
         this.maxConcurrentQuests = maxConcurrentQuests;
         this.sortingId = sortingID;
         this.maxDaily = maxDaily;
-        this.canBeSelected = canBeSelected;
+        this.requiredContext = requiredContext;
         this.isVisible = isVisible;
         this.isSilent = isSilent;
+    }
+
+    /**
+     * Check if this category matches the given context.
+     * Contexts are simply ids you pass in and only if this category contains that id it passes
+     * This is useful if you only want to make a quest accessible under a certain context.
+     * SimpleQuest ONLY handles no context quests. Anything else requires a custom implementation of SimpleQuest API
+     */
+    public boolean matchesContext(@Nullable ResourceLocation context) {
+        if (context == null) {
+            return this.requiredContext.isEmpty();
+        }
+        for (ResourceLocation res : this.requiredContext) {
+            if (res.equals(context))
+                return true;
+        }
+        return false;
     }
 
     public int getMaxConcurrentQuests() {
@@ -68,6 +88,15 @@ public class QuestCategory implements Comparable<QuestCategory> {
                 });
             }
         }
+        ImmutableList.Builder<ResourceLocation> requiredContext = new ImmutableList.Builder<>();
+        JsonArray ctxs = obj.getAsJsonArray("required_contexts");
+        if (e != null) {
+            ctxs.forEach(ea -> {
+                if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
+                    requiredContext.add(new ResourceLocation(ea.getAsString()));
+                }
+            });
+        }
         return new QuestCategory(id,
                 GsonHelper.getAsString(obj, "name"),
                 description.build(),
@@ -76,7 +105,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
                 GsonHelper.getAsInt(obj, "max_concurrent_quests", -1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
                 GsonHelper.getAsInt(obj, "max_daily", -1),
-                GsonHelper.getAsBoolean(obj, "selectable", true),
+                requiredContext.build(),
                 GsonHelper.getAsBoolean(obj, "is_visible", true),
                 GsonHelper.getAsBoolean(obj, "is_silent", false));
     }
@@ -101,8 +130,11 @@ public class QuestCategory implements Comparable<QuestCategory> {
             obj.addProperty("max_concurrent_quests", this.maxConcurrentQuests);
         if (this.sortingId != 0 || full)
             obj.addProperty("sorting_id", this.sortingId);
-        if (!this.canBeSelected || full)
-            obj.addProperty("selectable", this.canBeSelected);
+        if (!this.requiredContext.isEmpty() || full) {
+            JsonArray arr = new JsonArray();
+            this.requiredContext.forEach(ctx -> arr.add(ctx.toString()));
+            obj.add("required_contexts", arr);
+        }
         if (!this.isVisible || full)
             obj.addProperty("is_visible", this.isVisible);
         if (this.isSilent || full)
@@ -148,10 +180,12 @@ public class QuestCategory implements Comparable<QuestCategory> {
         private final List<String> description = new ArrayList<>();
         private ItemStack icon = new ItemStack(Items.WRITTEN_BOOK);
         private int sortingID;
-        private boolean canBeSelected = true, isVisible = true, isSilent;
+        private boolean isVisible = true, isSilent;
         private boolean sameCategoryOnly;
         private int maxConcurrentQuests = -1;
         private int maxDaily = -1;
+
+        private final List<ResourceLocation> requiredContext = new ArrayList<>();
 
         public Builder(ResourceLocation id, String name) {
             this.id = id;
@@ -168,8 +202,8 @@ public class QuestCategory implements Comparable<QuestCategory> {
             return this;
         }
 
-        public Builder unselectable() {
-            this.canBeSelected = false;
+        public Builder needContexts(ResourceLocation... contexts) {
+            this.requiredContext.addAll(List.of(contexts));
             return this;
         }
 
@@ -204,7 +238,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         }
 
         public QuestCategory build() {
-            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sameCategoryOnly, this.maxConcurrentQuests, this.sortingID, this.maxDaily, this.canBeSelected, this.isVisible, this.isSilent);
+            return new QuestCategory(this.id, this.name, this.description, this.icon, this.sameCategoryOnly, this.maxConcurrentQuests, this.sortingID, this.maxDaily, this.requiredContext, this.isVisible, this.isSilent);
         }
     }
 }

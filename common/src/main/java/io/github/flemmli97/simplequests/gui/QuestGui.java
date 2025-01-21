@@ -133,8 +133,8 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             QuestBase quest = questMap.get(res);
-            if (quest.visibility != QuestBase.Visibility.DEFAULT)
-                return quest.visibility == QuestBase.Visibility.NEVER;
+            if (!SimpleQuests.canAcceptQuest(serverPlayer, quest))
+                return true;
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(quest);
             return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
                     || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
@@ -251,7 +251,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                     if (b) {
                         player.closeContainer();
                         PlayerData data = PlayerData.get(player);
-                        composite.getCompositeQuests().forEach(r -> {
+                        composite.getSubQuests().forEach(r -> {
                             if (data.isActive(r))
                                 data.reset(r, true);
                         });

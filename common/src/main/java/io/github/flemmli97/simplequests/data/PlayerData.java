@@ -3,8 +3,6 @@ package io.github.flemmli97.simplequests.data;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
-import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.progression.BlockTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
@@ -12,11 +10,13 @@ import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.FishingTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.QuestState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -220,7 +220,7 @@ public class PlayerData implements PlayerQuestData {
             this.player.sendMessage(new TranslatableComponent("simplequests.finish", prog.getTask(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
-                Quest quest = QuestsManager.instance().getActualQuests(res);
+                Quest quest = QuestsManager.instance().getActualQuest(res, null);
                 if (quest != null)
                     this.unlockTracker.remove(quest.id);
             });
@@ -361,7 +361,7 @@ public class PlayerData implements PlayerQuestData {
             this.dailySeed = this.player.getRandom().nextLong();
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
-                Quest quest = QuestsManager.instance().getActualQuests(r);
+                Quest quest = QuestsManager.instance().getActualQuest(r, null);
                 if (quest != null && quest.isDailyQuest)
                     this.reset(r, true, false);
             });
