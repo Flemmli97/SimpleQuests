@@ -47,7 +47,7 @@ public class PlayerData {
     private final ServerPlayer player;
     private List<QuestProgress> currentQuests = new ArrayList<>();
     private Map<ResourceLocation, Long> cooldownTracker = new HashMap<>();
-    private final List<QuestProgress> tickables = new ArrayList<>();
+    private List<QuestProgress> tickables = new ArrayList<>();
 
     private Set<ResourceLocation> unlockTracker = new HashSet<>();
 
@@ -433,20 +433,22 @@ public class PlayerData {
         if (tag.contains("TimeTracker"))
             this.questTrackerTime = LocalDateTime.parse(tag.getString("TimeTracker"), TIME);
         CompoundTag daily = tag.getCompound("DailyQuestTracker");
-        daily.getAllKeys().forEach(key -> this.dailyQuestsTracker.put(new ResourceLocation(key), done.getInt(key)));
+        daily.getAllKeys().forEach(key -> this.dailyQuestsTracker.put(new ResourceLocation(key), daily.getInt(key)));
         CompoundTag dailyCategory = tag.getCompound("DailyQuestCategoryTracker");
-        dailyCategory.getAllKeys().forEach(key -> this.dailyQuestsCategoryTracker.put(new ResourceLocation(key), done.getInt(key)));
+        dailyCategory.getAllKeys().forEach(key -> this.dailyQuestsCategoryTracker.put(new ResourceLocation(key), dailyCategory.getInt(key)));
         CompoundTag total = tag.getCompound("FinishedQuestTracker");
-        total.getAllKeys().forEach(key -> this.finishedQuestsTracker.put(new ResourceLocation(key), done.getInt(key)));
+        total.getAllKeys().forEach(key -> this.finishedQuestsTracker.put(new ResourceLocation(key), total.getInt(key)));
         ListTag unlocked = tag.getList("UnlockedQuests", Tag.TAG_STRING);
         unlocked.forEach(t -> this.unlockTracker.add(new ResourceLocation(t.getAsString())));
     }
 
     public void clone(PlayerData data) {
         this.currentQuests = data.currentQuests;
+        this.tickables = data.tickables;
         this.cooldownTracker = data.cooldownTracker;
         this.unlockTracker = data.unlockTracker;
         this.questTrackerTime = data.questTrackerTime;
+        this.dailySeed = data.dailySeed;
         this.dailyQuestsTracker.clear();
         this.dailyQuestsTracker.putAll(data.dailyQuestsTracker);
         this.dailyQuestsCategoryTracker.clear();
@@ -458,6 +460,7 @@ public class PlayerData {
     public void resetAll() {
         this.currentQuests.forEach(p -> p.getQuest().onReset(this.player));
         this.currentQuests.clear();
+        this.tickables.clear();
         this.cooldownTracker.clear();
         this.unlockTracker.clear();
         this.questTrackerTime = null;
