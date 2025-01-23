@@ -90,7 +90,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         }
         ImmutableList.Builder<ResourceLocation> requiredContext = new ImmutableList.Builder<>();
         JsonArray ctxs = obj.getAsJsonArray("required_contexts");
-        if (e != null) {
+        if (ctxs != null) {
             ctxs.forEach(ea -> {
                 if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
                     requiredContext.add(new ResourceLocation(ea.getAsString()));

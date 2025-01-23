@@ -73,7 +73,7 @@ public class SequentialQuest extends QuestBase {
     public String submissionTrigger(ServerPlayer player, int idx) {
         if (idx < 0 || idx >= this.quests.size())
             return super.submissionTrigger(player, idx);
-        QuestBase base = QuestsManager.instance().getAllQuests().get(this.quests.get(idx));
+        QuestBase base = QuestsManager.instance().getQuest(this.quests.get(idx));
         return base.submissionTrigger(player, idx);
     }
 
@@ -82,7 +82,14 @@ public class SequentialQuest extends QuestBase {
     public QuestBase resolveToQuest(ServerPlayer player, int idx) {
         if (idx < 0 || idx >= this.quests.size())
             return null;
-        return QuestsManager.instance().getAllQuests().get(this.quests.get(idx));
+        QuestBase quest = QuestsManager.instance().getQuest(this.quests.get(idx));
+        if (quest == null)
+            return null;
+        if (quest.getSubQuests().size() > 1) {
+            SimpleQuestsAPI.LOGGER.error("SequentialQuest {} does not support nested quest {}", this.id, quest.id);
+            return null;
+        }
+        return quest;
     }
 
     @Override
@@ -98,10 +105,8 @@ public class SequentialQuest extends QuestBase {
 
     @Override
     public Map<String, QuestEntry> resolveTasks(PlayerQuestData data, int idx) {
-        if (idx < 0 || idx >= this.quests.size())
-            return Map.of();
-        QuestBase base = QuestsManager.instance().getAllQuests().get(this.quests.get(idx));
-        return base.resolveTasks(data, 0);
+        QuestBase base = this.resolveToQuest(data.getPlayer(), idx);
+        return base == null ? Map.of() : base.resolveTasks(data, 0);
     }
 
     public static class Builder extends BuilderBase<Builder> {

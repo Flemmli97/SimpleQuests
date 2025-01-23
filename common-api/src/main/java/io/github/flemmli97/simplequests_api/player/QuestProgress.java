@@ -113,7 +113,6 @@ public class QuestProgress {
             case COMPLETE -> SubmitType.COMPLETE;
             case PARTIAL_COMPLETE -> SubmitType.PARTIAL_COMPLETE;
             case NO -> any ? SubmitType.PARTIAL : SubmitType.NOTHING;
-
         };
     }
 
@@ -138,11 +137,12 @@ public class QuestProgress {
     public QuestState tryComplete(PlayerQuestData data, String trigger) {
         ServerPlayer player = data.getPlayer();
         boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
-        if (completed && (!(this.getQuest() instanceof CompositeQuest))) {
-            QuestBase next = this.getQuest().resolveToQuest(player, this.questIndex + 1);
+        QuestBase toResolve = this.getQuest() instanceof CompositeQuest ? this.quest : this.getQuest();
+        if (completed) {
+            QuestBase next = toResolve.resolveToQuest(player, this.questIndex + 1);
             if (next != null) {
                 this.quest = next;
-                this.questEntries = this.quest.resolveTasks(data, 0);
+                this.questEntries = toResolve.resolveTasks(data, this.questIndex + 1);
                 this.questIndex += 1;
                 this.resetTrackers();
                 this.setup(data);

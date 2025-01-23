@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests_api.registry;
 
 import com.google.gson.JsonObject;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
@@ -41,6 +42,9 @@ public class QuestBaseRegistry {
 
     public static QuestBase deserialize(ResourceLocation type, ResourceLocation res, QuestCategory category, JsonObject obj) {
         QuestReader d = MAP.get(type);
+        // Legacy
+        if (d == null && res.getNamespace().equals(SimpleQuestsAPI.MODID))
+            d = MAP.get(new ResourceLocation("simplequests", res.getPath()));
         if (d != null)
             return d.fromJson(res, category, obj);
         throw new IllegalStateException("Missing entry for key " + type);

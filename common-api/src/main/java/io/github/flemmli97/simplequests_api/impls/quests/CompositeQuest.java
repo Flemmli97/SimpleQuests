@@ -65,7 +65,7 @@ public class CompositeQuest extends QuestBase {
     public QuestBase resolveToQuest(ServerPlayer player, int idx) {
         if (idx < 0 || idx >= this.compositeQuests.size())
             return null;
-        return QuestsManager.instance().getAllQuests().get(this.compositeQuests.get(idx));
+        return QuestsManager.instance().getQuest(this.compositeQuests.get(idx));
     }
 
     @Override
@@ -77,16 +77,14 @@ public class CompositeQuest extends QuestBase {
     public String submissionTrigger(ServerPlayer player, int idx) {
         if (idx < 0 || idx >= this.compositeQuests.size())
             return super.submissionTrigger(player, idx);
-        QuestBase base = QuestsManager.instance().getAllQuests().get(this.compositeQuests.get(idx));
+        QuestBase base = QuestsManager.instance().getQuest(this.compositeQuests.get(idx));
         return base.submissionTrigger(player, idx);
     }
 
     @Override
     public Map<String, QuestEntry> resolveTasks(PlayerQuestData data, int idx) {
-        if (idx < 0 || idx >= this.compositeQuests.size())
-            return Map.of();
-        QuestBase base = QuestsManager.instance().getAllQuests().get(this.compositeQuests.get(idx));
-        return base.resolveTasks(data, 0);
+        QuestBase base = this.resolveToQuest(data.getPlayer(), idx);
+        return base == null ? Map.of() : base.resolveTasks(data, 0);
     }
 
     public static class Builder extends BuilderBase<Builder> {
