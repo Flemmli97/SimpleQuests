@@ -3,24 +3,9 @@ plugins {
     id "dev.architectury.loom" version "1.4-SNAPSHOT" apply false
 }
 
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/mc-architectury-v1/main.gradle"
-
-tasks.buildAll {
-    dependsOn(":fabric-api:build")
-    dependsOn(":forge-api:build")
-}
-
-tasks.cleanAll {
-    dependsOn(":common-api:clean")
-    dependsOn(":fabric-api:clean")
-    dependsOn(":forge-api:clean")
-}
-
-tasks.buildToLocal {
-    dependsOn ":common-api:publishToMavenLocal", ":fabric-api:publishToMavenLocal", ":forge-api:publishToMavenLocal"
-}
+apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/main.gradle"
 
 task publishAPI {
-    dependsOn cleanAll, buildAll, ":common-api:publish", ":fabric-api:publish", ":forge-api:publish"
-    buildAll.mustRunAfter cleanAll
+    dependsOn clean, build, ":common-api:publish", ":fabric-api:publish", ":forge-api:publish"
+    build.mustRunAfter clean
 }
