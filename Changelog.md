@@ -1,3 +1,8 @@
+Simple Quests 1.5.8
+================
+- Update language to support player based translation
+- Fix some problems with player data
+
 Simple Quests 1.5.7
 ================
 - Fix nullpointer error with quest gui
