@@ -5,7 +5,11 @@ plugins {
 
 apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/main.gradle"
 
-task publishAPI {
-    dependsOn clean, build, ":common-api:publish", ":fabric-api:publish", ":forge-api:publish"
-    build.mustRunAfter clean
+tasks.register("publishAPI") {
+    group = 'publishing'
+    var clean = [":common-api:clean", ":fabric-api:clean", ":forge-api:clean"]
+    dependsOn clean
+    var publish = [":common-api:publish", ":fabric-api:publish", ":forge-api:publish"]
+    publish.each { tasks.findByPath(it).mustRunAfter clean }
+    dependsOn publish
 }
