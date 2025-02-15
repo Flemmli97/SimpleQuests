@@ -4,6 +4,7 @@ Simple Quests 2.0.0
   - Underlying system is now split into api and implementation
   - Allows more modular handling of things
 - Update language to support player based translation
+- Fix some problems with player data
 
 Simple Quests 1.5.5
 ================
