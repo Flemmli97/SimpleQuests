@@ -26,17 +26,17 @@ public class MultiBlockInteractEntry extends MultiQuestEntryBase {
     public static final QuestEntryKey<MultiBlockInteractEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "multi_block_interaction"));
     public static final Codec<MultiBlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
-                    Codec.BOOL.optionalFieldOf("allowDupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty()),
+                    Codec.BOOL.optionalFieldOf("allow_dupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty()),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
+                    Codec.STRING.fieldOf("task_description").forGetter(d -> d.taskDescription),
 
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
                     Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
 
                     Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ITEM_PREDICATE_CODEC, Codec.unit(e))).listOf()
-                            .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
+                            .optionalFieldOf("item_predicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
                     Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.BLOCK_PREDICATE_CODEC, Codec.unit(e))).listOf()
-                            .optionalFieldOf("blockPredicates").forGetter(d -> d.blockPredicates.isEmpty() ? Optional.empty() : Optional.of(d.blockPredicates)),
+                            .optionalFieldOf("block_predicates").forGetter(d -> d.blockPredicates.isEmpty() ? Optional.empty() : Optional.of(d.blockPredicates)),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
             ).apply(instance, (consume, allowDupes, desc, taskDescription, player, use, item, pred, amount) -> new MultiBlockInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, use, consume, allowDupes.orElse(false), desc, taskDescription, player.orElse(null))));
 

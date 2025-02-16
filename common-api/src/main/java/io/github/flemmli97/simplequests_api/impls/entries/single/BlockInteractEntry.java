@@ -34,19 +34,19 @@ public record BlockInteractEntry(ItemPredicate heldItem, BlockPredicate blockPre
 
     public static final QuestEntryKey<BlockInteractEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "block_interact"));
     public static final Codec<BlockInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
-            instance.group(Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
-                    Codec.STRING.optionalFieldOf("blockDescription").forGetter(d -> d.blockDescription.isEmpty() ? Optional.empty() : Optional.of(d.blockDescription)),
+            instance.group(Codec.STRING.optionalFieldOf("held_description").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                    Codec.STRING.optionalFieldOf("block_description").forGetter(d -> d.blockDescription.isEmpty() ? Optional.empty() : Optional.of(d.blockDescription)),
 
                     JsonCodecs.BLOCK_PREDICATE_CODEC.optionalFieldOf("block").forGetter(d -> d.blockPredicate == BlockPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.blockPredicate)),
-                    Codec.BOOL.fieldOf("consumeItem").forGetter(d -> d.consumeItem),
+                    Codec.BOOL.fieldOf("consume_item").forGetter(d -> d.consumeItem),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
 
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate)),
                     JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.heldItem)),
 
                     ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
-                    Codec.BOOL.optionalFieldOf("allowDupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty())
+                    Codec.BOOL.optionalFieldOf("allow_dupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty())
             ).apply(instance, (heldDesc, blockDescription, block, consume, desc, player, item, amount, use, allowDupes) -> {
                 ItemPredicate itemPredicate = item.orElse(ItemPredicate.ANY);
                 BlockPredicate blockPredicate = block.orElse(BlockPredicate.ANY);

@@ -7,7 +7,9 @@
   "icon": {
     "item": "minecraft:fishing_rod",
     "count": 1,
-    "tag": "{Damage:0}"
+    "tag": {
+      "Damage": 0
+    }
   },
   "repeat_delay": "1d",
   "repeat_daily": 0,
@@ -19,7 +21,7 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
-      "itemPredicates": [
+      "item_predicates": [
         {
           "description": "cod",
           "value": {
@@ -43,7 +45,7 @@
         "max": 5
       },
       "description": "Fish some fishes",
-      "taskDescription": "Fish %1$s %3$sx",
+      "task_description": "Fish %1$s %3$sx",
       "id": "simplequests_api:multi_fishing"
     }
   },

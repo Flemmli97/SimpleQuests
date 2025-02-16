@@ -27,7 +27,7 @@ public class MultiKillEntry extends MultiQuestEntryBase {
             instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.ENTITY_PREDICATE_CODEC, "predicates can't be empty").fieldOf("predicates").forGetter(d -> d.predicate),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, MultiKillEntry::new));
 
     private final List<Either<EntityPredicate, Pair<EntityPredicate, String>>> predicate;

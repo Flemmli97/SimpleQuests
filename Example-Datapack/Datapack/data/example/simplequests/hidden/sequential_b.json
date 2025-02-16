@@ -17,7 +17,7 @@
   "entries": {
     "granite": {
       "amount": 15,
-      "consumeItems": true,
+      "consume_items": true,
       "predicate": {
         "items": [
           "minecraft:granite"

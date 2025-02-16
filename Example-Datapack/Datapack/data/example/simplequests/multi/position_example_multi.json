@@ -30,7 +30,7 @@
           }
         }
       ],
-      "minDist": 15,
+      "min_dist": 15,
       "description": "Go to the position from this quest",
       "id": "simplequests_api:multi_position"
     }

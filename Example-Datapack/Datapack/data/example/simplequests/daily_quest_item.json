@@ -16,7 +16,7 @@
   "entries": {
     "interact": {
       "amount": 5,
-      "consumeItems": true,
+      "consume_items": true,
       "predicate": {
         "items": [
           "minecraft:cod"

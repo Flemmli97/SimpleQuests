@@ -27,11 +27,11 @@ public record FishingEntry(ItemPredicate item, EntityPredicate playerPredicate, 
     public static final QuestEntryKey<FishingEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "fishing"));
     public static final Codec<FishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    Codec.STRING.optionalFieldOf("itemDescription").forGetter(d -> d.itemDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.itemDescription)),
-                    Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.entityDescription)),
+                    Codec.STRING.optionalFieldOf("item_description").forGetter(d -> d.itemDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.itemDescription)),
+                    Codec.STRING.optionalFieldOf("entity_description").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.ofNullable(d.entityDescription)),
 
                     JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("item").forGetter(d -> d.item),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.playerPredicate)),
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> d.playerPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.ofNullable(d.playerPredicate)),
                     ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount)
             ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount) -> new FishingEntry(item, pred.orElse(EntityPredicate.ANY), amount, desc, heldDesc.orElse(""), entityDesc.orElse(""))));
 

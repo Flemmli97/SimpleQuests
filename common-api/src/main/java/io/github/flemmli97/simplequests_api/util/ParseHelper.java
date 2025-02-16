@@ -4,14 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,17 +23,10 @@ public class ParseHelper {
     private static final Codec<ItemStack> STACK_CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Registry.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
                             Codec.INT.optionalFieldOf("count").forGetter((itemStack) -> Optional.of(itemStack.getCount())),
-                            Codec.STRING.optionalFieldOf("tag").forGetter((itemStack) -> Optional.ofNullable(itemStack.getTag()).map(CompoundTag::toString)))
+                            CompoundTag.CODEC.optionalFieldOf("tag").forGetter((itemStack) -> Optional.ofNullable(itemStack.getTag())))
                     .apply(instance, (item, count, tag) -> {
-                        CompoundTag nbt = tag.map(sTag -> {
-                            try {
-                                return TagParser.parseTag(sTag);
-                            } catch (CommandSyntaxException e) {
-                                return null;
-                            }
-                        }).orElse(null);
                         ItemStack stack = new ItemStack(item, count.orElse(1));
-                        stack.setTag(nbt);
+                        stack.setTag(tag.orElse(null));
                         return stack;
                     }));
 

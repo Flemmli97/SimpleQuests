@@ -33,14 +33,14 @@ public record EntityInteractEntry(ItemPredicate heldItem, EntityPredicate entity
     public static final QuestEntryKey<EntityInteractEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "entity_interact"));
     public static final Codec<EntityInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    Codec.STRING.optionalFieldOf("heldDescription").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
-                    Codec.STRING.optionalFieldOf("entityDescription").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
+                    Codec.STRING.optionalFieldOf("held_description").forGetter(d -> d.heldDescription.isEmpty() ? Optional.empty() : Optional.of(d.heldDescription)),
+                    Codec.STRING.optionalFieldOf("entity_description").forGetter(d -> d.entityDescription.isEmpty() ? Optional.empty() : Optional.of(d.entityDescription)),
 
                     JsonCodecs.ITEM_PREDICATE_CODEC.optionalFieldOf("item").forGetter(d -> d.heldItem == ItemPredicate.ANY ? Optional.empty() : Optional.of(d.heldItem)),
                     JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("predicate").forGetter(d -> d.entityPredicate == EntityPredicate.ANY ? Optional.empty() : Optional.of(d.entityPredicate)),
                     ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (desc, heldDesc, entityDesc, item, pred, amount, consume, player) ->
                     new EntityInteractEntry(item.orElse(null), pred.orElse(null), amount, consume, desc, heldDesc.orElse(""), entityDesc.orElse(""), player.orElse(null))));
 

@@ -46,7 +46,7 @@ public class QuestBaseRegistry {
         if (d == null && res.getNamespace().equals(SimpleQuestsAPI.MODID))
             d = MAP.get(new ResourceLocation("simplequests", res.getPath()));
         if (d != null)
-            return d.fromJson(res, category, obj);
+            return d.fromJson(res, category, QuestsManager.parseLegacy("quest", res, obj));
         throw new IllegalStateException("Missing entry for key " + type);
     }
 

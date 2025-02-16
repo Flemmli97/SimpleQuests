@@ -27,7 +27,7 @@
           "minecraft:diamond_ore"
         ]
       },
-      "consumeItem": false,
+      "consume_item": false,
       "description": "Mine diamond ore x3",
       "id": "simplequests_api:block_interact"
     }

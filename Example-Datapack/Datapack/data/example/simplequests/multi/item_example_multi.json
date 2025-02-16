@@ -18,7 +18,7 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
-      "consumeItems": true,
+      "consume_items": true,
       "description": "Give 10-15 cods or salmon",
       "predicates": [
         {

@@ -27,9 +27,9 @@ public class MultiItemEntry extends MultiQuestEntryBase {
     public static final Codec<MultiItemEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "predicates cant' be empty").fieldOf("predicates").forGetter(d -> d.predicate),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
-                    Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems),
+                    Codec.BOOL.fieldOf("consume_items").forGetter(d -> d.consumeItems),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (pred, amount, consume, desc, player) -> new MultiItemEntry(pred, amount, desc, consume, player.orElse(null))));
 
     private final List<Either<ItemPredicate, Pair<ItemPredicate, String>>> predicate;

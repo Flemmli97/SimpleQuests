@@ -34,8 +34,8 @@ public record ItemEntry(ItemPredicate predicate, int amount,
             instance.group(JsonCodecs.ITEM_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
                     Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
                     ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                    Codec.BOOL.fieldOf("consumeItems").forGetter(d -> d.consumeItems),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    Codec.BOOL.fieldOf("consume_items").forGetter(d -> d.consumeItems),
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (pred, desc, amount, consume, player) -> new ItemEntry(pred, amount, desc.orElse(""), consume, player.orElse(null))));
 
     @Override

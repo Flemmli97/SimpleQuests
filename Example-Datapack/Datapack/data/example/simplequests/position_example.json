@@ -20,7 +20,7 @@
         "y": 50,
         "z": 0
       },
-      "minDist": 15,
+      "min_dist": 15,
       "id": "simplequests_api:position"
     }
   },

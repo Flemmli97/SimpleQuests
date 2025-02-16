@@ -31,7 +31,7 @@ public record KillEntry(EntityPredicate predicate, int amount, String descriptio
             instance.group(JsonCodecs.ENTITY_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.predicate),
                     ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (pred, amount, desc, player) -> new KillEntry(pred, amount, desc.orElse(""), player.orElse(null))));
 
     @Override

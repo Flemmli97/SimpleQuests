@@ -15,7 +15,7 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
-      "itemPredicates": [
+      "item_predicates": [
         {
           "description": "nametag",
           "value": {
@@ -25,7 +25,7 @@
           }
         }
       ],
-      "entityPredicates": [
+      "entity_predicates": [
         {
           "description": "chicken",
           "value": {
@@ -46,7 +46,7 @@
       },
       "consume": true,
       "description": "Use a nametag on either a cow/chicken 3-6 times",
-      "taskDescription": "Use %1$s on %2$s %3$sx",
+      "task_description": "Use %1$s on %2$s %3$sx",
       "id": "simplequests_api:multi_entity_interaction"
     }
   },

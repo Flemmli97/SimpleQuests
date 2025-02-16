@@ -24,7 +24,7 @@ public class MultiAdvancementEntry extends MultiQuestEntryBase {
             instance.group(JsonCodecs.nonEmptyList(ResourceLocation.CODEC, "advancements list can't be empty").fieldOf("advancements").forGetter(d -> d.advancements),
                     Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, MultiAdvancementEntry::new));
 
     private final List<ResourceLocation> advancements;

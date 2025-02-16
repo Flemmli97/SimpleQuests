@@ -23,7 +23,7 @@ public class XPRangeEntry extends MultiQuestEntryBase {
     public static final Codec<XPRangeEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, XPRangeEntry::new));
 
     private final NumberProvider amount;

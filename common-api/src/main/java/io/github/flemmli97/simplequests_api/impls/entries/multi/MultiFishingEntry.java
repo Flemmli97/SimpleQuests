@@ -25,11 +25,11 @@ public class MultiFishingEntry extends MultiQuestEntryBase {
     public static final QuestEntryKey<MultiFishingEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "multi_fishing"));
     public static final Codec<MultiFishingEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
+                    Codec.STRING.fieldOf("task_description").forGetter(d -> d.taskDescription),
 
-                    JsonCodecs.descriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "item predicates can't be empty").fieldOf("itemPredicates").forGetter(d -> d.heldItems),
+                    JsonCodecs.descriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "item predicates can't be empty").fieldOf("item_predicates").forGetter(d -> d.heldItems),
                     Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(JsonCodecs.ENTITY_PREDICATE_CODEC, Codec.STRING)).listOf()
-                            .optionalFieldOf("entityPredicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
+                            .optionalFieldOf("entity_predicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount)
             ).apply(instance, (desc, taskDescription, item, pred, amount) -> new MultiFishingEntry(item, pred.orElse(List.of()), amount, desc, taskDescription)));
 

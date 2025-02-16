@@ -30,7 +30,7 @@ public record LocationEntry(LocationPredicate location, String description,
     public static final Codec<LocationEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.LOCATION_PREDICATE_CODEC.fieldOf("predicate").forGetter(d -> d.location),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (pred, desc, player) -> new LocationEntry(pred, desc, player.orElse(null))));
 
     @Override

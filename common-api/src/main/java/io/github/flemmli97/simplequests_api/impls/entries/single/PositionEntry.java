@@ -24,9 +24,9 @@ public record PositionEntry(BlockPos pos, int minDist, String description,
     public static final QuestEntryKey<PositionEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "position"));
     public static final Codec<PositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.BLOCK_POS_CODEC.fieldOf("pos").forGetter(d -> d.pos),
-                    ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
+                    ExtraCodecs.NON_NEGATIVE_INT.fieldOf("min_dist").forGetter(d -> d.minDist),
                     Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (pred, amount, desc, player) -> new PositionEntry(pred, amount, desc.orElse(""), player.orElse(null))));
 
     @Override

@@ -26,14 +26,14 @@ public class MultiEntityInteractEntry extends MultiQuestEntryBase {
     public static final Codec<MultiEntityInteractEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    Codec.STRING.fieldOf("taskDescription").forGetter(d -> d.taskDescription),
+                    Codec.STRING.fieldOf("task_description").forGetter(d -> d.taskDescription),
 
                     JsonCodecs.descriptiveList(JsonCodecs.ITEM_PREDICATE_CODEC, "empty item predicates")
-                            .optionalFieldOf("itemPredicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
+                            .optionalFieldOf("item_predicates").forGetter(d -> d.heldItems.isEmpty() ? Optional.empty() : Optional.of(d.heldItems)),
                     JsonCodecs.descriptiveList(JsonCodecs.ENTITY_PREDICATE_CODEC, "empty entity predicates")
-                            .optionalFieldOf("entityPredicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
+                            .optionalFieldOf("entity_predicates").forGetter(d -> d.entityPredicates.isEmpty() ? Optional.empty() : Optional.of(d.entityPredicates)),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (consume, desc, taskDescription, item, pred, amount, player) -> new MultiEntityInteractEntry(item.orElse(List.of()), pred.orElse(List.of()), amount, consume, desc, taskDescription, player.orElse(null))));
 
     private final List<Pair<ItemPredicate, String>> heldItems;

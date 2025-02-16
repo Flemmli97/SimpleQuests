@@ -25,7 +25,7 @@ public class MultiLocationEntry extends MultiQuestEntryBase {
     public static final Codec<MultiLocationEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.descriptiveList(JsonCodecs.LOCATION_PREDICATE_CODEC, "location predicates can't be empty").fieldOf("locations").forGetter(d -> d.locations),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, MultiLocationEntry::new));
 
     private final List<Pair<LocationPredicate, String>> locations;

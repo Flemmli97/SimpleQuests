@@ -22,7 +22,7 @@
           "minecraft:emerald_block"
         ]
       },
-      "consumeItem": false,
+      "consume_item": false,
       "description": "Place 3 emerald blocks",
       "id": "simplequests_api:block_interact"
     }

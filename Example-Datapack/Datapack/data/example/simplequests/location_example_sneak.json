@@ -19,7 +19,7 @@
         "feature": "minecraft:ocean_ruin_warm"
       },
       "description": "Find a warm ocean ruin",
-      "playerPredicate": {
+      "player_predicate": {
         "flags": {
           "is_sneaking": true
         }
@@ -31,7 +31,7 @@
         "feature": "minecraft:ocean_ruin_cold"
       },
       "description": "Find a cold ocean ruin",
-      "playerPredicate": {
+      "player_predicate": {
         "flags": {
           "is_sneaking": true
         }

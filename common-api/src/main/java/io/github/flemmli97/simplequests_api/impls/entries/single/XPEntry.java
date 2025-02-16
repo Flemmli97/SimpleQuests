@@ -21,7 +21,7 @@ public record XPEntry(int amount,
     public static final QuestEntryKey<XPEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "xp"));
     public static final Codec<XPEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (amount, pred) -> new XPEntry(amount, pred.orElse(null))));
 
     @Override

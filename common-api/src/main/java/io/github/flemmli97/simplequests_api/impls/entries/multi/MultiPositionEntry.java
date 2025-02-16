@@ -26,9 +26,9 @@ public class MultiPositionEntry extends MultiQuestEntryBase {
     public static final QuestEntryKey<MultiPositionEntry> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "multi_position"));
     public static final Codec<MultiPositionEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.optionalDescriptiveList(JsonCodecs.BLOCK_POS_CODEC, "positions can't be empty").fieldOf("positions").forGetter(d -> d.positions),
-                    ExtraCodecs.NON_NEGATIVE_INT.fieldOf("minDist").forGetter(d -> d.minDist),
+                    ExtraCodecs.NON_NEGATIVE_INT.fieldOf("min_dist").forGetter(d -> d.minDist),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, MultiPositionEntry::new));
 
     private final List<Either<BlockPos, Pair<BlockPos, String>>> positions;

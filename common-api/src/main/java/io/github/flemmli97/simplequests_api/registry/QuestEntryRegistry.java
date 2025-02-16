@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.entries.multi.MultiAdvancementEntry;
 import io.github.flemmli97.simplequests_api.impls.entries.multi.MultiBlockInteractEntry;
 import io.github.flemmli97.simplequests_api.impls.entries.multi.MultiCraftingEntry;
@@ -80,7 +81,7 @@ public class QuestEntryRegistry {
         if (d == null && res.getNamespace().equals(SimpleQuestsAPI.MODID))
             d = MAP.get(new ResourceLocation("simplequests", res.getPath()));
         if (d != null)
-            return d.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't deserialize QuestEntry from json {}", e));
+            return d.parse(JsonOps.INSTANCE, QuestsManager.parseLegacy("quest_entry", res, obj)).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't deserialize QuestEntry from json {}", e));
         throw new IllegalStateException("Missing entry for key " + res);
     }
 }

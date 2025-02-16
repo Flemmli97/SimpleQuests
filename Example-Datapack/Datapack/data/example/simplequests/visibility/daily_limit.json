@@ -16,7 +16,7 @@
   "entries": {
     "fish": {
       "amount": 15,
-      "consumeItems": true,
+      "consume_items": true,
       "predicate": {
         "items": [
           "minecraft:cod"

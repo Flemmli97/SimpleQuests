@@ -24,7 +24,7 @@ public record AdvancementEntry(ResourceLocation advancement, boolean reset,
     public static final Codec<AdvancementEntry> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(ResourceLocation.CODEC.fieldOf("advancement").forGetter(d -> d.advancement),
                     Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset),
-                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("playerPredicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                    JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
             ).apply(instance, (advancement, reset, pred) -> new AdvancementEntry(advancement, reset, pred.orElse(null))));
 
     @Override

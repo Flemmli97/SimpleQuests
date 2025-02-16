@@ -16,7 +16,7 @@
   "entries": {
     "sword": {
       "amount": 1,
-      "consumeItems": true,
+      "consume_items": true,
       "predicate": {
         "items": [
           "minecraft:diamond_sword"

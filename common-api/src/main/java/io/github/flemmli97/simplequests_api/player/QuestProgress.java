@@ -246,7 +246,8 @@ public class QuestProgress {
         if (tag.contains("QuestEntries")) {
             ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
-            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't read quest entry{}", e))));
+            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, QuestsManager.parseLegacy(entries.getCompound(key)))
+                    .getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't read quest entry{}", e))));
             this.questEntries = builder.build();
         } else {
             this.questEntries = this.quest.resolveTasks(data, this.questIndex);

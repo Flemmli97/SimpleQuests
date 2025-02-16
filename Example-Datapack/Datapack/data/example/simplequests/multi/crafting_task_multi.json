@@ -15,7 +15,7 @@
   "submission_trigger": "",
   "entries": {
     "crafting": {
-      "itemPredicates": [
+      "item_predicates": [
         {
           "description": "sticks",
           "value": {
@@ -39,7 +39,7 @@
         "max": 5
       },
       "description": "Craft some items",
-      "taskDescription": "Craft %1$s %3$sx",
+      "task_description": "Craft %1$s %3$sx",
       "id": "simplequests_api:multi_fishing"
     }
   },

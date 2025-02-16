@@ -22,7 +22,7 @@
           "minecraft:chest"
         ]
       },
-      "consumeItem": false,
+      "consume_item": false,
       "description": "Interact with chest x3",
       "id": "simplequests_api:block_interact"
     }

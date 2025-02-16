@@ -7,7 +7,9 @@
   "icon": {
     "item": "minecraft:fishing_rod",
     "count": 1,
-    "tag": "{Damage:0}"
+    "tag": {
+      "Damage": 0
+    }
   },
   "repeat_delay": "1d",
   "repeat_daily": 0,
