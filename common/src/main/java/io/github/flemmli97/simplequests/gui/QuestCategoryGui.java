@@ -164,6 +164,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         player.closeContainer();
         QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         player.getServer().execute(() -> QuestGui.openGui(player, category));
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 
