@@ -1,5 +1,5 @@
 {
-  "task": "Example of use of a fishing task",
+  "name": "Example of use of a fishing task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -7,7 +7,9 @@
   "icon": {
     "item": "minecraft:fishing_rod",
     "count": 1,
-    "tag": "{Damage:0}"
+    "tag": {
+      "Damage": 0
+    }
   },
   "repeat_delay": "1d",
   "repeat_daily": 0,
@@ -19,22 +21,16 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
-      "itemPredicates": [
+      "item_predicates": [
         {
-          "description": "cod",
-          "value": {
-            "items": [
-              "minecraft:cod"
-            ]
-          }
+          "items": [
+            "minecraft:cod"
+          ]
         },
         {
-          "description": "salmon",
-          "value": {
-            "items": [
-              "minecraft:salmon"
-            ]
-          }
+          "items": [
+            "minecraft:salmon"
+          ]
         }
       ],
       "amount": {
@@ -43,9 +39,8 @@
         "max": 5
       },
       "description": "Fish some fishes",
-      "taskDescription": "Fish %1$s %3$sx",
-      "id": "simplequests:multi_fishing"
+      "id": "simplequests_api:fishing"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

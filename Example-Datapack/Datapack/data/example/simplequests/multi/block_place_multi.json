@@ -1,5 +1,5 @@
 {
-  "task": "Example of using multi block place task",
+  "name": "Example of using multi block place task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,9 +15,10 @@
   "submission_trigger": "",
   "entries": {
     "place": {
-      "itemPredicates": [
+      "block_predicates": [],
+      "item_predicates": [
         {
-          "description": "emerald",
+          "description": "Place Emerald Blocks %2$sx",
           "value": {
             "items": [
               "minecraft:emerald_block"
@@ -30,12 +31,11 @@
         "min": 3,
         "max": 5
       },
-      "use": true,
       "consume": false,
+      "use": true,
       "description": "Place the blocks from the quest",
-      "taskDescription": "Place %1$s %3$sx",
-      "id": "simplequests:multi_block_interaction"
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

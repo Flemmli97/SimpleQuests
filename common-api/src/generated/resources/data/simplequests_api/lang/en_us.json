@@ -23,5 +23,5 @@
   "simplequests_api:block_interact.progress": "Progress: %1$s/%2$s",
   "simplequests_api:entity_interact.progress": "Progress: %1$s/%2$s",
   "simplequests_api:fishing.progress": "Progress: %1$s/%2$s",
-  "simplequests_api.task.formatter": " \u25B6 %s"
+  "simplequests_api.task.formatter": " ▶ %s"
 }

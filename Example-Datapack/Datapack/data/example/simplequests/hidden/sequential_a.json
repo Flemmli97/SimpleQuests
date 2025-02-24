@@ -1,6 +1,5 @@
 {
-  "category": "example:hidden",
-  "task": "Sequential Quest Example a",
+  "name": "Sequential Quest Example a",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -16,16 +15,18 @@
   "submission_trigger": "",
   "entries": {
     "andesite": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:andesite"
+          ]
+        }
+      ],
       "amount": 15,
-      "consumeItems": true,
-      "predicate": {
-        "items": [
-          "minecraft:andesite"
-        ]
-      },
+      "consume_items": true,
       "description": "Give 15 andesite",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

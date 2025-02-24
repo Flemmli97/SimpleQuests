@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi advancements quest",
+  "name": "Example for a multi advancements quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -25,8 +25,8 @@
       ],
       "reset": true,
       "description": "Task Description. Will select one of the following advancements: adventure/trade, adventure/bullseye, adventure/ol_betsy",
-      "id": "simplequests:multi_advancements"
+      "id": "simplequests_api:advancement"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

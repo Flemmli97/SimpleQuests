@@ -1,5 +1,5 @@
 {
-  "task": "Example of use of a multi crafting task",
+  "name": "Example of use of a multi crafting task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,9 +15,9 @@
   "submission_trigger": "",
   "entries": {
     "crafting": {
-      "itemPredicates": [
+      "item_predicates": [
         {
-          "description": "sticks",
+          "description": "Craft sticks x2$sx",
           "value": {
             "items": [
               "minecraft:stick"
@@ -25,7 +25,7 @@
           }
         },
         {
-          "description": "furnace",
+          "description": "Craft furnaces x2$sx",
           "value": {
             "items": [
               "minecraft:furnace"
@@ -39,9 +39,8 @@
         "max": 5
       },
       "description": "Craft some items",
-      "taskDescription": "Craft %1$s %3$sx",
-      "id": "simplequests:multi_fishing"
+      "id": "simplequests_api:crafting"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

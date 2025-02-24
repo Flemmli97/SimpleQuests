@@ -1,5 +1,5 @@
 {
-  "task": "Example of use of a crafting task",
+  "name": "Example of use of a crafting task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,15 +15,17 @@
   "submission_trigger": "",
   "entries": {
     "sticks": {
-      "item": {
-        "items": [
-          "minecraft:stick"
-        ]
-      },
+      "item_predicates": [
+        {
+          "items": [
+            "minecraft:stick"
+          ]
+        }
+      ],
       "amount": 3,
-      "description": "Craft at 8 sticks",
-      "id": "simplequests:crafting"
+      "description": "Craft 3 sticks",
+      "id": "simplequests_api:crafting"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

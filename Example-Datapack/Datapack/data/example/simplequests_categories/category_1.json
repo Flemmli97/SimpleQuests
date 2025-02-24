@@ -5,7 +5,7 @@
   "only_same_category": false,
   "max_concurrent_quests": -1,
   "sorting_id": 0,
-  "selectable": true,
+  "required_contexts": [],
   "is_visible": true,
   "is_silent": false
 }

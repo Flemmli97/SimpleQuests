@@ -1,5 +1,5 @@
 {
-  "task": "Example for an xp with range quest",
+  "name": "Example for an xp with range quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -21,8 +21,8 @@
         "max": 10
       },
       "description": "Submit xp to this quest",
-      "id": "simplequests:multi_xp"
+      "id": "simplequests_api:xp"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

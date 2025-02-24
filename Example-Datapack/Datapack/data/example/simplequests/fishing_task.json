@@ -1,5 +1,5 @@
 {
-  "task": "Example of use of a fishing task",
+  "name": "Example of use of a fishing task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -7,7 +7,9 @@
   "icon": {
     "item": "minecraft:fishing_rod",
     "count": 1,
-    "tag": "{Damage:0}"
+    "tag": {
+      "Damage": 0
+    }
   },
   "repeat_delay": "1d",
   "repeat_daily": 0,
@@ -19,15 +21,17 @@
   "submission_trigger": "",
   "entries": {
     "cod": {
-      "item": {
-        "items": [
-          "minecraft:cod"
-        ]
-      },
-      "amount": 5,
-      "description": "Fish 5 cods",
-      "id": "simplequests:fishing"
+      "item_predicates": [
+        {
+          "items": [
+            "minecraft:cod"
+          ]
+        }
+      ],
+      "amount": 3,
+      "description": "",
+      "id": "simplequests_api:fishing"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

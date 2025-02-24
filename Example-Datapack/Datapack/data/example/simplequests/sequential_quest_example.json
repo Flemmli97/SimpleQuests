@@ -1,5 +1,6 @@
 {
-  "task": "Example for a sequential quest",
+  "category": "example:category_1",
+  "name": "Example for a sequential quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -16,5 +17,5 @@
     "example:hidden/sequential_a",
     "example:hidden/sequential_b"
   ],
-  "type": "simplequests:sequential_quest"
+  "type": "simplequests_api:sequential_quest"
 }

@@ -1,5 +1,5 @@
 {
-  "task": "Example for block breaking task",
+  "name": "Example for block breaking task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,22 +15,26 @@
   "submission_trigger": "",
   "entries": {
     "break": {
+      "block_predicates": [
+        {
+          "blocks": [
+            "minecraft:diamond_ore"
+          ]
+        }
+      ],
+      "item_predicates": [
+        {
+          "items": [
+            "minecraft:diamond_pickaxe"
+          ]
+        }
+      ],
       "amount": 3,
+      "consume": false,
       "use": false,
-      "item": {
-        "items": [
-          "minecraft:diamond_pickaxe"
-        ]
-      },
-      "block": {
-        "blocks": [
-          "minecraft:diamond_ore"
-        ]
-      },
-      "consumeItem": false,
-      "description": "Mine diamond ore x3",
-      "id": "simplequests:block_interact"
+      "description": "",
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

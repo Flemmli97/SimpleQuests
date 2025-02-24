@@ -1,5 +1,5 @@
 {
-  "task": "Example for an item quest",
+  "name": "Example for an item quest",
   "description": [
     "This is an example description",
     "This is another example description"
@@ -18,16 +18,18 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:cod"
+          ]
+        }
+      ],
       "amount": 15,
-      "consumeItems": true,
-      "predicate": {
-        "items": [
-          "minecraft:cod"
-        ]
-      },
+      "consume_items": true,
       "description": "Give 15 cods",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }
