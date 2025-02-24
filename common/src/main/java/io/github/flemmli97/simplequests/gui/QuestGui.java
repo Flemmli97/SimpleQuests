@@ -289,6 +289,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 }
             }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
         }
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 
