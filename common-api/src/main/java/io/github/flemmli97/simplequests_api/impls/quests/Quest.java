@@ -14,6 +14,7 @@ import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -79,10 +80,10 @@ public class Quest extends QuestBase {
     }
 
     @Override
-    public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
+    public List<MutableComponent> getTasks(ServerPlayer player, Style taskStyle) {
         List<MutableComponent> list = new ArrayList<>();
         for (Map.Entry<String, QuestTask<?>> e : this.entries.entrySet()) {
-            list.add(Component.translatable(SimpleQuestsAPI.MODID + ".task.formatter", e.getValue().translation(player)));
+            list.add(Component.translatable(SimpleQuestsAPI.MODID + ".task.formatter", e.getValue().translation(player).withStyle(taskStyle)));
         }
         return list;
     }

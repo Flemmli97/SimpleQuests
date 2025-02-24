@@ -23,12 +23,14 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class QuestProgress {
@@ -76,16 +78,20 @@ public class QuestProgress {
         return this.base;
     }
 
-    public MutableComponent getTask(ServerPlayer player) {
-        return this.getQuest().getTask(player, this.questIndex);
-    }
-
-    public MutableComponent formattedQuest(ServerPlayer player) {
-        return this.getQuest().getFormattedWith(player, this.questIndex, this.getQuestEntries());
+    public MutableComponent getName(ServerPlayer player) {
+        return this.getQuest().getName(player, this.questIndex);
     }
 
     public List<MutableComponent> getDescription(ServerPlayer player) {
         return this.getQuest().getDescription(player, this.questIndex);
+    }
+
+    public List<MutableComponent> getTaskComponents(ServerPlayer player) {
+        List<MutableComponent> list = new ArrayList<>();
+        for (Map.Entry<String, ResolvedQuestTask> e : this.getQuestEntries().entrySet()) {
+            list.add(e.getValue().translation(player));
+        }
+        return list;
     }
 
     public Collection<ResourceLocation> getCompletionID() {
@@ -98,7 +104,7 @@ public class QuestProgress {
         return this.questEntries;
     }
 
-    public SubmitType submit(PlayerQuestData data, String trigger) {
+    public SubmitType submit(PlayerQuestData data, String trigger, Consumer<ResolvedQuestTask> cons) {
         boolean any = false;
         ServerPlayer player = data.getPlayer();
         for (Map.Entry<String, ResolvedQuestTask> entry : this.questEntries.entrySet()) {
@@ -106,6 +112,7 @@ public class QuestProgress {
                 continue;
             if (entry.getValue().submit(player)) {
                 this.entries.add(entry.getKey());
+                cons.accept(entry.getValue());
                 any = true;
             }
         }

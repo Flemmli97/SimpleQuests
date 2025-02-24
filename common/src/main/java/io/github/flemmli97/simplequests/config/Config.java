@@ -1,6 +1,7 @@
 package io.github.flemmli97.simplequests.config;
 
 import io.github.flemmli97.simplequests.LoaderHandler;
+import io.github.flemmli97.simplequests.SimpleQuests;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,9 +11,6 @@ import java.io.IOException;
 public class Config {
 
     private transient File config;
-
-    public String lang = "en_us";
-    public boolean fallBackToEnLang = false;
 
     public int opPermLevel = 2;
     public int mainPermLevel = 0;
@@ -31,7 +29,7 @@ public class Config {
                 this.save();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            SimpleQuests.LOGGER.error(e);
         }
     }
 
@@ -40,14 +38,12 @@ public class Config {
             FileReader reader = new FileReader(this.config);
             Config obj = ConfigHandler.GSON.fromJson(reader, Config.class);
             reader.close();
-            this.lang = obj.lang;
-            this.fallBackToEnLang = obj.fallBackToEnLang;
             this.opPermLevel = obj.opPermLevel;
             this.mainPermLevel = obj.mainPermLevel;
             this.maxConcurrentQuest = obj.maxConcurrentQuest;
             this.dailyQuestAmount = obj.dailyQuestAmount;
         } catch (IOException e) {
-            e.printStackTrace();
+            SimpleQuests.LOGGER.error(e);
         }
         this.save();
     }
@@ -58,7 +54,7 @@ public class Config {
             ConfigHandler.GSON.toJson(this, writer);
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            SimpleQuests.LOGGER.error(e);
         }
     }
 }

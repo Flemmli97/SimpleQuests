@@ -34,7 +34,7 @@ public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteract
         if (this.questEntry().check(player, with)) {
             if (this.entities.contains(with.getUUID())) {
                 if (!prog.getQuest().category.isSilent)
-                    player.sendSystemMessage(Component.translatable("simplequests.interaction.dupe").withStyle(ChatFormatting.DARK_RED));
+                    player.sendSystemMessage(Component.translatable(EntityInteractTask.ID + ".dupe").withStyle(ChatFormatting.DARK_RED));
                 return false;
             }
             this.entities.add(with.getUUID());
@@ -46,13 +46,8 @@ public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteract
     @Override
     public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
         float perc = this.entities.size() / (float) this.questEntry().amount();
-        ChatFormatting form = ChatFormatting.DARK_GREEN;
-        if (perc <= 0.35) {
-            form = ChatFormatting.DARK_RED;
-        } else if (perc <= 0.7) {
-            form = ChatFormatting.GOLD;
-        }
-        return Component.translatable(ENTITY_INTERACT_PROGRESS, this.entities.size(), this.questEntry().amount()).withStyle(form);
+        return Component.translatable(ENTITY_INTERACT_PROGRESS, this.entities.size(), this.questEntry().amount())
+                .withStyle(ProgressionTrackerBase.of(perc));
     }
 
     @Override

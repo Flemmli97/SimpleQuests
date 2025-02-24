@@ -8,11 +8,11 @@ import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.util.QuestUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -77,14 +77,6 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         this.isDailyQuest = isDailyQuest;
         this.unlockCondition = unlockCondition;
         this.visibility = visibility;
-    }
-
-    public static List<MutableComponent> getFormattedTasks(ServerPlayer player, Map<String, ResolvedQuestTask> resolvedTasks) {
-        List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, ResolvedQuestTask> e : resolvedTasks.entrySet()) {
-            list.add(Component.literal(" - ").append(e.getValue().translation(player)));
-        }
-        return list;
     }
 
     public static void runCommand(ServerPlayer player, String command) {
@@ -195,8 +187,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return this.visibility;
     }
 
-    public final MutableComponent getTask(ServerPlayer player) {
-        return this.getTask(player, -1);
+    public final MutableComponent getName(ServerPlayer player) {
+        return this.getName(player, -1);
     }
 
     /**
@@ -204,11 +196,11 @@ public abstract class QuestBase implements Comparable<QuestBase> {
      *
      * @param idx If -1 should return itself
      */
-    public MutableComponent getTask(ServerPlayer player, int idx) {
+    public MutableComponent getName(ServerPlayer player, int idx) {
         QuestBase resolved = this.resolveToQuest(player, idx);
         if (resolved == null)
             return Component.translatable(this.name);
-        return resolved.getTask(player);
+        return resolved.getName(player);
     }
 
     public final List<MutableComponent> getDescription(ServerPlayer player) {
@@ -223,30 +215,11 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public List<MutableComponent> getDescription(ServerPlayer player, int idx) {
         QuestBase resolved = this.resolveToQuest(player, idx);
         if (resolved == null)
-            return this.description.stream().map(s -> Component.translatable(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
+            return this.description.stream().map(Component::translatable).collect(Collectors.toList());
         return resolved.getDescription(player);
     }
 
-    /**
-     * The formatted quest with the given tasks. Delegates to subquests if possible
-     *
-     * @param idx If -1 should return itself
-     */
-    public MutableComponent getFormattedWith(ServerPlayer player, int idx, Map<String, ResolvedQuestTask> resolvedTasks, ChatFormatting... subFormatting) {
-        QuestBase resolved = this.resolveToQuest(player, idx);
-        if (resolved != null)
-            return this.getFormattedWith(player, -1, resolvedTasks, subFormatting);
-        MutableComponent main = Component.literal("").append(this.getTask(player, idx).withStyle(ChatFormatting.LIGHT_PURPLE));
-        for (MutableComponent tasks : getFormattedTasks(player, resolvedTasks)) {
-            if (subFormatting != null)
-                main.append("\n").append(tasks.withStyle(subFormatting));
-            else
-                main.append("\n").append(tasks);
-        }
-        return main;
-    }
-
-    public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
+    public List<MutableComponent> getTasks(ServerPlayer player, Style taskStyle) {
         return List.of();
     }
 

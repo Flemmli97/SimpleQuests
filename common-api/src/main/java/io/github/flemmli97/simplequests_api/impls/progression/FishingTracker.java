@@ -4,7 +4,6 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
@@ -42,13 +41,8 @@ public class FishingTracker extends ProgressionTrackerBase<Collection<ItemStack>
     @Override
     public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
         float perc = this.value / (float) this.questEntry().amount();
-        ChatFormatting form = ChatFormatting.DARK_GREEN;
-        if (perc <= 0.35) {
-            form = ChatFormatting.DARK_RED;
-        } else if (perc <= 0.7) {
-            form = ChatFormatting.GOLD;
-        }
-        return Component.translatable(FISHING_PROGRESS, this.value, this.questEntry().amount()).withStyle(form);
+        return Component.translatable(FISHING_PROGRESS, this.value, this.questEntry().amount())
+                .withStyle(ProgressionTrackerBase.of(perc));
     }
 
     @Override

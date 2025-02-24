@@ -54,9 +54,12 @@ public class LangAPIGen implements DataProvider {
         this.add(BlockInteractTask.ID + ".block_and_item.use", "Interact with %1$s using %2$s x%3$s");
         this.add(BlockInteractTask.ID + ".item", "Break blocks using %1$s x%2$s");
         this.add(BlockInteractTask.ID + ".item.use", "Use %1$s on blocks x%2$s");
+        this.add(BlockInteractTask.ID + ".block.dupe.true", "You already interacted with this block");
+        this.add(BlockInteractTask.ID + ".block.dupe.false", "You already broke this block");
         this.add(CraftingTask.ID.toString(), "Craft %1$s x%2$s");
         this.add(EntityInteractTask.ID.toString(), "Interact with %1$s x%2$s");
         this.add(EntityInteractTask.ID + ".item", "Use %2$s on %1$s x%3$s");
+        this.add(EntityInteractTask.ID + ".dupe", "You already interacted with this!");
         this.add(FishingTask.ID.toString(), "Fish %1$s x%2$s");
         this.add(ItemTask.ID + ".single", "Submit %1$s x%2$s");
         this.add(ItemTask.ID + ".single.keep", "Have %1$s x%2$s");

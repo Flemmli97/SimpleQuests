@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class SimpleQuestImplAPI {
 
@@ -25,7 +24,7 @@ public class SimpleQuestImplAPI {
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */
-    public static <V, T extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, T> key, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill) {
+    public static <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFullfill) {
         return trigger(serverPlayer, key, with, onFullfill, "");
     }
 
@@ -37,7 +36,7 @@ public class SimpleQuestImplAPI {
      * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */
-    public static <V, T extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, T> key, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, @NotNull String trigger) {
+    public static <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFullfill, @NotNull String trigger) {
         return PlayerData.get(serverPlayer).trigger(key, with, onFullfill, trigger);
     }
 
@@ -58,5 +57,11 @@ public class SimpleQuestImplAPI {
      */
     public static Collection<QuestProgress> activeQuest(ServerPlayer serverPlayer, QuestCategory category) {
         return PlayerData.get(serverPlayer).getCurrentQuests(category);
+    }
+
+    public interface QuestTriggerHook<R> {
+
+        void onFullfill(QuestProgress progress, Pair<String, R> task, QuestState state);
+
     }
 }

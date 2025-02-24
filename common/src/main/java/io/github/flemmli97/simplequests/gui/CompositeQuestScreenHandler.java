@@ -68,15 +68,14 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     private ItemStack ofQuest(Quest quest, int idx, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         ItemStack stack = quest.getIcon();
-        stack.setHoverName(quest.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
-        ListTag lore = new ListTag();
-        quest.getDescription(player).forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(c.getStyle().withItalic(false))))));
+        stack.setHoverName(quest.getName(player).setStyle(QuestGui.NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(Enchantments.UNBREAKING, 1);
             stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);
         }
-        for (MutableComponent comp : quest.getFormattedGuiTasks(player))
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
+        ListTag lore = new ListTag();
+        for (MutableComponent comp : QuestGui.questComponents(data, quest, PlayerData.AcceptType.ACCEPT))
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(comp)));
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putInt("Quest", idx);
         return stack;
