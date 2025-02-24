@@ -57,8 +57,8 @@ public class QuestEntryRegistry {
     public static QuestTask<?> deserialize(ResourceLocation res, JsonObject obj) {
         TaskCodec<ResolvedQuestTask> d = MAP.get(res);
         // Legacy
-        if (d == null && res.getNamespace().equals(SimpleQuestsAPI.MODID))
-            d = MAP.get(new ResourceLocation("simplequests", res.getPath()));
+        if (d == null && res.getNamespace().equals("simplequests"))
+            d = MAP.get(new ResourceLocation(SimpleQuestsAPI.MODID, res.getPath()));
         if (d != null)
             return d.taskHolderCodec().parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't deserialize QuestEntry from json {}", e));
         throw new IllegalStateException("Missing entry for key " + res);

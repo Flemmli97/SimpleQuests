@@ -43,8 +43,8 @@ public class QuestBaseRegistry {
     public static QuestBase deserialize(ResourceLocation type, ResourceLocation res, QuestCategory category, JsonObject obj) {
         QuestReader d = MAP.get(type);
         // Legacy
-        if (d == null && res.getNamespace().equals(SimpleQuestsAPI.MODID))
-            d = MAP.get(new ResourceLocation("simplequests", res.getPath()));
+        if (d == null && res.getNamespace().equals("simplequests"))
+            d = MAP.get(new ResourceLocation(SimpleQuestsAPI.MODID, res.getPath()));
         if (d != null)
             return d.fromJson(res, category, obj);
         throw new IllegalStateException("Missing entry for key " + type);
