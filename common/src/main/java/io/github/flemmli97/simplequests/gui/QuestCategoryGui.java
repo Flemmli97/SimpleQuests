@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -86,7 +86,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories();
+        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories(null);
         this.categories = new ArrayList<>(categoryMap.keySet());
         this.categories.removeIf(res -> QuestsManager.instance().getQuestsForCategory(categoryMap.get(res)).isEmpty());
         this.maxPages = (this.categories.size() - 1) / ENTRY_PER_PAGE;
@@ -111,7 +111,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private void flipPage() {
-        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories();
+        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories(null);
         int id = this.page * ENTRY_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -162,9 +162,9 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         if (!tag.contains("QuestCategory"))
             return false;
         ResourceLocation id = new ResourceLocation(tag.getString("QuestCategory"));
-        QuestCategory category = QuestsManager.instance().getQuestCategory(id);
+        QuestCategory category = QuestsManager.instance().getQuestCategory(id, null);
         if (category == null) {
-            SimpleQuests.LOGGER.error("No such category " + id);
+            SimpleQuests.LOGGER.error("No such category {}", id);
             return false;
         }
         player.closeContainer();

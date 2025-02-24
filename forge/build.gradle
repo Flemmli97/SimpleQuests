@@ -29,7 +29,10 @@ repositories {
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-forge:${ftb_ranks}")
 
-    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-forge")
+    // Jar-Jar only in the remapped jar but we cant use that
+    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-forge"
+    compileOnly(include(project(path: ":forge-api")))
+    runtimeOnly(project(path: ":forge-api", configuration: "shadowBundle"))
 }
 
 shadowJar {

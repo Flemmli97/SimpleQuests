@@ -8,14 +8,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.CurrentQuestGui;
 import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.quest.QuestCategory;
-import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.types.QuestBase;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -34,27 +34,29 @@ public class QuestCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("simplequests")
-                .then(Commands.literal("quests").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.QUESTS)).executes(QuestCommand::show)
+                .then(Commands.literal("quests").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.QUESTS)).executes(QuestCommand::show)
                         .then(Commands.argument("category", ResourceLocationArgument.id())
-                                .requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.SHOW_CATEGORY, true)).suggests(QuestCommand::questCategories).executes(QuestCommand::showCategory)))
-                .then(Commands.literal("accept").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.ACCEPT))
+                                .requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SHOW_CATEGORY, true)).suggests(QuestCommand::questCategories).executes(QuestCommand::showCategory)))
+                .then(Commands.literal("accept").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.ACCEPT))
                         .then(Commands.argument("quest", ResourceLocationArgument.id())
                                 .suggests(QuestCommand::quests).executes(QuestCommand::accept))
-                        .then(Commands.literal("select").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.SELECT)).then(Commands.argument("quest", ResourceLocationArgument.id())
-                                .suggests(QuestCommand::questsComposite).then(Commands.argument("select", ResourceLocationArgument.id())).executes(QuestCommand::acceptComposite))))
-                .then(Commands.literal("submit").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.SUBMIT)).executes(QuestCommand::submit)
-                        .then(Commands.argument("type", StringArgumentType.string()).requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.SUBMIT_TYPE, true))
+                        .then(Commands.literal("select").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SELECT))
+                                .then(Commands.argument("quest", ResourceLocationArgument.id())
+                                        .suggests(QuestCommand::questsComposite).then(Commands.argument("select", ResourceLocationArgument.id())
+                                                .suggests(QuestCommand::selectionQuests).executes(QuestCommand::acceptComposite)))))
+                .then(Commands.literal("submit").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SUBMIT)).executes(QuestCommand::submit)
+                        .then(Commands.argument("type", StringArgumentType.string()).requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SUBMIT_TYPE, true))
                                 .executes(QuestCommand::submitType)))
-                .then(Commands.literal("current").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.CURRENT))
+                .then(Commands.literal("current").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.CURRENT))
                         .executes(QuestCommand::current))
-                .then(Commands.literal("reset").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.RESET))
+                .then(Commands.literal("reset").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RESET))
                         .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QuestCommand::activequests).executes(QuestCommand::reset)))
-                .then(Commands.literal("resetAll").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.RESET_ALL, true))
+                .then(Commands.literal("resetAll").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RESET_ALL, true))
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetAll)))
-                .then(Commands.literal("resetCooldown").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.RESET_COOLDOWN, true))
+                .then(Commands.literal("resetCooldown").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RESET_COOLDOWN, true))
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetCooldown)))
-                .then(Commands.literal("reload").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.RELOAD, true)).executes(QuestCommand::reload))
-                .then(Commands.literal("unlock").requires(src -> SimpleQuests.getHandler().hasPerm(src, QuestCommandPerms.UNLOCK, true))
+                .then(Commands.literal("reload").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RELOAD, true)).executes(QuestCommand::reload))
+                .then(Commands.literal("unlock").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.UNLOCK, true))
                         .then(Commands.argument("target", EntityArgument.players())
                                 .then(Commands.argument("quest", ResourceLocationArgument.id())
                                         .suggests(QuestCommand::lockedQuests).executes(QuestCommand::unlock)))));
@@ -62,17 +64,17 @@ public class QuestCommand {
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        if (QuestsManager.instance().categories().size() == 1)
-            QuestGui.openGui(player, QuestsManager.instance().categories().get(0), false, 0);
-        else
-            QuestCategoryGui.openGui(player);
+        List<QuestCategory> categories = QuestsManager.instance().categories(null);
+        if (categories.size() == 1)
+            QuestGui.openGui(player, categories.get(0), false, 0);
+        QuestCategoryGui.openGui(player);
         return Command.SINGLE_SUCCESS;
     }
 
     private static int showCategory(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "category");
-        QuestCategory category = QuestsManager.instance().getQuestCategory(id);
+        QuestCategory category = QuestsManager.instance().getQuestCategory(id, null);
         if (category == null) {
             ctx.getSource().sendFailure(Component.translatable("simplequests.quest.category.noexist", id));
             return 0;
@@ -84,8 +86,8 @@ public class QuestCommand {
     private static int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        QuestBase base = QuestsManager.instance().getAllQuests().get(id);
-        if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
+        QuestBase base = QuestsManager.instance().getQuest(id, null);
+        if (base == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), base)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
             return 0;
         }
@@ -101,8 +103,8 @@ public class QuestCommand {
     private static int acceptComposite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        QuestBase base = QuestsManager.instance().getAllQuests().get(id);
-        if (base == null || (!SimpleQuests.getHandler().hasPerm(ctx.getSource(), QuestCommandPerms.ACCEPTADMIN, true) && !base.category.canBeSelected)) {
+        QuestBase base = QuestsManager.instance().getQuest(id, null);
+        if (base == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), base)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
             return 0;
         }
@@ -112,8 +114,8 @@ public class QuestCommand {
         }
         ResourceLocation select = ResourceLocationArgument.getId(ctx, "select");
         int i = -1;
-        for (int idx = 0; idx < composite.getCompositeQuests().size(); idx++) {
-            if (composite.getCompositeQuests().get(idx).equals(select)) {
+        for (int idx = 0; idx < composite.getSubQuests().size(); idx++) {
+            if (composite.getSubQuests().get(idx).equals(select)) {
                 i = idx;
                 break;
             }
@@ -184,7 +186,7 @@ public class QuestCommand {
 
     private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ResourceLocation res = ResourceLocationArgument.getId(ctx, "quest");
-        if (!QuestsManager.instance().getAllQuests().containsKey(res)) {
+        if (QuestsManager.instance().getQuest(res, null) == null) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.unlock.fail", res), true);
             return 0;
         }
@@ -215,19 +217,27 @@ public class QuestCommand {
     private static List<String> acceptableQuests(ServerPlayer player, boolean composite) {
         return QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> e.getValue().category.canBeSelected && (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
-                .map(e -> e.getKey().toString()).collect(Collectors.toList());
+                .filter(e -> SimpleQuests.canAcceptQuest(player, e.getValue()) && (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
+                .map(e -> e.getKey().toString()).toList();
+    }
+
+    public static CompletableFuture<Suggestions> selectionQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
+        QuestBase base = QuestsManager.instance().getQuest(ResourceLocationArgument.getId(context, "quest"));
+        if (base instanceof CompositeQuest comp) {
+            return SharedSuggestionProvider.suggest(comp.getSubQuests().stream().map(ResourceLocation::toString).toList(), build);
+        }
+        return SharedSuggestionProvider.suggest(List.of(), build);
     }
 
     public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
         return SharedSuggestionProvider.suggest(QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> e.getValue().needsUnlock)
+                .filter(e -> SimpleQuests.canAcceptQuest(context.getSource(), e.getValue()) && e.getValue().needsUnlock)
                 .map(e -> e.getKey().toString()).collect(Collectors.toList()), build);
     }
 
     public static CompletableFuture<Suggestions> questCategories(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
-        return SharedSuggestionProvider.suggest(QuestsManager.instance().getCategories()
+        return SharedSuggestionProvider.suggest(QuestsManager.instance().getCategories(null)
                 .keySet().stream()
                 .map(ResourceLocation::toString).collect(Collectors.toList()), build);
     }

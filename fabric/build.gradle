@@ -21,5 +21,8 @@ dependencies {
 
     modCompileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks}")
 
-    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
+    // Jar-Jar only in the remapped jar but we cant use that
+    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-fabric"
+    compileOnly(include(project(path: ":fabric-api")))
+    runtimeOnly(project(path: ":fabric-api", configuration: "shadowBundle"))
 }

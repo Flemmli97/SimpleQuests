@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests.mixin;
 
 import com.mojang.authlib.GameProfile;
+import io.github.flemmli97.simplequests.data.PlayerData;
+import io.github.flemmli97.simplequests.data.SimpleQuestDataGet;
 import io.github.flemmli97.simplequests.gui.QuestGui;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.player.SimpleQuestDataGet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;

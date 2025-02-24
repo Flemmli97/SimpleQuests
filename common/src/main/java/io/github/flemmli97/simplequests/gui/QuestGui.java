@@ -1,12 +1,12 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.quest.QuestCategory;
-import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.types.QuestBase;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -138,8 +138,8 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             QuestBase quest = questMap.get(res);
-            if (quest.visibility != QuestBase.Visibility.DEFAULT)
-                return quest.visibility == QuestBase.Visibility.NEVER;
+            if (!SimpleQuests.canAcceptQuest(serverPlayer, quest))
+                return true;
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(quest);
             return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
                     || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
@@ -246,7 +246,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         ResourceLocation id = new ResourceLocation(tag.getString("Quest"));
         QuestBase quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
         if (quest == null) {
-            SimpleQuests.LOGGER.error("No such quest " + id);
+            SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
         boolean remove = stack.isEnchanted();
@@ -256,7 +256,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                     if (b) {
                         player.closeContainer();
                         PlayerData data = PlayerData.get(player);
-                        composite.getCompositeQuests().forEach(r -> {
+                        composite.getSubQuests().forEach(r -> {
                             if (data.isActive(r))
                                 data.reset(r, true);
                         });

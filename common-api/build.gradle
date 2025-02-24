@@ -1,0 +1,43 @@
+archivesBaseName = rootProject.api_base_name
+version = "${project.minecraft_version}-${rootProject.api_version}-common"
+
+repositories {
+    mavenLocal()
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
+}
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+    modImplementation "io.github.flemmli97:lingua_bib:${lingua_bib}-common"
+}
+
+architectury {
+    injectInjectables = false
+    common(rootProject.enabled_platforms.split(","))
+}
+
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(jar) {
+                classifier null
+                builtBy jar
+            }
+            artifact(sourcesJar) {
+                classifier "sources"
+                builtBy remapSourcesJar
+            }
+            artifactId project.archives_base_name
+        }
+    }
+}

@@ -5,11 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "ServerPlayerMixin",
-    "AbstractContainerAccessor",
-    "EntityPredicateAccessor",
-    "ItemPredicateAccessor",
-    "ItemStackMixin",
-    "FishingRodHookedMixin"
+    "AbstractContainerAccessor"
   ],
   "server": [
   ],

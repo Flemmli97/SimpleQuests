@@ -6,9 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.player.ProgressionTrackerImpl;
-import io.github.flemmli97.simplequests.quest.entry.QuestEntryImpls;
+import io.github.flemmli97.simplequests.data.PlayerData;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
@@ -41,7 +39,6 @@ public class LangGen implements DataProvider {
         this.add("simplequests.active.full", "You already have the max amount of active quests");
         this.add("simplequests.accept", "Accepted quest %s");
         this.add("simplequests.finish", "Finished quest [%s]");
-        this.add("simplequests.current", "Current quest [%s]");
         this.add("simplequests.current.no", "No active quest");
         this.add("simplequests.reset", "Reset current quest [%s]");
         this.add("simplequests.reset.confirm", "Are you sure? Submitted items will not be refunded! Type again to confirm");
@@ -51,16 +48,15 @@ public class LangGen implements DataProvider {
         this.add("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
         this.add("simplequests.unlock.fail", "No such quest %s");
 
-        this.add("simplequests.missing.advancement", "Advancement with id %s missing");
-        this.add("simplequests.kill", "Finished kill task %s");
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
-        this.add("simplequests.quest.is_selection", "Quest with id %s is a selection quest!");
-        this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection-quest!");
+        this.add("simplequests.quest.is_selection", "Quest with id %s is a selection-quest!");
+        this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
         this.add("simplequests.quest.composite.resolve.none", "Selection-quest with id %1$s has no selectable quest with %2$s!");
         this.add("simplequests.quest.category.noexist", "No quest category exists with id %s");
         this.add("simplequests.task", "Finished task %s");
-        this.add("simplequests.interaction.dupe", "You already interacted with this predicate");
-        this.add("simplequests.interaction.block.dupe.true", "You already interacted with this block!");
+
+        this.add("simplequests.interaction.dupe", "You already interacted with this!");
+        this.add("simplequests.interaction.block.dupe.true", "You already interacted with this block");
         this.add("simplequests.interaction.block.dupe.false", "You already broke this block");
 
         this.add(PlayerData.AcceptType.REQUIREMENTS.langKey(), "Missing requirements for quest");
@@ -83,24 +79,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.gui.button.main", "Back");
 
         this.add("simplequests.reload", "Reloading configs");
-
-        this.add(QuestEntryImpls.ItemEntry.ID + ".single", "Submit %1$s x%2$s");
-        this.add(QuestEntryImpls.ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
-        this.add(QuestEntryImpls.ItemEntry.ID + ".multi", "Submit any of the following x%2$s: %1$s");
-        this.add(QuestEntryImpls.ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
-        this.add(QuestEntryImpls.ItemEntry.ID + ".empty", "<Empty tag/items>");
-        this.add(QuestEntryImpls.KillEntry.ID.toString(), "Kill %s x%2$s");
-        this.add(QuestEntryImpls.KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
-        this.add(QuestEntryImpls.XPEntry.ID.toString(), "Submit Experience: %s lvl");
-        this.add(QuestEntryImpls.AdvancementEntry.ID.toString(), "Obtain the advancement %s");
-        this.add(QuestEntryImpls.PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
-
-        this.add("simplequest.quest.progress", "Progress: %1$s - %2$s");
-        this.add(ProgressionTrackerImpl.KillTracker.KILL_PROGRESS, "Progress: %1$s/%2$s");
-        this.add(ProgressionTrackerImpl.CraftingTracker.CRAFTING_PROGRESS, "Progress: %1$s/%2$s");
-        this.add(ProgressionTrackerImpl.BlockTracker.BLOCK_INTERACT_PROGRESS, "Progress: %1$s/%2$s");
-        this.add(ProgressionTrackerImpl.EntityTracker.ENTITY_INTERACT_PROGRESS, "Progress: %1$s/%2$s");
-        this.add(ProgressionTrackerImpl.FishingTracker.FISHING_PROGRESS, "Progress: %1$s/%2$s");
+        this.add("simplequest.quest.progress", "%1$s - %2$s");
     }
 
     @Override

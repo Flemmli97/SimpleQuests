@@ -7,10 +7,9 @@ public class ConfigHandler {
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
-    public static Config CONFIG;
+    public static final Config CONFIG = new Config();
 
     public static void init() {
-        CONFIG = new Config();
         reloadConfigs();
     }
 
