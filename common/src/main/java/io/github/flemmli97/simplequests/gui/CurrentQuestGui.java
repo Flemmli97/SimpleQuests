@@ -192,6 +192,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
         }, "simplequests.gui.reset");
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 

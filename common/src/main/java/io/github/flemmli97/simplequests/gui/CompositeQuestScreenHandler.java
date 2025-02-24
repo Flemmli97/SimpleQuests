@@ -160,6 +160,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
                 QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
         }, "simplequests.gui.confirm");
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 
