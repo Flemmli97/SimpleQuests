@@ -1,5 +1,5 @@
 {
-  "name": "Example for a location quest using a location predicate",
+  "name": "Example for a predicate quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,26 +15,32 @@
   "submission_trigger": "",
   "entries": {
     "structure": {
-      "locations": [
+      "predicates": [
         {
           "description": "Find a warm ocean ruin",
           "value": {
-            "feature": "minecraft:ocean_ruin_warm"
+            "location": {
+              "feature": "minecraft:ocean_ruin_warm"
+            }
           }
         }
       ],
-      "id": "simplequests_api:location"
+      "submit": false,
+      "id": "simplequests_api:predicates"
     },
     "structure2": {
-      "locations": [
+      "predicates": [
         {
           "description": "Find a cold ocean ruin",
           "value": {
-            "feature": "minecraft:ocean_ruin_cold"
+            "location": {
+              "feature": "minecraft:ocean_ruin_cold"
+            }
           }
         }
       ],
-      "id": "simplequests_api:location"
+      "submit": false,
+      "id": "simplequests_api:predicates"
     }
   },
   "type": "simplequests_api:quest"

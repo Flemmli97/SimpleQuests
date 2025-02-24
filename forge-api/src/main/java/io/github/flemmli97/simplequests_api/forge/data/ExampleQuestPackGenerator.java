@@ -13,8 +13,7 @@ import io.github.flemmli97.simplequests_api.impls.tasks.EntityInteractTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.ItemTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
-import io.github.flemmli97.simplequests_api.impls.tasks.LocationTask;
-import io.github.flemmli97.simplequests_api.impls.tasks.PositionTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.PredicateTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.XPTask;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
@@ -29,7 +28,6 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
@@ -166,44 +164,52 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                                 .located(LocationPredicate.inBiome(Biomes.PLAINS)).build(), "Kill %2$s plains cow")), UniformGenerator.between(5, 8), "Task: 5-8 cows or cows in a plains biome", null)));
 
         //Location example
-        this.addQuest(new Quest.Builder(new ResourceLocation("example", "location_example"),
-                "Example for a location quest using a location predicate",
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "submitting_predicate_example"),
+                "Example for a predicate quest. Requires submitting",
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withSortingNum(1)
                 .withIcon(new ItemStack(Items.MAP))
-                .addTaskEntry("structure", new LocationTask(DescriptiveValue.list(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm")))
-                        , "Find a warm ocean ruin").build(), "", null))
-                .addTaskEntry("structure2", new LocationTask(DescriptiveValue.list(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold")))
-                        , "Find a cold ocean ruin").build(), "", null)));
-        this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/location_example_multi"),
-                "Example for a multi location quest using a location predicate",
+                .addTaskEntry("structure", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))))
+                        .build(), "Find a warm ocean ruin").build(), "", true))
+                .addTaskEntry("structure2", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))))
+                        .build(), "Find a cold ocean ruin").build(), "", true)));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "predicate_example"),
+                "Example for a predicate quest",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .withSortingNum(1)
+                .withIcon(new ItemStack(Items.MAP))
+                .addTaskEntry("structure", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))))
+                        .build(), "Find a warm ocean ruin").build(), ""))
+                .addTaskEntry("structure2", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))))
+                        .build(), "Find a cold ocean ruin").build(), "")));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/predicate_example_multi"),
+                "Example for a multi predicate quest using a predicate type",
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withSortingNum(1)
                 .withIcon(new ItemStack(Items.COMPASS))
-                .addTaskEntry("structure", new LocationTask(DescriptiveValue.list(
-                                LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))), "Go to warm ocean ruin")
-                        .add(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))), "Go to cold ocean ruin").build(), "Find a warm or cold ocean ruin", null)));
-        this.addQuest(new Quest.Builder(new ResourceLocation("example", "location_example_sneak"),
-                "Example for a location quest using a location predicate. Player needs to sneak additionally",
+                .addTaskEntry("structure", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                                .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
+                                        new ResourceLocation("ocean_ruin_warm")))).build(), "Go to warm ocean ruin")
+                        .add(EntityPredicate.Builder.entity()
+                                .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
+                                        new ResourceLocation("ocean_ruin_cold")))).build(), "Go to cold ocean ruin").build(), "Find a warm or cold ocean ruin")));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "predicate_example_sneak"),
+                "Example for a predicate quest using a predicate type. Player needs to sneak additionally",
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withSortingNum(1)
                 .withIcon(new ItemStack(Items.MAP))
-                .addTaskEntry("structure", new LocationTask(DescriptiveValue.list(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))), "Find a warm ocean ruin").build(), "", EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setCrouching(true).build()).build()))
-                .addTaskEntry("structure2", new LocationTask(DescriptiveValue.list(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))), "Find a cold ocean ruin").build(), "", EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setCrouching(true).build()).build())));
-
-        //Position example
-        this.addQuest(new Quest.Builder(new ResourceLocation("example", "position_example"),
-                "Example for a simple position quest",
-                new ResourceLocation("chests/abandoned_mineshaft"))
-                .withIcon(new ItemStack(Items.PURPUR_BLOCK))
-                .addTaskEntry("place", new PositionTask(DescriptiveValue.list(new BlockPos(0, 50, 0)).build(), 15, "", null)));
-        this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/position_example_multi"),
-                "Example for a multi position quest",
-                new ResourceLocation("chests/abandoned_mineshaft"))
-                .withIcon(new ItemStack(Items.PURPUR_BLOCK))
-                .addTaskEntry("place", new PositionTask(DescriptiveValue.list(
-                                new BlockPos(0, 50, 0))
-                        .add(new BlockPos(100, 50, 100), "Position description. Go to 100, 50, 100").build(), 15, "Go to the position from this quest", null)));
+                .addTaskEntry("structure", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .flags(EntityFlagsPredicate.Builder.flags().setCrouching(true).build())
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_warm"))))
+                        .build(), "Find a warm ocean ruin. Sneak when there").build(), ""))
+                .addTaskEntry("structure2", new PredicateTask(DescriptiveValue.list(EntityPredicate.Builder.entity()
+                        .flags(EntityFlagsPredicate.Builder.flags().setCrouching(true).build())
+                        .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))))
+                        .build(), "Find a cold ocean ruin. Sneak when there").build(), "")));
 
         //XP example
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "xp_example"),

@@ -16,7 +16,6 @@
   "simplequests_api:item.multi": "Submit any of the following x%2$s: %1$s",
   "simplequests_api:item.multi.keep": "Have any of the following x%2$s: %1$s",
   "simplequests_api:entity": "Kill %s x%2$s",
-  "simplequests_api:position": "Go to [x:%1$s;y:%2$s;z:%3$s]",
   "simplequests_api:xp": "Submit Experience: %s lvl",
   "simplequests_api.empty_tag": "<Empty tag!>",
   "simplequests_api:entity.progress": "Progress: %1$s/%2$s",

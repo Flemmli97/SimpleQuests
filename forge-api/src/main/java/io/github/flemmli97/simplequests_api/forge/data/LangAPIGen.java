@@ -15,7 +15,6 @@ import io.github.flemmli97.simplequests_api.impls.tasks.EntityInteractTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.ItemTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
-import io.github.flemmli97.simplequests_api.impls.tasks.PositionTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.XPTask;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
@@ -60,7 +59,6 @@ public class LangAPIGen implements DataProvider {
         this.add(ItemTask.ID + ".multi", "Submit any of the following x%2$s: %1$s");
         this.add(ItemTask.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
         this.add(KillTask.ID.toString(), "Kill %s x%2$s");
-        this.add(PositionTask.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
         this.add(XPTask.ID.toString(), "Submit Experience: %s lvl");
         this.add(SimpleQuestsAPI.MODID + ".empty_tag", "<Empty tag!>");
 
