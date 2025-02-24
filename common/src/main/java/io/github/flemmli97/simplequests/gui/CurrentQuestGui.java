@@ -1,23 +1,18 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
+import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.player.QuestProgress;
-import io.github.flemmli97.simplequests.quest.types.QuestBase;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -66,7 +61,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
     private ItemStack ofQuest(QuestProgress progress, ServerPlayer player) {
         QuestBase quest = progress.getQuest();
         ItemStack stack = quest.getIcon();
-        stack.set(DataComponents.CUSTOM_NAME, progress.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.set(DataComponents.CUSTOM_NAME, progress.getName(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         List<Component> lore = new ArrayList<>();
         progress.getDescription(player).forEach(c -> lore.add(c.setStyle(c.getStyle().withItalic(false))));
         List<String> finished = progress.finishedTasks();
@@ -74,7 +69,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 .filter(e -> !finished.contains(e.getKey()))
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
-                    MutableComponent translation = e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW));
+                    MutableComponent translation = Component.literal("▶ ").append(e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW)));
                     if (comp == null)
                         lore.add(translation);
                     else
@@ -89,16 +84,6 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         ItemStack stack = new ItemStack(Items.GRAY_STAINED_GLASS_PANE);
         stack.set(DataComponents.CUSTOM_NAME, Component.literal(""));
         return stack;
-    }
-
-    public static void playSongToPlayer(ServerPlayer player, Holder<SoundEvent> event, float vol, float pitch) {
-        player.connection.send(
-                new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
-    }
-
-    public static void playSongToPlayer(ServerPlayer player, SoundEvent event, float vol, float pitch) {
-        player.connection.send(
-                new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(event), SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
     }
 
     @Override
@@ -169,13 +154,13 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         if (index == 0) {
             this.page--;
             this.flipPage();
-            CurrentQuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
+            QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         if (index == 8) {
             this.page++;
             this.flipPage();
-            CurrentQuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
+            QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         ItemStack stack = slot.getItem();
@@ -183,7 +168,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         if (customData == null)
             return false;
         if (stack.getItem() == Items.BOOK) {
-            playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+            QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             return false;
         }
         Optional<ResourceLocation> opt = customData.read(ResourceLocation.CODEC.fieldOf(QuestGui.STACK_NBT_ID)).result();
@@ -192,7 +177,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         ResourceLocation id = opt.get();
         Optional<QuestProgress> questOpt = PlayerData.get(this.player).getCurrentQuest().stream().filter(p -> p.getQuest().id.equals(id)).findFirst();
         if (questOpt.isEmpty()) {
-            SimpleQuests.LOGGER.error("No such quest " + id);
+            SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
         QuestBase quest = questOpt.get().getQuest();
@@ -200,13 +185,14 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
             if (b) {
                 player.closeContainer();
                 PlayerData.get(player).reset(quest.id, true);
-                playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
+                QuestGui.playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
             } else {
                 player.closeContainer();
                 player.getServer().execute(() -> CurrentQuestGui.openGui(player));
-                playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
         }, "simplequests.gui.reset");
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 

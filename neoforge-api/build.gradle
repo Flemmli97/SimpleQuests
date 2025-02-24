@@ -1,0 +1,130 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "group": "com.github.johnrengelman", "name": "shadow", "version": "8.+"
+    }
+}
+
+apply plugin: com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+
+archivesBaseName = rootProject.api_base_name
+version = "${project.minecraft_version}-${rootProject.api_version}-neoforge"
+
+architectury {
+    platformSetupLoomIde()
+    neoForge()
+}
+
+loom {
+    runs {
+        client {
+            vmArgs "-Dmixin.debug.export=true"
+        }
+        data {
+            data()
+            programArgs "--all", "--mod", "simplequests_api"
+            programArgs "--output", project(":common-api").file("src/generated/resources").absolutePath
+            property("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
+        }
+    }
+    mods {
+        main { // to match the default mod generated for Forge
+            sourceSet project.sourceSets.main
+            sourceSet project(':common-api').sourceSets.main
+        }
+    }
+}
+
+ext {
+    mod_meta = ["version": project.version, "loader_version": neo_loader_version, "mcversion": minecraft_version, "neoforge_version": neoforge_version]
+}
+
+configurations {
+    common {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+    developmentForge.extendsFrom api
+    shadowBundle {
+        canBeConsumed = true
+        canBeResolved = true
+    }
+}
+
+repositories {
+    maven {
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/releases'
+    }
+    maven {
+        name = "LinguaBib"
+        url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
+    }
+}
+
+dependencies {
+    neoForge "net.neoforged:neoforge:${neoforge_version}"
+
+    api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
+    shadowBundle(project(path: ":common-api", configuration: "transformProductionNeoForge"))
+
+    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand mod_meta
+    }
+    exclude '.cache'
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+jar {
+    archiveClassifier = 'dev'
+}
+
+sourcesJar {
+    def commonSources = project(":common-api").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+    archiveClassifier.set("sources")
+}
+
+artifacts {
+    shadowBundle(shadowJar)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(remapJar) {
+                classifier null
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                classifier "sources"
+                builtBy remapSourcesJar
+            }
+            artifactId project.archives_base_name
+        }
+    }
+}

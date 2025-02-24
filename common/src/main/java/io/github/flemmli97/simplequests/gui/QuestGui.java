@@ -1,12 +1,12 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
+import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests.player.PlayerData;
-import io.github.flemmli97.simplequests.quest.QuestCategory;
-import io.github.flemmli97.simplequests.quest.types.CompositeQuest;
-import io.github.flemmli97.simplequests.quest.types.QuestBase;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -33,6 +33,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.enchantment.Enchantments;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,9 @@ import java.util.Optional;
 
 public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
 
+    public static final Style NAME_STYLE = Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.GOLD, ChatFormatting.BOLD);
+    public static final Style DESCRIPTION_STYLE = Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GRAY);
+    public static final Style TASK_STYLE = Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW);
     public static final String STACK_NBT_ID = "SimpleQuestsQuest";
 
     public static int QUEST_PER_PAGE = 12;
@@ -87,11 +91,23 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         player.openMenu(fac);
     }
 
+    public static List<MutableComponent> questComponents(PlayerData data, QuestBase quest, PlayerData.AcceptType type) {
+        List<MutableComponent> components = new ArrayList<>();
+        quest.getDescription(data.getPlayer()).forEach(c -> components.add(c.setStyle(DESCRIPTION_STYLE)));
+        components.add(Component.literal(""));
+        if (type == PlayerData.AcceptType.DELAY) {
+            components.add(Component.translatable(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
+        }
+        for (MutableComponent comp : quest.getTasks(data.getPlayer(), TASK_STYLE))
+            components.add(comp.setStyle(DESCRIPTION_STYLE));
+        return components;
+    }
+
     private ItemStack ofQuest(int i, QuestBase quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
-        stack.set(DataComponents.CUSTOM_NAME, quest.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
         List<Component> lore = new ArrayList<>();
         quest.getDescription(player).forEach(c -> lore.add(c.setStyle(c.getStyle().withItalic(false))));
         if (data.isActive(quest)) {
@@ -105,7 +121,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
             lore.add(Component.translatable(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
             this.updateList.put(i, quest);
         }
-        for (MutableComponent comp : quest.getFormattedGuiTasks(player))
+        for (MutableComponent comp : quest.getTasks(player))
             lore.add(comp.setStyle(comp.getStyle().withItalic(false)));
         MutableComponent requirement = switch (type) {
             case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
@@ -144,8 +160,8 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
             QuestBase quest = questMap.get(res);
-            if (quest.visibility != QuestBase.Visibility.DEFAULT)
-                return quest.visibility == QuestBase.Visibility.NEVER;
+            if (!SimpleQuests.canAcceptQuest(serverPlayer, quest))
+                return true;
             PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(quest);
             return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
                     || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
@@ -253,7 +269,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         ResourceLocation id = opt.get();
         QuestBase quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
         if (quest == null) {
-            SimpleQuests.LOGGER.error("No such quest " + id);
+            SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
         boolean remove = stack.isEnchanted();
@@ -263,7 +279,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                     if (b) {
                         player.closeContainer();
                         PlayerData data = PlayerData.get(player);
-                        composite.getCompositeQuests().forEach(r -> {
+                        composite.getSubQuests().forEach(r -> {
                             if (data.isActive(r))
                                 data.reset(r, true);
                         });
@@ -296,6 +312,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 }
             }, remove ? "simplequests.gui.reset" : "simplequests.gui.confirm");
         }
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
 

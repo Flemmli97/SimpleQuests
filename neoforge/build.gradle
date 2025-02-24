@@ -26,7 +26,10 @@ repositories {
 dependencies {
     modCompileOnly("dev.ftb.mods:ftb-ranks-neoforge:${ftb_ranks}")
 
-    modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge")
+    // Jar-Jar only in the remapped jar but we cant use that
+    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge"
+    compileOnly(include(project(path: ":neoforge-api")))
+    runtimeOnly(project(path: ":neoforge-api", configuration: "shadowBundle"))
 }
 
 shadowJar {

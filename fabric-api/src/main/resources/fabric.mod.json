@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "simplequests_api",
+  "version": "${version}",
+  "name": "Simple Quests API",
+  "description": "API handling questing",
+  "authors": [
+    "Flemmli97"
+  ],
+  "contact": {
+    "issues": "https://github.com/Flemmli97/SimpleQuests/issues",
+    "sources": "https://github.com/Flemmli97/SimpleQuests"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.flemmli97.simplequests_api.fabric.SimpleQuestsAPIFabric"
+    ]
+  },
+  "mixins": [
+    "simplequests_api.mixins.json",
+    "simplequests_api.fabric.mixins.json"
+  ],
+  "depends": {
+    "fabric": ">=${fabric_version}",
+    "minecraft": ">=${mcversion}"
+  }
+}

@@ -1,0 +1,97 @@
+package io.github.flemmli97.simplequests_api.impls.tasks;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
+import io.github.flemmli97.simplequests_api.util.QuestUtils;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
+
+public class XPTask implements QuestTask<XPTask.XPTaskResolved> {
+
+    public static final QuestEntryKey<XPTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "xp"));
+    public static final MapCodec<XPTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
+            instance.group(NumberProviders.CODEC.fieldOf("amount").forGetter(d -> d.amount),
+                    Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
+                    EntityPredicate.CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+            ).apply(instance, (amount, desc, pred) -> new XPTask(amount, desc.orElse(""), pred.orElse(null))));
+
+    private final String description;
+
+    private final NumberProvider amount;
+    private final EntityPredicate playerPredicate;
+
+    public XPTask(NumberProvider amount, String description, @Nullable EntityPredicate player) {
+        if (description.isEmpty() && !(amount instanceof ConstantValue))
+            throw new IllegalStateException("Description is required");
+        this.description = description;
+        this.amount = amount;
+        this.playerPredicate = player;
+    }
+
+    @Override
+    public MutableComponent translation(ServerPlayer player) {
+        if (this.description.isEmpty() && this.amount instanceof ConstantValue c) {
+            // Can pass null since its constant
+            return Component.translatable(this.getId().toString(), c.getInt(null));
+        }
+        return Component.translatable(this.description);
+    }
+
+    @Override
+    public QuestEntryKey<XPTask> getId() {
+        return ID;
+    }
+
+    @Override
+    public XPTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+        return new XPTaskResolved(QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
+    }
+
+    public record XPTaskResolved(int amount, EntityPredicate playerPredicate) implements ResolvedQuestTask {
+
+        public static final MapCodec<XPTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
+                instance.group(ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(d -> d.amount),
+                        EntityPredicate.CODEC.optionalFieldOf("player_predicate").forGetter(d -> Optional.ofNullable(d.playerPredicate))
+                ).apply(instance, (amount, pred) -> new XPTaskResolved(amount, pred.orElse(null))));
+
+        @Override
+        public boolean submit(ServerPlayer player) {
+            if (this.playerPredicate != null && !this.playerPredicate.matches(player, player))
+                return false;
+            if (player.experienceLevel >= this.amount) {
+                player.giveExperienceLevels(-this.amount);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public QuestEntryKey<XPTask> getId() {
+            return ID;
+        }
+
+        @Override
+        public MutableComponent translation(ServerPlayer player) {
+            return Component.translatable(this.getId().toString(), this.amount);
+        }
+    }
+}

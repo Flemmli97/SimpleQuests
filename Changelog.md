@@ -1,3 +1,17 @@
+Simple Quests 2.1.0
+================
+- Merged changes from 1.18 branch
+  - API split
+- VERY IMPORTANT: Old questpack will not work anymore!
+  - All fields in json are now snake_case
+  - Multi quest task and single ones are now merged together
+  - Active quests for players will be reset
+  - See https://gist.github.com/Flemmli97/2b542ed19c65156d7f80521edb19c13c for information of how to update
+- Added new quest task: `simplequests:predicate`
+  - Submitting task that checks for a player predicate
+- Removed location and position task
+  - Replaced by `simplequests:ticking_predicates` which takes an entity predicate
+
 Simple Quests 1.5.8
 ================
 - Update language to support player based translation

@@ -1,20 +1,16 @@
 package io.github.flemmli97.simplequests.gui;
 
 import io.github.flemmli97.simplequests.SimpleQuests;
-import io.github.flemmli97.simplequests.datapack.QuestsManager;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -79,16 +75,11 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         return stack;
     }
 
-    private static void playSongToPlayer(ServerPlayer player, Holder<SoundEvent> event, float vol, float pitch) {
-        player.connection.send(
-                new ClientboundSoundPacket(event, SoundSource.PLAYERS, player.position().x, player.position().y, player.position().z, vol, pitch, player.getRandom().nextLong()));
-    }
-
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories();
+        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories(null);
         this.categories = new ArrayList<>(categoryMap.keySet());
         this.categories.removeIf(res -> QuestsManager.instance().getQuestsForCategory(categoryMap.get(res)).isEmpty());
         this.maxPages = (this.categories.size() - 1) / ENTRY_PER_PAGE;
@@ -113,7 +104,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private void flipPage() {
-        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories();
+        Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories(null);
         int id = this.page * ENTRY_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -148,13 +139,13 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         if (index == 0) {
             this.page--;
             this.flipPage();
-            playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
+            QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         if (index == 8) {
             this.page++;
             this.flipPage();
-            playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
+            QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
             return true;
         }
         ItemStack stack = slot.getItem();
@@ -165,12 +156,13 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         if (opt.isEmpty())
             return false;
         ResourceLocation id = opt.get();
-        QuestCategory category = QuestsManager.instance().getQuestCategory(id);
+        QuestCategory category = QuestsManager.instance().getQuestCategory(id, null);
         if (category == null) {
-            SimpleQuests.LOGGER.error("No such category " + id);
+            SimpleQuests.LOGGER.error("No such category {}", id);
             return false;
         }
         player.closeContainer();
+        QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         player.getServer().execute(() -> QuestGui.openGui(player, category));
         return true;
     }
