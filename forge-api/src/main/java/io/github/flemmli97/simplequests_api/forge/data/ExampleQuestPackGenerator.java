@@ -187,7 +187,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                         .located(LocationPredicate.inFeature(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("ocean_ruin_cold"))))
                         .build(), "Find a cold ocean ruin").build(), "")));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/predicate_example_multi"),
-                "Example for a multi predicate quest using a predicate type",
+                "Example for a multi predicate quests",
                 new ResourceLocation("chests/abandoned_mineshaft"))
                 .withSortingNum(1)
                 .withIcon(new ItemStack(Items.COMPASS))
