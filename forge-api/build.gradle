@@ -11,7 +11,7 @@ buildscript {
 apply plugin: com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 
 archivesBaseName = rootProject.api_base_name
-version = project.minecraft_version + "-" + rootProject.api_version
+version = "${project.minecraft_version}-${rootProject.api_version}-forge"
 
 architectury {
     platformSetupLoomIde()
@@ -56,7 +56,7 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
     developmentForge.extendsFrom api
-    shadowArtifact {
+    shadowBundle {
         canBeConsumed = true
         canBeResolved = true
     }
@@ -73,7 +73,7 @@ dependencies {
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
-    shadowArtifact(project(path: ":common-api", configuration: "transformProductionForge"))
+    shadowBundle(project(path: ":common-api", configuration: "transformProductionForge"))
 
     modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-forge")
 }
@@ -90,35 +90,28 @@ processResources {
 shadowJar {
     exclude "fabric.mod.json"
 
-    configurations = [project.configurations.shadowArtifact]
-    archiveClassifier.set("dev-shadow")
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier.set("forge")
 }
 
 jar {
-    archiveClassifier.set("dev")
+    archiveClassifier = 'dev'
 }
 
 sourcesJar {
     def commonSources = project(":common-api").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
-    archiveClassifier.set("forge-sources")
+    archiveClassifier.set("sources")
 }
 
 artifacts {
-    shadowArtifact(shadowJar)
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
+    shadowBundle(shadowJar)
 }
 
 publishing {
@@ -133,17 +126,6 @@ publishing {
                 builtBy remapSourcesJar
             }
             artifactId project.archives_base_name
-            version project.version + "-forge"
-        }
-    }
-
-    repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
-            }
         }
     }
 }

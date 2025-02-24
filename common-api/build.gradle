@@ -1,5 +1,5 @@
 archivesBaseName = rootProject.api_base_name
-version = project.minecraft_version + "-" + rootProject.api_version
+version = "${project.minecraft_version}-${rootProject.api_version}-common"
 
 repositories {
     mavenLocal()
@@ -38,17 +38,6 @@ publishing {
                 builtBy remapSourcesJar
             }
             artifactId project.archives_base_name
-            version project.version + "-common"
-        }
-    }
-
-    repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
-            }
         }
     }
 }

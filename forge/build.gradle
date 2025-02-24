@@ -32,7 +32,7 @@ dependencies {
     // Jar-Jar only in the remapped jar but we cant use that
     modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-forge"
     compileOnly(include(project(path: ":forge-api")))
-    runtimeOnly(project(path: ":forge-api", configuration: "shadowArtifact"))
+    runtimeOnly(project(path: ":forge-api", configuration: "shadowBundle"))
 }
 
 shadowJar {

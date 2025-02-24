@@ -25,5 +25,5 @@ dependencies {
     // Jar-Jar only in the remapped jar but we cant use that
     modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-fabric"
     compileOnly(include(project(path: ":fabric-api")))
-    runtimeOnly(project(path: ":fabric-api", configuration: "shadowArtifact"))
+    runtimeOnly(project(path: ":fabric-api", configuration: "shadowBundle"))
 }

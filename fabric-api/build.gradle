@@ -11,7 +11,7 @@ buildscript {
 apply plugin: com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 
 archivesBaseName = rootProject.api_base_name
-version = project.minecraft_version + "-" + rootProject.api_version
+version = "${project.minecraft_version}-${rootProject.api_version}-fabric"
 
 architectury {
     platformSetupLoomIde()
@@ -37,9 +37,9 @@ configurations {
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
     developmentFabric.extendsFrom api
-    shadowArtifact {
+    shadowBundle {
         canBeConsumed = true
-        canBeResolved = false
+        canBeResolved = true
     }
 }
 
@@ -55,7 +55,7 @@ dependencies {
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
 
     api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common-api", configuration: "transformProductionFabric")) { transitive false }
+    shadowBundle(project(path: ":common-api", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
 }
@@ -70,35 +70,28 @@ processResources {
 }
 
 shadowJar {
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier.set("fabric")
 }
 
 jar {
-    archiveClassifier.set("dev")
+    archiveClassifier = 'dev'
 }
 
 sourcesJar {
     def commonSources = project(":common-api").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
-    archiveClassifier.set("fabric-sources")
+    archiveClassifier.set("sources")
 }
 
 artifacts {
-    shadowArtifact(shadowJar)
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
+    shadowBundle(shadowJar)
 }
 
 publishing {
@@ -113,17 +106,6 @@ publishing {
                 builtBy remapSourcesJar
             }
             artifactId project.archives_base_name
-            version project.version + "-fabric"
-        }
-    }
-
-    repositories {
-        maven {
-            url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.gitlab.token") ?: System.getenv("GPR_GITLAB_TOKEN")
-            }
         }
     }
 }
