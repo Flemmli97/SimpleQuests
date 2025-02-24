@@ -134,7 +134,7 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
                                 consume, allowDupes.orElse(false), player.orElse(null))));
 
         public BlockInteractTaskResolved {
-            if (this.blockPredicate() == null && this.heldItem() == null)
+            if (heldItem == null && blockPredicate == null)
                 throw new IllegalStateException("Either block or item predicate needs to be defined");
         }
 
