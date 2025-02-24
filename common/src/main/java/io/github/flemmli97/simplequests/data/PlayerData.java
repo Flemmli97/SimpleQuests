@@ -2,6 +2,7 @@ package io.github.flemmli97.simplequests.data;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import io.github.flemmli97.simplequests.api.SimpleQuestImplAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
@@ -19,6 +20,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 public class PlayerData implements PlayerQuestData {
 
@@ -91,8 +93,15 @@ public class PlayerData implements PlayerQuestData {
         }
         QuestProgress prog = new QuestProgress(quest, this, subQuestIndex);
         this.currentQuests.add(prog);
-        if (!prog.getQuest().category.isSilent)
-            this.player.sendMessage(new TranslatableComponent("simplequests.accept", prog.formattedQuest(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+        if (!prog.getQuest().category.isSilent) {
+            this.player.sendMessage(new TranslatableComponent("simplequests.accept",
+                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+            this.player.sendMessage(new TextComponent(""), Util.NIL_UUID);
+            for (MutableComponent comp : prog.getTaskComponents(this.player)) {
+                this.player.sendMessage(new TranslatableComponent("simplequests.task.chat_format",
+                        comp.withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD)).withStyle(ChatFormatting.GOLD), Util.NIL_UUID);
+            }
+        }
         return true;
     }
 
@@ -105,15 +114,26 @@ public class PlayerData implements PlayerQuestData {
         Map<ResourceLocation, QuestState> completion = new HashMap<>();
         List<QuestProgress> completed = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
-            switch (prog.submit(this, trigger)) {
+            List<ResolvedQuestTask> tasks = new ArrayList<>();
+            switch (prog.submit(this, trigger, tasks::add)) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
                     completion.put(prog.getQuest().id, QuestState.COMPLETE);
                 }
-                case PARTIAL_COMPLETE -> completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
-                case PARTIAL ->
-                        this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                case PARTIAL_COMPLETE -> {
+                    completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
+                    this.player.sendMessage(new TranslatableComponent("simplequests.finish.sub",
+                            prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID);
+                }
+                case PARTIAL -> {
+                    this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                    if (!prog.getQuest().category.isSilent) {
+                        tasks.forEach(t -> this.player.sendMessage(new TranslatableComponent("simplequests.task.complete", t.translation(this.player)
+                                .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID));
+                    }
+                }
                 case NOTHING -> {
                     if (sendFailMessage)
                         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
@@ -124,7 +144,7 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, BiConsumer<QuestProgress, Pair<String, R>> onFullfill, String trigger) {
+    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, SimpleQuestImplAPI.QuestTriggerHook<R> onFullfill, String trigger) {
         if (key.equals(EntityTracker.KEY)) {
             if (this.interactionCooldown > 0)
                 return Map.of();
@@ -136,15 +156,18 @@ public class PlayerData implements PlayerQuestData {
             Set<Pair<String, R>> fulfilled = prog.tryFullFill(this.player, key, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.forEach(p -> onFullfill.accept(prog, p));
             }
             QuestState state = prog.tryComplete(this, trigger);
+            fulfilled.forEach(p -> onFullfill.onFullfill(prog, p, state));
             if (state == QuestState.COMPLETE) {
                 this.completeQuest(prog);
                 completed.add(prog);
                 completion.put(prog.getQuest().id, QuestState.COMPLETE);
             } else if (state == QuestState.PARTIAL_COMPLETE) {
                 completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
+                this.player.sendMessage(new TranslatableComponent("simplequests.finish.sub",
+                        prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                        .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID);
             }
         });
         this.currentQuests.removeAll(completed);
@@ -153,9 +176,10 @@ public class PlayerData implements PlayerQuestData {
 
     @Override
     public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger) {
-        return this.trigger(key, with, (prog, p) -> {
-            if (!prog.getQuest().category.isSilent)
-                this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+        return this.trigger(key, with, (prog, p, state) -> {
+            if (state == QuestState.NO && !prog.getQuest().category.isSilent)
+                this.player.sendMessage(new TranslatableComponent("simplequests.task.complete", p.getSecond().translation(this.player)
+                        .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID);
         }, trigger);
     }
 
@@ -170,7 +194,9 @@ public class PlayerData implements PlayerQuestData {
         this.dailyQuestsTracker.compute(prog.getQuest().category.id, (key, i) -> i == null ? 1 : ++i);
         this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getQuest().category.isSilent)
-            this.player.sendMessage(new TranslatableComponent("simplequests.finish", prog.getTask(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+            this.player.sendMessage(new TranslatableComponent("simplequests.finish",
+                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                    .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID);
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
                 Quest quest = QuestsManager.instance().getActualQuest(res, null);
@@ -209,7 +235,7 @@ public class PlayerData implements PlayerQuestData {
             return;
         } else if (forced || this.player.level.getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendMessage(new TranslatableComponent("simplequests.reset", prog.getTask(this.player)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                this.player.sendMessage(new TranslatableComponent("simplequests.reset", prog.getName(this.player)).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
             this.currentQuests.remove(prog);
             this.removeTickableQuestProgress(prog);
             prog.getQuest().onReset(this.player);
@@ -290,15 +316,21 @@ public class PlayerData implements PlayerQuestData {
             Pair<Boolean, Set<ResolvedQuestTask>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                fulfilled.getSecond().forEach(e -> {
-                    if (!prog.getQuest().category.isSilent)
-                        this.player.sendMessage(new TranslatableComponent("simplequests.task", e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
-                });
             }
-            if (prog.tryComplete(this, trigger) == QuestState.COMPLETE) {
-                this.completeQuest(prog);
-                completed.add(prog);
-                return true;
+            QuestState state = prog.tryComplete(this, trigger);
+            switch (state) {
+                case COMPLETE -> {
+                    this.completeQuest(prog);
+                    completed.add(prog);
+                    return true;
+                }
+                case PARTIAL_COMPLETE -> this.player.sendMessage(new TranslatableComponent("simplequests.finish.sub",
+                        prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                        .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), Util.NIL_UUID);
+                case NO -> fulfilled.getSecond().forEach(e -> {
+                    if (!prog.getQuest().category.isSilent)
+                        this.player.sendMessage(new TranslatableComponent("simplequests.task.complete", e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
+                });
             }
             return fulfilled.getFirst();
         });

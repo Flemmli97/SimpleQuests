@@ -38,8 +38,9 @@ public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>
     public boolean progress(ServerPlayer player, QuestProgress prog, Pair<BlockPos, Boolean> with) {
         if (this.questEntry().check(player, with.getFirst(), with.getSecond())) {
             if (!this.allowDupes && this.pos.contains(with.getFirst())) {
-                if (!prog.getQuest().category.isSilent)
-                    player.sendMessage(new TranslatableComponent("simplequests.interaction.block.dupe." + this.questEntry().use()).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                if (!prog.getQuest().category.isSilent) {
+                    player.sendMessage(new TranslatableComponent(BlockInteractTask.ID + ".block.dupe." + this.questEntry().use()).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+                }
                 return false;
             }
             this.pos.add(with.getFirst());
@@ -52,13 +53,8 @@ public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>
     @Override
     public MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress) {
         float perc = this.amount / (float) this.questEntry().amount();
-        ChatFormatting form = ChatFormatting.DARK_GREEN;
-        if (perc <= 0.35) {
-            form = ChatFormatting.DARK_RED;
-        } else if (perc <= 0.7) {
-            form = ChatFormatting.GOLD;
-        }
-        return new TranslatableComponent(BLOCK_INTERACT_PROGRESS, this.amount, this.questEntry().amount()).withStyle(form);
+        return new TranslatableComponent(BLOCK_INTERACT_PROGRESS, this.amount, this.questEntry().amount())
+                .withStyle(ProgressionTrackerBase.of(perc));
     }
 
     @Override

@@ -63,10 +63,10 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
 
     private ItemStack ofCategory(int i, QuestCategory category, ServerPlayer player) {
         ItemStack stack = category.getIcon();
-        stack.setHoverName(category.getName().setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.setHoverName(category.getName().setStyle(QuestGui.NAME_STYLE));
         ListTag lore = new ListTag();
         for (String comp : category.description)
-            lore.add(StringTag.valueOf(comp));
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(new TranslatableComponent(comp).withStyle(QuestGui.DESCRIPTION_STYLE))));
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putString("QuestCategory", category.id.toString());
         return stack;

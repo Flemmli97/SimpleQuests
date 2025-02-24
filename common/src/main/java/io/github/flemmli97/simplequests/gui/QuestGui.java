@@ -40,6 +40,9 @@ import java.util.Map;
 
 public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
 
+    public static final Style NAME_STYLE = Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.GOLD, ChatFormatting.BOLD);
+    public static final Style DESCRIPTION_STYLE = Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GRAY);
+    public static final Style TASK_STYLE = Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW);
     public static int QUEST_PER_PAGE = 12;
 
     private int page, maxPages;
@@ -84,30 +87,40 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         player.openMenu(fac);
     }
 
+    public static List<MutableComponent> questComponents(PlayerData data, QuestBase quest, PlayerData.AcceptType type) {
+        List<MutableComponent> components = new ArrayList<>();
+        quest.getDescription(data.getPlayer()).forEach(c -> components.add(c.setStyle(DESCRIPTION_STYLE)));
+        components.add(new TextComponent(""));
+        if (type == PlayerData.AcceptType.DELAY) {
+            components.add(new TranslatableComponent(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
+        }
+        for (MutableComponent comp : quest.getTasks(data.getPlayer(), TASK_STYLE))
+            components.add(comp.setStyle(DESCRIPTION_STYLE));
+        return components;
+    }
+
     private ItemStack ofQuest(int i, QuestBase quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
-        stack.setHoverName(quest.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
-        ListTag lore = new ListTag();
-        quest.getDescription(player).forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(c.getStyle().withItalic(false))))));
+        stack.setHoverName(quest.getName(player).setStyle(NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(Enchantments.UNBREAKING, 1);
             stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);
         }
         if (type == PlayerData.AcceptType.DELAY) {
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(new TranslatableComponent(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED))));
             this.updateList.put(i, quest);
         }
-        for (MutableComponent comp : quest.getFormattedGuiTasks(player))
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(comp.setStyle(comp.getStyle().withItalic(false)))));
+        ListTag lore = new ListTag();
+        for (MutableComponent comp : questComponents(data, quest, type))
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(comp)));
         MutableComponent requirement = switch (type) {
             case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
-                    new TranslatableComponent(type.langKey()).withStyle(ChatFormatting.DARK_RED);
+                    new TranslatableComponent(type.langKey()).withStyle(Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.DARK_RED));
             default -> null;
         };
         if (requirement != null)
-            lore.add(StringTag.valueOf(Component.Serializer.toJson(requirement.setStyle(requirement.getStyle().withItalic(false)))));
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(requirement)));
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putString("Quest", quest.id.toString());
         return stack;

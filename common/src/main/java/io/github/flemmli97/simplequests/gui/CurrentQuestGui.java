@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.gui;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import net.minecraft.ChatFormatting;
@@ -62,19 +63,23 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
     private ItemStack ofQuest(QuestProgress progress, ServerPlayer player) {
         QuestBase quest = progress.getQuest();
         ItemStack stack = quest.getIcon();
-        stack.setHoverName(progress.getTask(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.setHoverName(progress.getName(player).setStyle(QuestGui.NAME_STYLE));
         ListTag lore = new ListTag();
-        progress.getDescription(player).forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(c.getStyle().withItalic(false))))));
+        progress.getDescription(player).forEach(c -> lore.add(StringTag.valueOf(Component.Serializer.toJson(c.setStyle(QuestGui.DESCRIPTION_STYLE)))));
+        lore.add(StringTag.valueOf(Component.Serializer.toJson(new TextComponent(""))));
         List<String> finished = progress.finishedTasks();
         progress.getQuestEntries().entrySet().stream()
                 .filter(e -> !finished.contains(e.getKey()))
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
-                    MutableComponent translation = new TextComponent("▶ ").append(e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW)));
+                    MutableComponent translation = new TranslatableComponent(SimpleQuestsAPI.MODID + ".task.formatter",
+                            e.getValue().translation(player).withStyle(QuestGui.TASK_STYLE))
+                            .withStyle(QuestGui.DESCRIPTION_STYLE);
                     if (comp == null)
                         lore.add(StringTag.valueOf(Component.Serializer.toJson(translation)));
                     else
-                        lore.add(StringTag.valueOf(Component.Serializer.toJson(new TranslatableComponent("simplequest.quest.progress", translation, comp).setStyle(comp.getStyle().withItalic(false)))));
+                        lore.add(StringTag.valueOf(Component.Serializer.toJson(new TranslatableComponent("simplequest.quest.progress", translation, comp)
+                                .setStyle(QuestGui.DESCRIPTION_STYLE))));
                 });
         stack.getOrCreateTagElement("display").put("Lore", lore);
         stack.getOrCreateTagElement("SimpleQuests").putString("Quest", quest.id.toString());
