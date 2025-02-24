@@ -6,7 +6,9 @@
   "mixins": [
     "BlockPredicateMixin",
     "EntityPredicateMixin",
-    "ItemPredicateAccessor"
+    "FishingRodHookedMixin",
+    "ItemPredicateAccessor",
+    "ItemStackMixin"
   ],
   "server": [
   ],
