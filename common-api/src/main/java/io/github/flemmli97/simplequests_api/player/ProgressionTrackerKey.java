@@ -1,7 +1,8 @@
 package io.github.flemmli97.simplequests_api.player;
 
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -9,13 +10,14 @@ import net.minecraft.resources.ResourceLocation;
  *
  * @param questEntryKey The quest entry type linked to this tracker
  */
-public record ProgressionTrackerKey<T, E extends QuestEntry>(ResourceLocation id, QuestEntryKey<E> questEntryKey) {
+public record ProgressionTrackerKey<V, R extends ResolvedQuestTask>(ResourceLocation id,
+                                                                    QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
 
-    public ProgressionTrackerKey(String id, QuestEntryKey<E> questEntryKey) {
+    public ProgressionTrackerKey(String id, QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
         this(new ResourceLocation(id), questEntryKey);
     }
 
-    public ProgressionTrackerKey(String namespace, String path, QuestEntryKey<E> questEntryKey) {
+    public ProgressionTrackerKey(String namespace, String path, QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
         this(new ResourceLocation(namespace, path), questEntryKey);
     }
 

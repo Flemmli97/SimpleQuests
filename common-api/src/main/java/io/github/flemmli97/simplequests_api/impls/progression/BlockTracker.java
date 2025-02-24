@@ -2,12 +2,13 @@ package io.github.flemmli97.simplequests_api.impls.progression;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.BlockInteractEntry;
+import io.github.flemmli97.simplequests_api.impls.tasks.BlockInteractTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -18,17 +19,17 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>, BlockInteractEntry> {
+public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>, BlockInteractTask.BlockInteractTaskResolved> {
 
-    public static final String BLOCK_INTERACT_PROGRESS = BlockInteractEntry.ID + ".progress";
-    public static final ProgressionTrackerKey<Pair<BlockPos, Boolean>, BlockInteractEntry> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "block_tracker",
-            BlockInteractEntry.ID);
+    public static final String BLOCK_INTERACT_PROGRESS = BlockInteractTask.ID + ".progress";
+    public static final ProgressionTrackerKey<Pair<BlockPos, Boolean>, BlockInteractTask.BlockInteractTaskResolved> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "block_tracker",
+            BlockInteractTask.ID);
 
     private final Set<BlockPos> pos = new HashSet<>();
     private int amount;
     private final boolean allowDupes;
 
-    public BlockTracker(BlockInteractEntry questEntry) {
+    public BlockTracker(BlockInteractTask.BlockInteractTaskResolved questEntry) {
         super(questEntry);
         this.allowDupes = questEntry.allowDupes();
     }
@@ -57,22 +58,27 @@ public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>
         } else if (perc <= 0.7) {
             form = ChatFormatting.GOLD;
         }
-        return new TranslatableComponent(BLOCK_INTERACT_PROGRESS, this.pos.size(), this.questEntry().amount()).withStyle(form);
+        return new TranslatableComponent(BLOCK_INTERACT_PROGRESS, this.amount, this.questEntry().amount()).withStyle(form);
     }
 
     @Override
     public Tag save() {
+        CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
         this.pos.forEach(pos -> list.add(BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
                 .getOrThrow(false, SimpleQuestsAPI.LOGGER::error)));
+        tag.put("interacted", list);
+        tag.putInt("amount", this.amount);
         return list;
     }
 
     @Override
     public void load(Tag tag) {
         try {
-            ListTag list = (ListTag) tag;
+            CompoundTag compound = (CompoundTag) tag;
+            ListTag list = compound.getList("interacted", Tag.TAG_INT_ARRAY);
             list.forEach(t -> this.pos.add(BlockPos.CODEC.parse(NbtOps.INSTANCE, t).getOrThrow(true, SimpleQuestsAPI.LOGGER::error)));
+            this.amount = compound.getInt("amount");
         } catch (ClassCastException ignored) {
         }
     }

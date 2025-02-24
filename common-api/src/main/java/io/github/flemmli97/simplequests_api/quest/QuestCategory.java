@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.util.ParseHelper;
+import io.github.flemmli97.simplequests_api.util.QuestUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -100,7 +100,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         return new QuestCategory(id,
                 GsonHelper.getAsString(obj, "name"),
                 description.build(),
-                ParseHelper.icon(obj, "icon", Items.WRITTEN_BOOK),
+                QuestUtils.icon(obj, "icon", Items.WRITTEN_BOOK),
                 GsonHelper.getAsBoolean(obj, "only_same_category", false),
                 GsonHelper.getAsInt(obj, "max_concurrent_quests", -1),
                 GsonHelper.getAsInt(obj, "sorting_id", 0),
@@ -122,7 +122,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
                 obj.add("description", arr);
             }
         }
-        ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.WRITTEN_BOOK)
+        QuestUtils.writeItemStackToJson(this.icon, full ? null : Items.WRITTEN_BOOK)
                 .ifPresent(icon -> obj.add("icon", icon));
         if (this.sameCategoryOnly || full)
             obj.addProperty("only_same_category", this.sameCategoryOnly);

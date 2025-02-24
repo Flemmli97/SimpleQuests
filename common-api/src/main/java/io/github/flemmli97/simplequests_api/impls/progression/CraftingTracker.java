@@ -2,7 +2,7 @@ package io.github.flemmli97.simplequests_api.impls.progression;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.CraftingEntry;
+import io.github.flemmli97.simplequests_api.impls.tasks.CraftingTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.ChatFormatting;
@@ -14,15 +14,15 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-public class CraftingTracker extends ProgressionTrackerBase<Pair<ItemStack, Integer>, CraftingEntry> {
+public class CraftingTracker extends ProgressionTrackerBase<Pair<ItemStack, Integer>, CraftingTask.CraftingTaskResolved> {
 
-    public static final String CRAFTING_PROGRESS = CraftingEntry.ID + ".progress";
-    public static final ProgressionTrackerKey<Pair<ItemStack, Integer>, CraftingEntry> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "crafting_tracker",
-            CraftingEntry.ID);
+    public static final String CRAFTING_PROGRESS = CraftingTask.ID + ".progress";
+    public static final ProgressionTrackerKey<Pair<ItemStack, Integer>, CraftingTask.CraftingTaskResolved> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "crafting_tracker",
+            CraftingTask.ID);
 
     private int value = 0;
 
-    public CraftingTracker(CraftingEntry questEntry) {
+    public CraftingTracker(CraftingTask.CraftingTaskResolved questEntry) {
         super(questEntry);
     }
 

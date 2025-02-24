@@ -14,8 +14,6 @@ import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -29,10 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,46 +55,6 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
 
     public static QuestsManager instance() {
         return INSTANCE;
-    }
-
-    public static String toSnakeCase(String s) {
-        return s.replaceAll("(.)([A-Z])", "$1_$2")
-                .replaceAll("(.)(\\d+)(.)", "$1_$2_$3")
-                .replaceAll("(.)(\\d+)$", "$1_$2").toLowerCase();
-    }
-
-    public static <T extends JsonElement> T parseLegacy(String type, ResourceLocation id, T element) {
-        if (element.isJsonObject()) {
-            JsonObject obj = element.getAsJsonObject();
-            List<String> legacy = new ArrayList<>();
-            obj.keySet().forEach(key -> {
-                if (!key.toLowerCase(Locale.ROOT).equals(key))
-                    legacy.add(key);
-            });
-            legacy.forEach(key -> {
-                JsonElement e = obj.get(key);
-                obj.remove(key);
-                obj.add(toSnakeCase(key), e);
-            });
-            if (!legacy.isEmpty())
-                SimpleQuestsAPI.LOGGER.warn("Legacy {} {}. Following keys are outdated {}. Please update them! Refer to the documentations", type, id, legacy);
-            return element;
-        }
-        return element;
-    }
-
-    public static CompoundTag parseLegacy(CompoundTag tag) {
-        List<String> legacy = new ArrayList<>();
-        tag.getAllKeys().forEach(key -> {
-            if (!key.toLowerCase(Locale.ROOT).equals(key))
-                legacy.add(key);
-        });
-        legacy.forEach(key -> {
-            Tag t = tag.get(key);
-            tag.remove(key);
-            tag.put(QuestsManager.toSnakeCase(key), t);
-        });
-        return tag;
     }
 
     @Override
@@ -169,7 +125,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                                 .put(res, base);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    SimpleQuestsAPI.LOGGER.error("Unable to load quest {} {}", res, e);
                 }
             }
         });

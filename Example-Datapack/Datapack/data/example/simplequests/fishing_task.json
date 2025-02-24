@@ -1,5 +1,5 @@
 {
-  "task": "Example of use of a fishing task",
+  "name": "Example of use of a fishing task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -21,13 +21,15 @@
   "submission_trigger": "",
   "entries": {
     "cod": {
-      "item": {
-        "items": [
-          "minecraft:cod"
-        ]
-      },
-      "amount": 5,
-      "description": "Fish 5 cods",
+      "item_predicates": [
+        {
+          "items": [
+            "minecraft:cod"
+          ]
+        }
+      ],
+      "amount": 3,
+      "description": "",
       "id": "simplequests_api:fishing"
     }
   },

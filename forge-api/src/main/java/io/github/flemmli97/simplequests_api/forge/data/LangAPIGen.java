@@ -3,16 +3,20 @@ package io.github.flemmli97.simplequests_api.forge.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.AdvancementEntry;
-import io.github.flemmli97.simplequests_api.impls.entries.single.ItemEntry;
-import io.github.flemmli97.simplequests_api.impls.entries.single.KillEntry;
-import io.github.flemmli97.simplequests_api.impls.entries.single.PositionEntry;
-import io.github.flemmli97.simplequests_api.impls.entries.single.XPEntry;
 import io.github.flemmli97.simplequests_api.impls.progression.BlockTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.FishingTracker;
 import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
+import io.github.flemmli97.simplequests_api.impls.tasks.AdvancementTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.BlockInteractTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.CraftingTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.EntityInteractTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.ItemTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.PositionTask;
+import io.github.flemmli97.simplequests_api.impls.tasks.XPTask;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -39,23 +43,34 @@ public class LangAPIGen implements DataProvider {
     }
 
     protected void addTranslations() {
-        this.add(ItemEntry.ID + ".single", "Submit %1$s x%2$s");
-        this.add(ItemEntry.ID + ".single.keep", "Have %1$s x%2$s");
-        this.add(ItemEntry.ID + ".multi", "Submit any of the following x%2$s: %1$s");
-        this.add(ItemEntry.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
-        this.add(ItemEntry.ID + ".empty", "<Empty tag/items>");
-        this.add(KillEntry.ID.toString(), "Kill %s x%2$s");
-        this.add(KillEntry.ID + ".tag", "Kill entities in the tag %s x%2$s");
-        this.add(XPEntry.ID.toString(), "Submit Experience: %s lvl");
-        this.add("simplequests_api.missing.advancement", "Advancement with id %s missing");
-        this.add(AdvancementEntry.ID.toString(), "Obtain the advancement %s");
-        this.add(PositionEntry.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        this.add(AdvancementTask.ID.toString(), "Obtain the advancement %s");
+        this.add(AdvancementTask.MISSING_ADVANCEMENT, "Advancement with id %s missing");
+        this.add(BlockInteractTask.ID.toString(), "Break %1$s x%2$s");
+        this.add(BlockInteractTask.ID + ".use", "Interact with %1$s x%2$s");
+        this.add(BlockInteractTask.ID + ".block_and_item", "Interact with %1$s using %2$s x%3$s");
+        this.add(BlockInteractTask.ID + ".block_and_item.use", "Interact with %1$s using %2$s x%3$s");
+        this.add(BlockInteractTask.ID + ".item", "Break blocks using %1$s x%2$s");
+        this.add(BlockInteractTask.ID + ".item.use", "Use %1$s on blocks x%2$s");
+        this.add(CraftingTask.ID.toString(), "Craft %1$s x%2$s");
+        this.add(EntityInteractTask.ID.toString(), "Interact with %1$s x%2$s");
+        this.add(EntityInteractTask.ID + ".item", "Use %2$s on %1$s x%3$s");
+        this.add(FishingTask.ID.toString(), "Fish %1$s x%2$s");
+        this.add(ItemTask.ID + ".single", "Submit %1$s x%2$s");
+        this.add(ItemTask.ID + ".single.keep", "Have %1$s x%2$s");
+        this.add(ItemTask.ID + ".multi", "Submit any of the following x%2$s: %1$s");
+        this.add(ItemTask.ID + ".multi.keep", "Have any of the following x%2$s: %1$s");
+        this.add(KillTask.ID.toString(), "Kill %s x%2$s");
+        this.add(PositionTask.ID.toString(), "Go to [x:%1$s;y:%2$s;z:%3$s]");
+        this.add(XPTask.ID.toString(), "Submit Experience: %s lvl");
+        this.add(SimpleQuestsAPI.MODID + ".empty_tag", "<Empty tag!>");
 
         this.add(KillTracker.KILL_PROGRESS, "Progress: %1$s/%2$s");
         this.add(CraftingTracker.CRAFTING_PROGRESS, "Progress: %1$s/%2$s");
         this.add(BlockTracker.BLOCK_INTERACT_PROGRESS, "Progress: %1$s/%2$s");
         this.add(EntityTracker.ENTITY_INTERACT_PROGRESS, "Progress: %1$s/%2$s");
         this.add(FishingTracker.FISHING_PROGRESS, "Progress: %1$s/%2$s");
+
+        this.add(SimpleQuestsAPI.MODID + ".task.formatter", " ▶ %s");
     }
 
     @Override

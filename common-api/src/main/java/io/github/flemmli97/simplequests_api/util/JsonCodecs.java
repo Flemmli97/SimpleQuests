@@ -3,9 +3,9 @@ package io.github.flemmli97.simplequests_api.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -29,10 +29,10 @@ public class JsonCodecs {
 
     private static final Gson GSON = Deserializers.createConditionSerializer().create();
 
-    public static Codec<ItemPredicate> ITEM_PREDICATE_CODEC = jsonCodecBuilder(ItemPredicate::serializeToJson, ItemPredicate::fromJson, "ItemPredicate");
-    public static Codec<EntityPredicate> ENTITY_PREDICATE_CODEC = jsonCodecBuilder(EntityPredicate::serializeToJson, EntityPredicate::fromJson, "EntityPredicate");
-    public static Codec<BlockPredicate> BLOCK_PREDICATE_CODEC = jsonCodecBuilder(BlockPredicate::serializeToJson, BlockPredicate::fromJson, "BlockPredicate");
-    public static Codec<LocationPredicate> LOCATION_PREDICATE_CODEC = jsonCodecBuilder(LocationPredicate::serializeToJson, LocationPredicate::fromJson, "LocationPredicate");
+    public static Codec<ItemPredicate> ITEM_PREDICATE_CODEC = jsonCodecBuilder(nullToObj(ItemPredicate::serializeToJson), ItemPredicate::fromJson, "ItemPredicate");
+    public static Codec<EntityPredicate> ENTITY_PREDICATE_CODEC = jsonCodecBuilder(nullToObj(EntityPredicate::serializeToJson), EntityPredicate::fromJson, "EntityPredicate");
+    public static Codec<BlockPredicate> BLOCK_PREDICATE_CODEC = jsonCodecBuilder(nullToObj(BlockPredicate::serializeToJson), BlockPredicate::fromJson, "BlockPredicate");
+    public static Codec<LocationPredicate> LOCATION_PREDICATE_CODEC = jsonCodecBuilder(nullToObj(LocationPredicate::serializeToJson), LocationPredicate::fromJson, "LocationPredicate");
     // The default BlockPos Codec writes to an array, this writes to a map of x, y, z
     public static Codec<BlockPos> BLOCK_POS_CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Codec.INT.fieldOf("x").forGetter(Vec3i::getX),
@@ -42,14 +42,6 @@ public class JsonCodecs {
 
     public static Codec<NumberProvider> NUMBER_PROVIDER_CODEC = JsonCodecs.jsonCodecBuilder(GSON::toJsonTree, e -> GSON.fromJson(e, NumberProvider.class), "NumberProvider");
 
-    public static <E> Codec<List<Either<E, Pair<E, String>>>> optionalDescriptiveList(Codec<E> codec, String error) {
-        return nonEmptyList(Codec.either(codec, Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e)))), error);
-    }
-
-    public static <E> Codec<List<Pair<E, String>>> descriptiveList(Codec<E> codec, String error) {
-        return nonEmptyList(Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e))), error);
-    }
-
     public static <E> Codec<List<E>> nonEmptyList(Codec<E> codec, String error) {
         Function<List<E>, DataResult<List<E>>> function = list -> {
             if (list.isEmpty())
@@ -57,6 +49,15 @@ public class JsonCodecs {
             return DataResult.success(list);
         };
         return codec.listOf().flatXmap(function, function);
+    }
+
+    private static <E> Function<E, JsonElement> nullToObj(Function<E, JsonElement> encode) {
+        return v -> {
+            JsonElement e = encode.apply(v);
+            if (e.isJsonNull())
+                return new JsonObject();
+            return e;
+        };
     }
 
     public static <E> Codec<E> jsonCodecBuilder(Function<E, JsonElement> encode, Function<JsonElement, E> decode, String name) {
@@ -73,7 +74,7 @@ public class JsonCodecs {
 
             @Override
             public <T> DataResult<Pair<E, T>> decode(DynamicOps<T> ops, T input) {
-                JsonElement element = ops.convertTo(JsonOps.INSTANCE, input);
+                JsonElement element = input == null ? JsonNull.INSTANCE : ops.convertTo(JsonOps.INSTANCE, input);
                 try {
                     E result = decode.apply(element);
                     return DataResult.success(Pair.of(result, input));
@@ -100,7 +101,7 @@ public class JsonCodecs {
         @Override
         public <U> U convertMap(final DynamicOps<U> ops, JsonElement e) {
             DataResult<Stream<Pair<JsonPrimitive, JsonElement>>> mapLike = DataResult.success(e.getAsJsonObject().entrySet().stream()
-                    .filter(entry -> !(entry.getValue() instanceof JsonNull))
+                    .filter(entry -> !entry.getValue().isJsonNull())
                     .map(entry -> Pair.of(new JsonPrimitive(entry.getKey()), entry.getValue())));
             return ops.createMap(mapLike.result().orElse(Stream.empty()).map(entry ->
                     Pair.of(this.convertTo(ops, entry.getFirst()),

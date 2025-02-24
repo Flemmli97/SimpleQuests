@@ -1,6 +1,6 @@
 {
   "category": "example:category_1",
-  "task": "Example for an item quest with category 1",
+  "name": "Example for an item quest with category 1",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -16,13 +16,15 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:stone"
+          ]
+        }
+      ],
       "amount": 15,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:stone"
-        ]
-      },
       "description": "Give 15 stone",
       "id": "simplequests_api:item"
     }

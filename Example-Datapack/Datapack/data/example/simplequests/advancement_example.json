@@ -1,5 +1,5 @@
 {
-  "task": "Example for an advancement quest",
+  "name": "Example for an advancement quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -18,7 +18,9 @@
   "submission_trigger": "",
   "entries": {
     "trade": {
-      "advancement": "minecraft:adventure/trade",
+      "advancements": [
+        "minecraft:adventure/trade"
+      ],
       "reset": true,
       "id": "simplequests_api:advancement"
     }

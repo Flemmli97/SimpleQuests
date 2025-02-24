@@ -1,5 +1,5 @@
 {
-  "task": "Example for a kill quest",
+  "name": "Example for a kill quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,9 +15,11 @@
   "submission_trigger": "",
   "entries": {
     "cows": {
-      "predicate": {
-        "type": "minecraft:cow"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:cow"
+        }
+      ],
       "amount": 15,
       "id": "simplequests_api:entity"
     }

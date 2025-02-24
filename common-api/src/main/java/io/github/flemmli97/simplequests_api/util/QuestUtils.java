@@ -8,17 +8,30 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ParseHelper {
+public class QuestUtils {
 
     private static final Codec<ItemStack> STACK_CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(Registry.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
@@ -91,5 +104,40 @@ public class ParseHelper {
         if (stack.getCount() == 1 && !stack.hasTag())
             return defaultValue != null && stack.getItem() == defaultValue ? Optional.empty() : Optional.of(new JsonPrimitive(Registry.ITEM.getKey(stack.getItem()).toString()));
         return STACK_CODEC.encodeStart(JsonOps.INSTANCE, stack).resultOrPartial(SimpleQuestsAPI.LOGGER::error);
+    }
+
+    public static int getAmount(NumberProvider provider, LootContext ctx, PlayerQuestData data, ResourceLocation quest) {
+        if (!(provider instanceof QuestNumberProvider.ContextMultiplierNumberProvider mult))
+            return provider.getInt(ctx);
+        return Math.round(mult.getFloatWith(ctx, () -> (float) data.getTimesCompleted(quest)));
+    }
+
+    public static Optional<String> optStr(String s) {
+        return s == null || s.isEmpty() ? Optional.empty() : Optional.of(s);
+    }
+
+    public static <T> MutableComponent tagsComponent(TagKey<T> tagKey, Registry<T> registry, Function<T, MutableComponent> translation) {
+        List<MutableComponent> tagEntries = new ArrayList<>();
+        registry.getTag(tagKey).ifPresent(n -> n.forEach(h -> tagEntries.add(translation.apply(h.value()))));
+        if (tagEntries.isEmpty()) {
+            return new TranslatableComponent("simplequest_api.empty_tag");
+        }
+        TextComponent comp = new TextComponent("[#" + tagKey.location() + "]");
+        if (tagEntries.size() == 1) {
+            comp.setStyle(Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tagEntries.get(0).withStyle(ChatFormatting.AQUA))));
+        } else {
+            MutableComponent items = null;
+            for (MutableComponent c : tagEntries) {
+                if (items == null)
+                    items = new TextComponent("[").append(c);
+                else
+                    items.append(new TextComponent(", ")).append(c);
+            }
+            items.append("]");
+            comp.setStyle(Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, items.withStyle(ChatFormatting.AQUA))));
+        }
+        return comp;
     }
 }

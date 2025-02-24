@@ -1,5 +1,5 @@
 {
-  "task": "Example for an item quest completable only once per day",
+  "name": "Example for an item quest completable only once per day",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,13 +15,15 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:cod"
+          ]
+        }
+      ],
       "amount": 15,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:cod"
-        ]
-      },
       "description": "Give 15 cods",
       "id": "simplequests_api:item"
     }

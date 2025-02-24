@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi item quest",
+  "name": "Example for a multi item quest",
   "description": [
     "This is an example description",
     "This is another example description"
@@ -18,8 +18,6 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
-      "consume_items": true,
-      "description": "Give 10-15 cods or salmon",
       "predicates": [
         {
           "items": [
@@ -40,7 +38,9 @@
         "min": 10,
         "max": 15
       },
-      "id": "simplequests_api:multi_item"
+      "consume_items": true,
+      "description": "Give 10-15 cods or salmon",
+      "id": "simplequests_api:item"
     }
   },
   "type": "simplequests_api:quest"

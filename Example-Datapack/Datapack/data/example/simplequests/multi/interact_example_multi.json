@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi entity interaction quest",
+  "name": "Example for a multi entity interaction quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,28 +15,19 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
-      "item_predicates": [
-        {
-          "description": "nametag",
-          "value": {
-            "items": [
-              "minecraft:name_tag"
-            ]
-          }
-        }
-      ],
       "entity_predicates": [
         {
-          "description": "chicken",
-          "value": {
-            "type": "minecraft:chicken"
-          }
+          "type": "minecraft:chicken"
         },
         {
-          "description": "cow",
-          "value": {
-            "type": "minecraft:cow"
-          }
+          "type": "minecraft:cow"
+        }
+      ],
+      "item_predicates": [
+        {
+          "items": [
+            "minecraft:name_tag"
+          ]
         }
       ],
       "amount": {
@@ -46,8 +37,7 @@
       },
       "consume": true,
       "description": "Use a nametag on either a cow/chicken 3-6 times",
-      "task_description": "Use %1$s on %2$s %3$sx",
-      "id": "simplequests_api:multi_entity_interaction"
+      "id": "simplequests_api:entity_interact"
     }
   },
   "type": "simplequests_api:quest"

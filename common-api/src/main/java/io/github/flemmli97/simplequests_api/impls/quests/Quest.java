@@ -5,15 +5,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.ItemEntry;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -28,7 +28,7 @@ public class Quest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "quest");
 
-    private final Map<String, QuestEntry> entries;
+    private final Map<String, QuestTask<?>> entries;
 
     private final ResourceLocation loot;
     private final String command;
@@ -36,7 +36,7 @@ public class Quest extends QuestBase {
     public final String questSubmissionTrigger;
 
     protected Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestEntry> entries,
+                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestTask<?>> entries,
                     boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command, Visibility visibility) {
         super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock,
                 icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
@@ -72,7 +72,7 @@ public class Quest extends QuestBase {
         if (!this.questSubmissionTrigger.isEmpty() || full)
             obj.addProperty("submission_trigger", this.questSubmissionTrigger);
         JsonObject entries = new JsonObject();
-        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry" + e))));
+        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.ENTRY_CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry {}", e))));
         obj.add("entries", entries);
         obj.addProperty(QuestBase.TYPE_ID, ID.toString());
         return obj;
@@ -81,20 +81,8 @@ public class Quest extends QuestBase {
     @Override
     public List<MutableComponent> getFormattedGuiTasks(ServerPlayer player) {
         List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, QuestEntry> e : this.entries.entrySet()) {
-            if (!(e.getValue() instanceof ItemEntry ing))
-                list.add(new TextComponent(" - ").append(e.getValue().translation(player)));
-            else {
-                List<MutableComponent> wrapped = SimpleQuestsAPI.wrapForGui(player, ing);
-                boolean start = true;
-                for (MutableComponent comp : wrapped) {
-                    if (start) {
-                        list.add(new TextComponent(" - ").append(comp));
-                        start = false;
-                    } else
-                        list.add(new TextComponent("   ").append(comp));
-                }
-            }
+        for (Map.Entry<String, QuestTask<?>> e : this.entries.entrySet()) {
+            list.add(new TranslatableComponent(SimpleQuestsAPI.MODID + ".task.formatter", e.getValue().translation(player)));
         }
         return list;
     }
@@ -123,9 +111,9 @@ public class Quest extends QuestBase {
     }
 
     @Override
-    public Map<String, QuestEntry> resolveTasks(PlayerQuestData data, int questIndex) {
-        ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
-        for (Map.Entry<String, QuestEntry> i : this.entries.entrySet()) {
+    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int questIndex) {
+        ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
+        for (Map.Entry<String, QuestTask<?>> i : this.entries.entrySet()) {
             builder.put(i.getKey(), i.getValue().resolve(data, this));
         }
         return builder.build();
@@ -133,7 +121,7 @@ public class Quest extends QuestBase {
 
     public static class Builder extends BuilderBase<Builder> {
 
-        protected final Map<String, QuestEntry> entries = new LinkedHashMap<>();
+        protected final Map<String, QuestTask<?>> entries = new LinkedHashMap<>();
 
         protected final ResourceLocation loot;
 
@@ -146,7 +134,7 @@ public class Quest extends QuestBase {
             this.loot = loot;
         }
 
-        public Builder addTaskEntry(String name, QuestEntry entry) {
+        public Builder addTaskEntry(String name, QuestTask<?> entry) {
             this.entries.put(name, entry);
             return this;
         }
@@ -168,7 +156,7 @@ public class Quest extends QuestBase {
 
         @Override
         public Quest build() {
-            Quest quest = new Quest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
+            Quest quest = new Quest(this.id, this.category, this.name, this.description, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest,
                     this.submissionTrigger, this.unlockCondition, this.command, this.visibility);
             quest.setDelayString(this.repeatDelayString);

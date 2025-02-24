@@ -35,6 +35,12 @@ loom {
             }
         }
     }
+    mods {
+        main { // to match the default mod generated for Forge
+            sourceSet project.sourceSets.main
+            sourceSet project(':common-api').sourceSets.main
+        }
+    }
 }
 
 ext {
@@ -42,15 +48,17 @@ ext {
 }
 
 configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    common {
+        canBeResolved = true
+        canBeConsumed = false
+    }
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
     developmentForge.extendsFrom api
     shadowArtifact {
         canBeConsumed = true
-        canBeResolved = false
+        canBeResolved = true
     }
 }
 
@@ -65,7 +73,7 @@ dependencies {
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common-api", configuration: "transformProductionForge")) { transitive = false }
+    shadowArtifact(project(path: ":common-api", configuration: "transformProductionForge"))
 
     modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-forge")
 }
@@ -82,7 +90,7 @@ processResources {
 shadowJar {
     exclude "fabric.mod.json"
 
-    configurations = [project.configurations.shadowCommon]
+    configurations = [project.configurations.shadowArtifact]
     archiveClassifier.set("dev-shadow")
 }
 

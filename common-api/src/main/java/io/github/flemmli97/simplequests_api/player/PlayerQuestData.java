@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.player;
 
 import io.github.flemmli97.simplequests_api.quest.QuestState;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.PlayerQuestDataRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,5 +30,5 @@ public interface PlayerQuestData {
 
     int getTimesCompleted(ResourceLocation quest);
 
-    <V, T extends QuestEntry> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, T> key, V with, @NotNull String trigger);
+    <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger);
 }

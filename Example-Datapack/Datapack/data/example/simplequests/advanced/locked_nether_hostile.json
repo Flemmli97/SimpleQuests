@@ -1,5 +1,5 @@
 {
-  "task": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
+  "name": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,28 +15,36 @@
   "submission_trigger": "",
   "entries": {
     "piglin": {
-      "predicate": {
-        "type": "minecraft:zombified_piglin"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:zombified_piglin"
+        }
+      ],
       "amount": 15,
       "id": "simplequests_api:entity"
     },
     "blaze": {
-      "predicate": {
-        "type": "minecraft:blaze"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:blaze"
+        }
+      ],
       "amount": 5,
       "id": "simplequests_api:entity"
     },
     "wither_skeleton": {
-      "predicate": {
-        "type": "minecraft:wither_skeleton"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:wither_skeleton"
+        }
+      ],
       "amount": 5,
       "id": "simplequests_api:entity"
     },
     "fortress": {
-      "advancement": "minecraft:nether/find_fortress",
+      "advancements": [
+        "minecraft:nether/find_fortress"
+      ],
       "reset": false,
       "id": "simplequests_api:advancement"
     }

@@ -8,7 +8,7 @@ import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
 import io.github.flemmli97.simplequests_api.player.ProgressionTracker;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
@@ -34,7 +34,7 @@ public class ProgressionTrackerRegistry {
     /**
      * Register a deserializer for a {@link QuestBase}
      */
-    public static synchronized <T, E extends QuestEntry> void registerSerializer(ProgressionTrackerKey<T, E> id, TrackerFactory<T, E> create) {
+    public static synchronized <T, E extends ResolvedQuestTask> void registerSerializer(ProgressionTrackerKey<T, E> id, TrackerFactory<T, E> create) {
         if (MAP.containsKey(id))
             throw new IllegalStateException("Tracker for " + id + " already registered");
         MAP.put(id, create);
@@ -42,7 +42,7 @@ public class ProgressionTrackerRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends QuestEntry> ProgressionTracker<T, E> deserialize(ProgressionTrackerKey<T, E> key, E entry, Tag tag) {
+    public static <T, E extends ResolvedQuestTask> ProgressionTracker<T, E> deserialize(ProgressionTrackerKey<T, E> key, E entry, Tag tag) {
         TrackerFactory<?, ?> d = MAP.get(key);
         if (d != null) {
             TrackerFactory<T, E> factory = (TrackerFactory<T, E>) d;
@@ -54,7 +54,7 @@ public class ProgressionTrackerRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends QuestEntry> ProgressionTracker<T, E> create(ProgressionTrackerKey<T, E> key, E entry) {
+    public static <T, E extends ResolvedQuestTask> ProgressionTracker<T, E> create(ProgressionTrackerKey<T, E> key, E entry) {
         TrackerFactory<?, ?> d = MAP.get(key);
         if (d != null) {
             TrackerFactory<T, E> tracker = (TrackerFactory<T, E>) d;
@@ -64,11 +64,11 @@ public class ProgressionTrackerRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, E extends QuestEntry> ProgressionTrackerKey<T, E> getKey(ResourceLocation id) {
+    public static <T, E extends ResolvedQuestTask> ProgressionTrackerKey<T, E> getKey(ResourceLocation id) {
         return (ProgressionTrackerKey<T, E>) KEYS.get(id);
     }
 
-    public interface TrackerFactory<T, E extends QuestEntry> {
+    public interface TrackerFactory<T, E extends ResolvedQuestTask> {
         ProgressionTracker<T, E> create(E entry);
 
     }

@@ -1,5 +1,5 @@
 {
-  "task": "Slay mobs",
+  "name": "Slay mobs",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -21,33 +21,44 @@
   "submission_trigger": "",
   "entries": {
     "zombies": {
-      "predicate": {
-        "type": "minecraft:zombie"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:zombie"
+        }
+      ],
       "amount": 10,
       "id": "simplequests_api:entity"
     },
     "zombies_baby": {
-      "predicate": {
-        "type": "minecraft:zombie",
-        "flags": {
-          "is_baby": true
+      "predicates": [
+        {
+          "description": "Baby Zombie",
+          "value": {
+            "type": "minecraft:zombie",
+            "flags": {
+              "is_baby": true
+            }
+          }
         }
-      },
+      ],
       "amount": 3,
       "id": "simplequests_api:entity"
     },
     "skeleton": {
-      "predicate": {
-        "type": "minecraft:skeleton"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:skeleton"
+        }
+      ],
       "amount": 10,
       "id": "simplequests_api:entity"
     },
     "spiders": {
-      "predicate": {
-        "type": "minecraft:spider"
-      },
+      "predicates": [
+        {
+          "type": "minecraft:spider"
+        }
+      ],
       "amount": 5,
       "id": "simplequests_api:entity"
     },

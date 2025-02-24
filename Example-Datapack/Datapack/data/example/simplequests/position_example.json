@@ -1,5 +1,5 @@
 {
-  "task": "Example for a simple position quest",
+  "name": "Example for a simple position quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,11 +15,13 @@
   "submission_trigger": "",
   "entries": {
     "place": {
-      "pos": {
-        "x": 0,
-        "y": 50,
-        "z": 0
-      },
+      "positions": [
+        {
+          "x": 0,
+          "y": 50,
+          "z": 0
+        }
+      ],
       "min_dist": 15,
       "id": "simplequests_api:position"
     }

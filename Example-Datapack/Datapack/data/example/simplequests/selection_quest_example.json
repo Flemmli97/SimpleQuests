@@ -1,5 +1,6 @@
 {
-  "task": "Example for a selection quest",
+  "category": "example:category_1",
+  "name": "Example for a selection quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,

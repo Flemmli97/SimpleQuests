@@ -9,7 +9,7 @@ import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
@@ -42,7 +42,7 @@ public class QuestProgress {
     private QuestBase base;
     private int questIndex;
     private QuestBase quest;
-    private Map<String, QuestEntry> questEntries;
+    private Map<String, ResolvedQuestTask> questEntries;
 
     public QuestProgress(QuestBase quest, PlayerQuestData data, int subQuestIndex) {
         this.base = quest;
@@ -94,14 +94,14 @@ public class QuestProgress {
         return Set.of(this.base.id);
     }
 
-    public Map<String, QuestEntry> getQuestEntries() {
+    public Map<String, ResolvedQuestTask> getQuestEntries() {
         return this.questEntries;
     }
 
     public SubmitType submit(PlayerQuestData data, String trigger) {
         boolean any = false;
         ServerPlayer player = data.getPlayer();
-        for (Map.Entry<String, QuestEntry> entry : this.questEntries.entrySet()) {
+        for (Map.Entry<String, ResolvedQuestTask> entry : this.questEntries.entrySet()) {
             if (this.entries.contains(entry.getKey()) && !this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
@@ -117,14 +117,14 @@ public class QuestProgress {
     }
 
     @SuppressWarnings("unchecked")
-    public <V, T extends QuestEntry> Set<Pair<String, T>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, T> key, V with) {
-        Set<Pair<String, T>> fullfilled = new HashSet<>();
-        for (Map.Entry<String, QuestEntry> e : this.questEntries.entrySet()) {
+    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
+        Set<Pair<String, R>> fullfilled = new HashSet<>();
+        for (Map.Entry<String, ResolvedQuestTask> e : this.questEntries.entrySet()) {
             if (this.entries.contains(e.getKey()))
                 continue;
             if (e.getValue().getId().equals(key.questEntryKey())) {
-                T entry = (T) e.getValue();
-                ProgressionTracker<V, T> tracker = this.getOrCreateTracker(key, entry, e.getKey());
+                R entry = (R) e.getValue();
+                ProgressionTracker<V, R> tracker = this.getOrCreateTracker(key, entry, e.getKey());
                 if (tracker.progress(player, this, with)) {
                     fullfilled.add(Pair.of(e.getKey(), entry));
                     this.entries.add(e.getKey());
@@ -166,21 +166,21 @@ public class QuestProgress {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, E extends QuestEntry> ProgressionTracker<T, E> getTracker(ProgressionTrackerKey<T, E> key, String entryName) {
+    public <V, R extends ResolvedQuestTask> ProgressionTracker<V, R> getTracker(ProgressionTrackerKey<V, R> key, String entryName) {
         Map<String, ProgressionTracker<?, ?>> tracks = this.progressionTrackers.get(key);
         if (tracks == null)
             return null;
-        return (ProgressionTracker<T, E>) tracks.get(entryName);
+        return (ProgressionTracker<V, R>) tracks.get(entryName);
     }
 
     @SuppressWarnings("unchecked")
-    public <T, E extends QuestEntry> ProgressionTracker<T, E> getOrCreateTracker(ProgressionTrackerKey<T, E> key, E entry, String entryName) {
+    public <T, R extends ResolvedQuestTask> ProgressionTracker<T, R> getOrCreateTracker(ProgressionTrackerKey<T, R> key, R entry, String entryName) {
         Map<String, ProgressionTracker<?, ?>> tracks = this.progressionTrackers.computeIfAbsent(key, k -> new HashMap<>());
-        return (ProgressionTracker<T, E>) tracks.computeIfAbsent(entryName, (res) -> ProgressionTrackerRegistry.create(key, entry));
+        return (ProgressionTracker<T, R>) tracks.computeIfAbsent(entryName, (res) -> ProgressionTrackerRegistry.create(key, entry));
     }
 
-    public Pair<Boolean, Set<QuestEntry>> tickProgress(PlayerQuestData data) {
-        Set<QuestEntry> fullfilled = new HashSet<>();
+    public Pair<Boolean, Set<ResolvedQuestTask>> tickProgress(PlayerQuestData data) {
+        Set<ResolvedQuestTask> fullfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
             if (e.getValue().test(data)) {
                 fullfilled.add(this.questEntries.get(e.getKey()));
@@ -208,7 +208,7 @@ public class QuestProgress {
         }
         tag.putInt("QuestIndex", this.questIndex);
         CompoundTag entries = new CompoundTag();
-        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry {}", e))));
+        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry {}", e))));
         tag.put("QuestEntries", entries);
 
         ListTag list = new ListTag();
@@ -244,10 +244,14 @@ public class QuestProgress {
         this.questIndex = tag.getInt("QuestIndex");
         this.quest = this.base.resolveToQuest(data.getPlayer(), this.questIndex);
         if (tag.contains("QuestEntries")) {
-            ImmutableMap.Builder<String, QuestEntry> builder = new ImmutableMap.Builder<>();
+            ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
-            entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.CODEC.parse(NbtOps.INSTANCE, QuestsManager.parseLegacy(entries.getCompound(key)))
-                    .getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't read quest entry{}", e))));
+            entries.getAllKeys().forEach(key -> QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.parse(NbtOps.INSTANCE, entries.getCompound(key)).get()
+                    .ifLeft(v -> builder.put(key, v))
+                    .ifRight(s -> {
+                        SimpleQuestsAPI.LOGGER.error("Couldn't read quest entry {}", s);
+                        throw new IllegalStateException();
+                    }));
             this.questEntries = builder.build();
         } else {
             this.questEntries = this.quest.resolveTasks(data, this.questIndex);
@@ -258,19 +262,19 @@ public class QuestProgress {
         CompoundTag progressionTrackers = tag.getCompound("ProgressionTrackers");
         progressionTrackers.getAllKeys().forEach(key -> {
             CompoundTag trackers = progressionTrackers.getCompound(key);
-            ProgressionTrackerKey<?, QuestEntry> id = ProgressionTrackerRegistry.getKey(new ResourceLocation(key));
+            ProgressionTrackerKey<?, ResolvedQuestTask> id = ProgressionTrackerRegistry.getKey(new ResourceLocation(key));
             Map<String, ProgressionTracker<?, ?>> t = this.progressionTrackers.computeIfAbsent(id, k -> new HashMap<>());
             trackers.getAllKeys().forEach(entry -> this.loadTracker(id, t, entry, trackers));
         });
     }
 
-    private void loadTracker(ProgressionTrackerKey<?, QuestEntry> key, Map<String, ProgressionTracker<?, ?>> map, String name, CompoundTag tag) {
+    private void loadTracker(ProgressionTrackerKey<?, ResolvedQuestTask> key, Map<String, ProgressionTracker<?, ?>> map, String name, CompoundTag tag) {
         if (this.quest == null) {
             SimpleQuestsAPI.LOGGER.error("Quest not set. This shouldn't be!");
             throw new IllegalStateException();
         }
         try {
-            ProgressionTracker<?, QuestEntry> entry = ProgressionTrackerRegistry.deserialize(key, this.questEntries.get(name), tag.get(name));
+            ProgressionTracker<?, ResolvedQuestTask> entry = ProgressionTrackerRegistry.deserialize(key, this.questEntries.get(name), tag.get(name));
             map.putIfAbsent(name, entry);
         } catch (ClassCastException e) {
             SimpleQuestsAPI.LOGGER.error("Couldn't find quest entry for tracker {}", name);

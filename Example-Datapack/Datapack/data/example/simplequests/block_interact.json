@@ -1,5 +1,5 @@
 {
-  "task": "Example for block interaction task",
+  "name": "Example for block interaction task",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,15 +15,17 @@
   "submission_trigger": "",
   "entries": {
     "task": {
+      "block_predicates": [
+        {
+          "blocks": [
+            "minecraft:chest"
+          ]
+        }
+      ],
       "amount": 3,
+      "consume": false,
       "use": true,
-      "block": {
-        "blocks": [
-          "minecraft:chest"
-        ]
-      },
-      "consume_item": false,
-      "description": "Interact with chest x3",
+      "description": "",
       "id": "simplequests_api:block_interact"
     }
   },

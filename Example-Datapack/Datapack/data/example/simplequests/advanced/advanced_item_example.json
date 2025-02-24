@@ -1,5 +1,5 @@
 {
-  "task": "Example for an item quest",
+  "name": "Example for an item quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,22 +15,27 @@
   "submission_trigger": "",
   "entries": {
     "sword": {
+      "predicates": [
+        {
+          "description": "Diamond Sword (Sharpness 2-3)",
+          "value": {
+            "items": [
+              "minecraft:diamond_sword"
+            ],
+            "enchantments": [
+              {
+                "enchantment": "minecraft:sharpness",
+                "levels": {
+                  "min": 2,
+                  "max": 3
+                }
+              }
+            ]
+          }
+        }
+      ],
       "amount": 1,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:diamond_sword"
-        ],
-        "enchantments": [
-          {
-            "enchantment": "minecraft:sharpness",
-            "levels": {
-              "min": 2,
-              "max": 3
-            }
-          }
-        ]
-      },
       "description": "Give 1 diamond sword with sharp 2 or 3",
       "id": "simplequests_api:item"
     }

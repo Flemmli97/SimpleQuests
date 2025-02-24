@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi location quest using a location predicate",
+  "name": "Example for a multi location quest using a location predicate",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -30,7 +30,7 @@
         }
       ],
       "description": "Find a warm or cold ocean ruin",
-      "id": "simplequests_api:multi_location"
+      "id": "simplequests_api:location"
     }
   },
   "type": "simplequests_api:quest"

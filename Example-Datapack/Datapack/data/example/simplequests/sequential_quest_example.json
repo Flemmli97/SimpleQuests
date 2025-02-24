@@ -1,5 +1,6 @@
 {
-  "task": "Example for a sequential quest",
+  "category": "example:category_1",
+  "name": "Example for a sequential quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,

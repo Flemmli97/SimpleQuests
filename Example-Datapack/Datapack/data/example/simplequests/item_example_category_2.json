@@ -1,6 +1,5 @@
 {
-  "category": "example:category_2",
-  "task": "Example for an item quest with category 2",
+  "name": "Example for an item quest with category 2",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -16,13 +15,15 @@
   "submission_trigger": "",
   "entries": {
     "andesite": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:andesite"
+          ]
+        }
+      ],
       "amount": 15,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:andesite"
-        ]
-      },
       "description": "Give 15 andesite",
       "id": "simplequests_api:item"
     }

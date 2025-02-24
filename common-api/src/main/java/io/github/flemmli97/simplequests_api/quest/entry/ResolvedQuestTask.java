@@ -2,7 +2,6 @@ package io.github.flemmli97.simplequests_api.quest.entry;
 
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,7 +13,7 @@ import java.util.function.Predicate;
  * A task instance for a quest. E.g. what the player should do
  * Register under {@link QuestEntryRegistry#registerSerializer}
  */
-public interface QuestEntry {
+public interface ResolvedQuestTask {
 
     /**
      * Called when player uses the submit command
@@ -44,16 +43,5 @@ public interface QuestEntry {
      */
     default Predicate<PlayerQuestData> tickable() {
         return null;
-    }
-
-    /**
-     * Get the actual QuestEntry for the given player when the player accepts a quest with this entry
-     * In most cases return self
-     *
-     * @param data PlayerQuestData instance of the player that accepted the quest
-     * @param base The quest containing this entry
-     */
-    default QuestEntry resolve(PlayerQuestData data, QuestBase base) {
-        return this;
     }
 }

@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.impls.progression;
 
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.FishingEntry;
+import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.ChatFormatting;
@@ -15,15 +15,15 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
 
-public class FishingTracker extends ProgressionTrackerBase<Collection<ItemStack>, FishingEntry> {
+public class FishingTracker extends ProgressionTrackerBase<Collection<ItemStack>, FishingTask.FishingTaskResolved> {
 
-    public static final String FISHING_PROGRESS = FishingEntry.ID + ".progress";
-    public static final ProgressionTrackerKey<Collection<ItemStack>, FishingEntry> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "fishing_tracker",
-            FishingEntry.ID);
+    public static final String FISHING_PROGRESS = FishingTask.ID + ".progress";
+    public static final ProgressionTrackerKey<Collection<ItemStack>, FishingTask.FishingTaskResolved> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "fishing_tracker",
+            FishingTask.ID);
 
     private int value = 0;
 
-    public FishingTracker(FishingEntry questEntry) {
+    public FishingTracker(FishingTask.FishingTaskResolved questEntry) {
         super(questEntry);
     }
 

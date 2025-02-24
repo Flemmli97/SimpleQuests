@@ -70,7 +70,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 .filter(e -> !finished.contains(e.getKey()))
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
-                    MutableComponent translation = e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW));
+                    MutableComponent translation = new TextComponent("▶ ").append(e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW)));
                     if (comp == null)
                         lore.add(StringTag.valueOf(Component.Serializer.toJson(translation)));
                     else

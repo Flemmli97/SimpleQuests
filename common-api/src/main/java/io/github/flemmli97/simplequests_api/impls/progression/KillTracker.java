@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.impls.progression;
 
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.KillEntry;
+import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.ChatFormatting;
@@ -13,15 +13,15 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
-public class KillTracker extends ProgressionTrackerBase<LivingEntity, KillEntry> {
+public class KillTracker extends ProgressionTrackerBase<LivingEntity, KillTask.KillTaskResolved> {
 
-    public static final String KILL_PROGRESS = KillEntry.ID + ".progress";
-    public static final ProgressionTrackerKey<LivingEntity, KillEntry> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "kill_tracker",
-            KillEntry.ID);
+    public static final String KILL_PROGRESS = KillTask.ID + ".progress";
+    public static final ProgressionTrackerKey<LivingEntity, KillTask.KillTaskResolved> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "kill_tracker",
+            KillTask.ID);
 
     private int value = 0;
 
-    public KillTracker(KillEntry questEntry) {
+    public KillTracker(KillTask.KillTaskResolved questEntry) {
         super(questEntry);
     }
 

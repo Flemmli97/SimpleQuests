@@ -12,7 +12,7 @@ import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -124,7 +124,7 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, T> key, V with, BiConsumer<QuestProgress, Pair<String, T>> onFullfill, String trigger) {
+    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, BiConsumer<QuestProgress, Pair<String, R>> onFullfill, String trigger) {
         if (key.equals(EntityTracker.KEY)) {
             if (this.interactionCooldown > 0)
                 return Map.of();
@@ -133,7 +133,7 @@ public class PlayerData implements PlayerQuestData {
         List<QuestProgress> completed = new ArrayList<>();
         Map<ResourceLocation, QuestState> completion = new HashMap<>();
         this.currentQuests.forEach(prog -> {
-            Set<Pair<String, T>> fulfilled = prog.tryFullFill(this.player, key, with);
+            Set<Pair<String, R>> fulfilled = prog.tryFullFill(this.player, key, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.forEach(p -> onFullfill.accept(prog, p));
@@ -152,7 +152,7 @@ public class PlayerData implements PlayerQuestData {
     }
 
     @Override
-    public <V, T extends QuestEntry> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, T> key, V with, @NotNull String trigger) {
+    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger) {
         return this.trigger(key, with, (prog, p) -> {
             if (!prog.getQuest().category.isSilent)
                 this.player.sendMessage(new TranslatableComponent("simplequests.task", p.getSecond().translation(this.player)).withStyle(ChatFormatting.DARK_GREEN), Util.NIL_UUID);
@@ -287,7 +287,7 @@ public class PlayerData implements PlayerQuestData {
     public void tickTickableQuests(String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
         this.tickables.removeIf(prog -> {
-            Pair<Boolean, Set<QuestEntry>> fulfilled = prog.tickProgress(this);
+            Pair<Boolean, Set<ResolvedQuestTask>> fulfilled = prog.tickProgress(this);
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 fulfilled.getSecond().forEach(e -> {

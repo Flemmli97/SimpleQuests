@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * A custom Resourcelocation class to ensure generics
  */
-public record QuestEntryKey<E extends QuestEntry>(ResourceLocation id) {
+public record QuestEntryKey<E extends QuestTask<? extends ResolvedQuestTask>>(ResourceLocation id) {
 
     public QuestEntryKey(String id) {
         this(new ResourceLocation(id));

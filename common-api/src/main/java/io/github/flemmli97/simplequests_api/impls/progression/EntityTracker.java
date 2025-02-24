@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests_api.impls.progression;
 
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.entries.single.EntityInteractEntry;
+import io.github.flemmli97.simplequests_api.impls.tasks.EntityInteractTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import net.minecraft.ChatFormatting;
@@ -18,15 +18,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteractEntry> {
+public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteractTask.EntityInteractTaskResolved> {
 
-    public static final String ENTITY_INTERACT_PROGRESS = EntityInteractEntry.ID + ".progress";
-    public static final ProgressionTrackerKey<Entity, EntityInteractEntry> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "entity_tracker",
-            EntityInteractEntry.ID);
+    public static final String ENTITY_INTERACT_PROGRESS = EntityInteractTask.ID + ".progress";
+    public static final ProgressionTrackerKey<Entity, EntityInteractTask.EntityInteractTaskResolved> KEY = new ProgressionTrackerKey<>(SimpleQuestsAPI.MODID, "entity_tracker",
+            EntityInteractTask.ID);
 
     private final Set<UUID> entities = new HashSet<>();
 
-    public EntityTracker(EntityInteractEntry questEntry) {
+    public EntityTracker(EntityInteractTask.EntityInteractTaskResolved questEntry) {
         super(questEntry);
     }
 

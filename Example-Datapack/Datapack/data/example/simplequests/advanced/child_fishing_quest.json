@@ -1,5 +1,5 @@
 {
-  "task": "Catch lots of fishes! Needs parent quest completed before doing this quest",
+  "name": "Catch lots of fishes! Needs parent quest completed before doing this quest",
   "description": [],
   "parent_id": "example:item_example",
   "redo_parent": false,
@@ -15,24 +15,28 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:cod"
+          ]
+        }
+      ],
       "amount": 15,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:cod"
-        ]
-      },
       "description": "Give 15 cods",
       "id": "simplequests_api:item"
     },
     "fish_2": {
+      "predicates": [
+        {
+          "items": [
+            "minecraft:salmon"
+          ]
+        }
+      ],
       "amount": 15,
       "consume_items": true,
-      "predicate": {
-        "items": [
-          "minecraft:salmon"
-        ]
-      },
       "description": "Give 15 salmon",
       "id": "simplequests_api:item"
     }

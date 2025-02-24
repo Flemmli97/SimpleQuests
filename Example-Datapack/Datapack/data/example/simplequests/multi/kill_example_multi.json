@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi kill quest",
+  "name": "Example for a multi kill quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -35,7 +35,7 @@
         "max": 8
       },
       "description": "Task: 5-8 cows or cows in a plains biome",
-      "id": "simplequests_api:multi_kill"
+      "id": "simplequests_api:entity"
     }
   },
   "type": "simplequests_api:quest"

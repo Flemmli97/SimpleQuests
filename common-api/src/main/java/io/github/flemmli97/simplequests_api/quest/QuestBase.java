@@ -5,9 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
-import io.github.flemmli97.simplequests_api.util.ParseHelper;
+import io.github.flemmli97.simplequests_api.util.QuestUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -47,8 +47,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public final int repeatDelay, repeatDaily;
 
-    protected final String questTaskString;
-    protected final List<String> questTaskDesc;
+    protected final String name;
+    protected final List<String> description;
 
     public final boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -62,13 +62,13 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public final Visibility visibility;
 
-    public QuestBase(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
+    public QuestBase(ResourceLocation id, QuestCategory category, String name, List<String> description, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
                      ItemStack icon, int repeatDelay, int repeatDaily, int sortingId,
                      boolean isDailyQuest, EntityPredicate unlockCondition, Visibility visibility) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
-        this.questTaskString = questTaskString;
-        this.questTaskDesc = questTaskDesc;
+        this.name = name;
+        this.description = description;
         this.neededParentQuests = parents;
         this.redoParent = redoParent;
         this.needsUnlock = needsUnlock;
@@ -81,9 +81,9 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         this.visibility = visibility;
     }
 
-    public static List<MutableComponent> getFormattedTasks(ServerPlayer player, Map<String, QuestEntry> resolvedTasks) {
+    public static List<MutableComponent> getFormattedTasks(ServerPlayer player, Map<String, ResolvedQuestTask> resolvedTasks) {
         List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, QuestEntry> e : resolvedTasks.entrySet()) {
+        for (Map.Entry<String, ResolvedQuestTask> e : resolvedTasks.entrySet()) {
             list.add(new TextComponent(" - ").append(e.getValue().translation(player)));
         }
         return list;
@@ -96,7 +96,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public static <B extends BuilderBase<B>> B of(Function<String, B> questBuilder,
                                                   QuestCategory category, JsonObject obj) {
-        B questbuilder = questBuilder.apply(GsonHelper.getAsString(obj, "task"));
+        B questbuilder = questBuilder.apply(GsonHelper.getAsString(obj, "name"));
         questbuilder.withCategory(category);
         JsonElement descEl = obj.get("description");
         if (descEl != null) {
@@ -126,8 +126,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             questbuilder.setRedoParent();
         if (GsonHelper.getAsBoolean(obj, "need_unlock", false))
             questbuilder.needsUnlocking();
-        questbuilder.withIcon(ParseHelper.icon(obj, "icon", Items.PAPER));
-        questbuilder.setRepeatDelay(ParseHelper.tryParseTime(obj, "repeat_delay", 0));
+        questbuilder.withIcon(QuestUtils.icon(obj, "icon", Items.PAPER));
+        questbuilder.setRepeatDelay(QuestUtils.tryParseTime(obj, "repeat_delay", 0));
         questbuilder.setMaxDaily(GsonHelper.getAsInt(obj, "repeat_daily", 0));
         questbuilder.withSortingNum(GsonHelper.getAsInt(obj, "sorting_id", 0));
         if (GsonHelper.getAsBoolean(obj, "daily_quest", false))
@@ -143,13 +143,13 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             obj.addProperty("id", this.id.toString());
         if (this.category != QuestCategory.DEFAULT_CATEGORY)
             obj.addProperty("category", this.category.id.toString());
-        obj.addProperty("task", this.questTaskString);
-        if (!this.questTaskDesc.isEmpty() || full) {
-            if (this.questTaskDesc.size() == 1)
-                obj.addProperty("description", this.questTaskDesc.get(0));
+        obj.addProperty("name", this.name);
+        if (!this.description.isEmpty() || full) {
+            if (this.description.size() == 1)
+                obj.addProperty("description", this.description.get(0));
             else {
                 JsonArray arr = new JsonArray();
-                this.questTaskDesc.forEach(arr::add);
+                this.description.forEach(arr::add);
                 obj.add("description", arr);
             }
         }
@@ -168,7 +168,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             obj.addProperty("need_unlock", this.needsUnlock);
         if (this.unlockCondition != EntityPredicate.ANY || full)
             obj.add("unlock_condition", this.unlockCondition.serializeToJson());
-        ParseHelper.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
+        QuestUtils.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
                 .ifPresent(icon -> obj.add("icon", icon));
         if (this.repeatDelayString != null)
             obj.addProperty("repeat_delay", this.repeatDelayString);
@@ -209,7 +209,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public MutableComponent getTask(ServerPlayer player, int idx) {
         QuestBase resolved = this.resolveToQuest(player, idx);
         if (resolved == null)
-            return new TranslatableComponent(this.questTaskString);
+            return new TranslatableComponent(this.name);
         return resolved.getTask(player);
     }
 
@@ -225,7 +225,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public List<MutableComponent> getDescription(ServerPlayer player, int idx) {
         QuestBase resolved = this.resolveToQuest(player, idx);
         if (resolved == null)
-            return this.questTaskDesc.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
+            return this.description.stream().map(s -> new TranslatableComponent(s).withStyle(ChatFormatting.DARK_GREEN)).collect(Collectors.toList());
         return resolved.getDescription(player);
     }
 
@@ -234,7 +234,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
      *
      * @param idx If -1 should return itself
      */
-    public MutableComponent getFormattedWith(ServerPlayer player, int idx, Map<String, QuestEntry> resolvedTasks, ChatFormatting... subFormatting) {
+    public MutableComponent getFormattedWith(ServerPlayer player, int idx, Map<String, ResolvedQuestTask> resolvedTasks, ChatFormatting... subFormatting) {
         QuestBase resolved = this.resolveToQuest(player, idx);
         if (resolved != null)
             return this.getFormattedWith(player, -1, resolvedTasks, subFormatting);
@@ -306,7 +306,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public void onReset(ServerPlayer player) {
     }
 
-    public abstract Map<String, QuestEntry> resolveTasks(PlayerQuestData data, int questIndex);
+    public abstract Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int questIndex);
 
     public boolean isDynamic() {
         return false;
@@ -338,8 +338,8 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         protected int repeatDelay, repeatDaily;
         protected String repeatDelayString;
 
-        protected final String questTaskString;
-        protected final List<String> questDesc = new ArrayList<>();
+        protected final String name;
+        protected final List<String> description = new ArrayList<>();
 
         protected boolean redoParent, needsUnlock, isDailyQuest;
 
@@ -351,13 +351,13 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         protected Visibility visibility = Visibility.DEFAULT;
 
-        protected BuilderBase(ResourceLocation id, String task) {
+        protected BuilderBase(ResourceLocation id, String name) {
             this.id = id;
-            this.questTaskString = task;
+            this.name = name;
         }
 
         public T addDescription(String desc) {
-            this.questDesc.add(desc);
+            this.description.add(desc);
             return this.asThis();
         }
 
@@ -393,7 +393,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         public T setRepeatDelay(String delay) {
             this.repeatDelayString = delay;
-            this.repeatDelay = ParseHelper.tryParseTime(this.repeatDelayString, this.repeatDelayString);
+            this.repeatDelay = QuestUtils.tryParseTime(this.repeatDelayString, this.repeatDelayString);
             return this.asThis();
         }
 

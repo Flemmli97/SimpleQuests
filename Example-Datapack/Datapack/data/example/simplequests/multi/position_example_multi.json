@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi position quest",
+  "name": "Example for a multi position quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -32,7 +32,7 @@
       ],
       "min_dist": 15,
       "description": "Go to the position from this quest",
-      "id": "simplequests_api:multi_position"
+      "id": "simplequests_api:position"
     }
   },
   "type": "simplequests_api:quest"

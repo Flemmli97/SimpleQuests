@@ -1,5 +1,5 @@
 {
-  "task": "Example for a location quest using a location predicate. Player needs to sneak additionally",
+  "name": "Example for a location quest using a location predicate. Player needs to sneak additionally",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,10 +15,14 @@
   "submission_trigger": "",
   "entries": {
     "structure": {
-      "predicate": {
-        "feature": "minecraft:ocean_ruin_warm"
-      },
-      "description": "Find a warm ocean ruin",
+      "locations": [
+        {
+          "description": "Find a warm ocean ruin",
+          "value": {
+            "feature": "minecraft:ocean_ruin_warm"
+          }
+        }
+      ],
       "player_predicate": {
         "flags": {
           "is_sneaking": true
@@ -27,10 +31,14 @@
       "id": "simplequests_api:location"
     },
     "structure2": {
-      "predicate": {
-        "feature": "minecraft:ocean_ruin_cold"
-      },
-      "description": "Find a cold ocean ruin",
+      "locations": [
+        {
+          "description": "Find a cold ocean ruin",
+          "value": {
+            "feature": "minecraft:ocean_ruin_cold"
+          }
+        }
+      ],
       "player_predicate": {
         "flags": {
           "is_sneaking": true

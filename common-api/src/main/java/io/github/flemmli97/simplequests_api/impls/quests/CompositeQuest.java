@@ -7,7 +7,7 @@ import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntry;
+import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -82,7 +82,7 @@ public class CompositeQuest extends QuestBase {
     }
 
     @Override
-    public Map<String, QuestEntry> resolveTasks(PlayerQuestData data, int idx) {
+    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int idx) {
         QuestBase base = this.resolveToQuest(data.getPlayer(), idx);
         return base == null ? Map.of() : base.resolveTasks(data, 0);
     }
@@ -107,7 +107,7 @@ public class CompositeQuest extends QuestBase {
 
         @Override
         public CompositeQuest build() {
-            CompositeQuest quest = new CompositeQuest(this.id, this.category, this.questTaskString, this.questDesc, this.neededParentQuests, this.redoParent, this.needsUnlock,
+            CompositeQuest quest = new CompositeQuest(this.id, this.category, this.name, this.description, this.neededParentQuests, this.redoParent, this.needsUnlock,
                     this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.isDailyQuest,
                     this.unlockCondition, this.compositeQuests, this.visibility);
             quest.setDelayString(this.repeatDelayString);
