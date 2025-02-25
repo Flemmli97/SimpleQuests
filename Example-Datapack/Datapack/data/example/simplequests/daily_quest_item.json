@@ -1,5 +1,5 @@
 {
-  "task": "Example for an daily item quest",
+  "name": "Example for an daily item quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,14 +15,15 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
-      "amount": 5,
-      "consumeItems": true,
-      "predicate": {
-        "items": "minecraft:cod"
-      },
-      "description": "Give 5 cods",
-      "id": "simplequests:item"
+      "predicates": [
+        {
+          "items": "minecraft:cod"
+        }
+      ],
+      "amount": 5.0,
+      "consume_items": true,
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

@@ -1,0 +1,47 @@
+{
+  "name": "Example for a predicate quest. Requires submitting",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:map",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "sorting_id": 1,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "entries": {
+    "structure": {
+      "predicates": [
+        {
+          "description": "Find a warm ocean ruin",
+          "value": {
+            "location": {
+              "structures": "minecraft:ocean_ruin_warm"
+            }
+          }
+        }
+      ],
+      "submit": true,
+      "id": "simplequests_api:predicates"
+    },
+    "structure2": {
+      "predicates": [
+        {
+          "description": "Find a cold ocean ruin",
+          "value": {
+            "location": {
+              "structures": "minecraft:ocean_ruin_cold"
+            }
+          }
+        }
+      ],
+      "submit": true,
+      "id": "simplequests_api:predicates"
+    }
+  },
+  "type": "simplequests_api:quest"
+}

@@ -1,5 +1,5 @@
 {
-  "task": "Example of using block interaction as block place detection",
+  "name": "Example of using block interaction as block place detection",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,15 +15,18 @@
   "submission_trigger": "",
   "entries": {
     "place": {
-      "amount": 3,
+      "block_predicates": [],
+      "item_predicates": [
+        {
+          "items": "minecraft:emerald_block"
+        }
+      ],
+      "amount": 3.0,
+      "consume": false,
       "use": true,
-      "item": {
-        "items": "minecraft:emerald_block"
-      },
-      "consumeItem": false,
       "description": "Place 3 emerald blocks",
-      "id": "simplequests:block_interact"
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

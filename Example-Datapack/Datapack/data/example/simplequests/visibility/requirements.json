@@ -1,5 +1,5 @@
 {
-  "task": "Example for an item quest needing an requirements to accept",
+  "name": "Example for an item quest needing an requirements to accept",
   "description": "Requires player to be y > 64",
   "parent_id": [],
   "redo_parent": false,
@@ -24,14 +24,16 @@
   "submission_trigger": "",
   "entries": {
     "fish": {
-      "amount": 15,
-      "consumeItems": true,
-      "predicate": {
-        "items": "minecraft:cod"
-      },
+      "predicates": [
+        {
+          "items": "minecraft:cod"
+        }
+      ],
+      "amount": 15.0,
+      "consume_items": true,
       "description": "Give 15 cods",
-      "id": "simplequests:item"
+      "id": "simplequests_api:item"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

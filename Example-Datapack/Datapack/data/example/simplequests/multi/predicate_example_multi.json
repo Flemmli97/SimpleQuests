@@ -1,5 +1,5 @@
 {
-  "task": "Example for a multi location quest using a location predicate",
+  "name": "Example for a multi predicate quests",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,23 +15,28 @@
   "submission_trigger": "",
   "entries": {
     "structure": {
-      "locations": [
+      "predicates": [
         {
           "description": "Go to warm ocean ruin",
           "value": {
-            "structures": "minecraft:ocean_ruin_warm"
+            "location": {
+              "structures": "minecraft:ocean_ruin_warm"
+            }
           }
         },
         {
           "description": "Go to cold ocean ruin",
           "value": {
-            "structures": "minecraft:ocean_ruin_cold"
+            "location": {
+              "structures": "minecraft:ocean_ruin_cold"
+            }
           }
         }
       ],
       "description": "Find a warm or cold ocean ruin",
-      "id": "simplequests:multi_location"
+      "submit": false,
+      "id": "simplequests_api:predicates"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

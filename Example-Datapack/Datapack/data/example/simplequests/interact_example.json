@@ -1,5 +1,5 @@
 {
-  "task": "Example for an entity interaction quest",
+  "name": "Example for an entity interaction quest",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,17 +15,21 @@
   "submission_trigger": "",
   "entries": {
     "interact": {
-      "predicate": {
-        "type": "minecraft:chicken"
-      },
-      "amount": 2,
+      "entity_predicates": [
+        {
+          "type": "minecraft:chicken"
+        }
+      ],
+      "item_predicates": [
+        {
+          "items": "minecraft:name_tag"
+        }
+      ],
+      "amount": 2.0,
       "consume": true,
       "description": "Use nametag on 2 chickens",
-      "item": {
-        "items": "minecraft:name_tag"
-      },
-      "id": "simplequests:entity_interact"
+      "id": "simplequests_api:entity_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

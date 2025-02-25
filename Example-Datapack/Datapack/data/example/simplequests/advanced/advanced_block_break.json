@@ -1,5 +1,5 @@
 {
-  "task": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
+  "name": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
   "description": [],
   "parent_id": [],
   "redo_parent": false,
@@ -15,31 +15,41 @@
   "submission_trigger": "",
   "entries": {
     "break": {
-      "amount": 3,
-      "use": false,
-      "item": {
-        "items": "minecraft:diamond_pickaxe",
-        "predicates": {
-          "minecraft:enchantments": [
-            {
-              "enchantments": "minecraft:unbreaking",
-              "levels": {
-                "min": 1
-              }
+      "block_predicates": [
+        {
+          "description": "East Facing Quartz Block",
+          "value": {
+            "blocks": "minecraft:quartz_stairs",
+            "state": {
+              "facing": "east"
             }
-          ]
+          }
         }
-      },
-      "block": {
-        "blocks": "minecraft:quartz_stairs",
-        "state": {
-          "facing": "east"
+      ],
+      "item_predicates": [
+        {
+          "description": "Unbreaking 1 Diamond Pickaxe",
+          "value": {
+            "items": "minecraft:diamond_pickaxe",
+            "predicates": {
+              "minecraft:enchantments": [
+                {
+                  "enchantments": "minecraft:unbreaking",
+                  "levels": {
+                    "min": 1
+                  }
+                }
+              ]
+            }
+          }
         }
-      },
-      "consumeItem": false,
+      ],
+      "amount": 3.0,
+      "consume": false,
+      "use": false,
       "description": "Quartz Stairs",
-      "id": "simplequests:block_interact"
+      "id": "simplequests_api:block_interact"
     }
   },
-  "type": "simplequests:quest"
+  "type": "simplequests_api:quest"
 }

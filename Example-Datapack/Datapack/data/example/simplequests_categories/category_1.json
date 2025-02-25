@@ -6,7 +6,7 @@
   "max_concurrent_quests": -1,
   "sorting_id": 0,
   "max_daily": -1,
-  "selectable": true,
+  "required_context": [],
   "is_visible": true,
   "is_silent": false
 }
