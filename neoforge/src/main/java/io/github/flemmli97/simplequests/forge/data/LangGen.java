@@ -38,12 +38,10 @@ public class LangGen implements DataProvider {
         this.add("simplequests.active", "This quest is already active");
         this.add("simplequests.active.full", "You already have the max amount of active quests");
         this.add("simplequests.accept", "Accepted quest %s");
-        this.add("simplequests.finish", "Finished quest [%s]");
         this.add("simplequests.finish", "Finished quest %s");
         this.add("simplequests.finish.sub", "Finished sub-quest %s");
         this.add("simplequests.current.no", "No active quest");
         this.add("simplequests.reset", "Reset current quest %s");
-        this.add("simplequests.reset", "Reset current quest [%s]");
         this.add("simplequests.reset.confirm", "Are you sure? Submitted items will not be refunded! Type again to confirm");
         this.add("simplequests.reset.notfound", "No active quest with id %s");
         this.add("simplequests.reset.cooldown", "Reset quest cooldowns for %s");

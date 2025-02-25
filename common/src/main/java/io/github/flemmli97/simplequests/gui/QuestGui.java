@@ -33,7 +33,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,9 +106,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
-        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
-        List<Component> lore = new ArrayList<>();
-        quest.getDescription(player).forEach(c -> lore.add(c.setStyle(c.getStyle().withItalic(false))));
+        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(player.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.UNBREAKING), 1);
             if (stack.has(DataComponents.STORED_ENCHANTMENTS))
@@ -118,18 +115,16 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 stack.set(DataComponents.ENCHANTMENTS, stack.get(DataComponents.ENCHANTMENTS).withTooltip(false));
         }
         if (type == PlayerData.AcceptType.DELAY) {
-            lore.add(Component.translatable(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
             this.updateList.put(i, quest);
         }
-        for (MutableComponent comp : quest.getTasks(player))
-            lore.add(comp.setStyle(comp.getStyle().withItalic(false)));
+        List<Component> lore = new ArrayList<>(questComponents(data, quest, type));
         MutableComponent requirement = switch (type) {
             case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
-                    Component.translatable(type.langKey()).withStyle(ChatFormatting.DARK_RED);
+                    Component.translatable(type.langKey()).withStyle(Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.DARK_RED));
             default -> null;
         };
         if (requirement != null)
-            lore.add(requirement.setStyle(requirement.getStyle().withItalic(false)));
+            lore.add(requirement);
         stack.set(DataComponents.LORE, new ItemLore(lore));
         CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id.toString()));
         return stack;

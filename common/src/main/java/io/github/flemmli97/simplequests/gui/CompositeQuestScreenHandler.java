@@ -14,7 +14,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -71,9 +70,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     private ItemStack ofQuest(Quest quest, int idx, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         ItemStack stack = quest.getIcon();
-        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
-        List<Component> lore = new ArrayList<>();
-        quest.getDescription(player).forEach(c -> lore.add(c.setStyle(c.getStyle().withItalic(false))));
+        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(QuestGui.NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(player.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.UNBREAKING), 1);
             if (stack.has(DataComponents.STORED_ENCHANTMENTS))
@@ -81,8 +78,7 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             else if (stack.has(DataComponents.ENCHANTMENTS))
                 stack.set(DataComponents.ENCHANTMENTS, stack.get(DataComponents.ENCHANTMENTS).withTooltip(false));
         }
-        for (MutableComponent comp : quest.getTasks(player))
-            lore.add(comp.setStyle(comp.getStyle().withItalic(false)));
+        List<Component> lore = new ArrayList<>(QuestGui.questComponents(data, quest, PlayerData.AcceptType.ACCEPT));
         stack.set(DataComponents.LORE, new ItemLore(lore));
         CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putInt(QuestGui.STACK_NBT_ID, idx));
         return stack;

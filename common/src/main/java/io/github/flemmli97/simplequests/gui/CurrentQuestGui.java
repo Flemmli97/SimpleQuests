@@ -3,6 +3,7 @@ package io.github.flemmli97.simplequests.gui;
 import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import net.minecraft.ChatFormatting;
@@ -61,19 +62,23 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
     private ItemStack ofQuest(QuestProgress progress, ServerPlayer player) {
         QuestBase quest = progress.getQuest();
         ItemStack stack = quest.getIcon();
-        stack.set(DataComponents.CUSTOM_NAME, progress.getName(player).setStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.GOLD)));
+        stack.set(DataComponents.CUSTOM_NAME, progress.getName(player).setStyle(QuestGui.NAME_STYLE));
         List<Component> lore = new ArrayList<>();
-        progress.getDescription(player).forEach(c -> lore.add(c.setStyle(c.getStyle().withItalic(false))));
+        progress.getDescription(player).forEach(c -> lore.add(c.setStyle(QuestGui.DESCRIPTION_STYLE)));
+        lore.add(Component.literal(""));
         List<String> finished = progress.finishedTasks();
         progress.getQuestEntries().entrySet().stream()
                 .filter(e -> !finished.contains(e.getKey()))
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
-                    MutableComponent translation = Component.literal("▶ ").append(e.getValue().translation(player).withStyle(Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW)));
+                    MutableComponent translation = Component.translatable(SimpleQuestsAPI.MODID + ".task.formatter",
+                                    e.getValue().translation(player).withStyle(QuestGui.TASK_STYLE))
+                            .withStyle(QuestGui.DESCRIPTION_STYLE);
                     if (comp == null)
                         lore.add(translation);
                     else
-                        lore.add(Component.translatable("simplequest.quest.progress", translation, comp).setStyle(comp.getStyle().withItalic(false)));
+                        lore.add(Component.translatable("simplequest.quest.progress", translation, comp)
+                                .setStyle(QuestGui.DESCRIPTION_STYLE));
                 });
         stack.set(DataComponents.LORE, new ItemLore(lore));
         CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id.toString()));
