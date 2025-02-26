@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
@@ -103,10 +104,12 @@ public class Quest extends QuestBase {
     }
 
     @Override
-    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int questIndex) {
+    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, QuestProgress progress, int questIndex) {
         ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
         for (Map.Entry<String, QuestTask<?>> i : this.entries.entrySet()) {
-            builder.put(i.getKey(), i.getValue().resolve(data, this));
+            ResolvedQuestTask task = i.getValue().resolve(data, progress, this);
+            if (task != null)
+                builder.put(i.getKey(), task);
         }
         return builder.build();
     }

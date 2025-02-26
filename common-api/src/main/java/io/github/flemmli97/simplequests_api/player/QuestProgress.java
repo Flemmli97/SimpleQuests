@@ -50,7 +50,7 @@ public class QuestProgress {
         this.base = quest;
         this.questIndex = subQuestIndex;
         this.quest = quest.resolveToQuest(data.getPlayer(), this.questIndex);
-        this.questEntries = this.base.resolveTasks(data, this.questIndex);
+        this.questEntries = this.base.resolveTasks(data, this, this.questIndex);
         this.setup(data);
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
@@ -149,7 +149,7 @@ public class QuestProgress {
             QuestBase next = toResolve.resolveToQuest(player, this.questIndex + 1);
             if (next != null) {
                 this.quest = next;
-                this.questEntries = toResolve.resolveTasks(data, this.questIndex + 1);
+                this.questEntries = toResolve.resolveTasks(data, this, this.questIndex + 1);
                 this.questIndex += 1;
                 this.resetTrackers();
                 this.setup(data);
@@ -262,7 +262,7 @@ public class QuestProgress {
                     .mapError(e -> "Couldn't read quest entry" + e).getOrThrow()));
             this.questEntries = builder.build();
         } else {
-            this.questEntries = this.quest.resolveTasks(data, this.questIndex);
+            this.questEntries = this.quest.resolveTasks(data, this, this.questIndex);
         }
         ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
         list.forEach(t -> this.entries.add(t.getAsString()));

@@ -44,6 +44,7 @@ public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
 
     private final List<DescriptiveValue<EntityPredicate>> predicates;
     private final NumberProvider amount;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
     public KillTask(List<DescriptiveValue<EntityPredicate>> predicates, NumberProvider amount, String description, @Nullable EntityPredicate playerPredicate) {
@@ -74,14 +75,14 @@ public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
     }
 
     @Override
-    public KillTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public KillTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<EntityPredicate> val = this.predicates.get(ctx.getRandom().nextInt(this.predicates.size()));
         return new KillTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
     }
 
     public record KillTaskResolved(DescriptiveValue<EntityPredicate> predicate, int amount,
-                                   EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                   @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final MapCodec<KillTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
                 instance.group(DescriptiveValue.withTranslation(EntityPredicate.CODEC).fieldOf("predicate").forGetter(d -> d.predicate),

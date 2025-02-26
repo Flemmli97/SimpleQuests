@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
@@ -21,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.loot.LootContext;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +42,10 @@ public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTas
 
     private final List<DescriptiveValue<ResourceLocation>> advancements;
     private final boolean reset;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
-    public AdvancementTask(List<DescriptiveValue<ResourceLocation>> advancements, boolean reset, String description, EntityPredicate player) {
+    public AdvancementTask(List<DescriptiveValue<ResourceLocation>> advancements, boolean reset, String description, @Nullable EntityPredicate player) {
         if (advancements.size() > 1 && description.isEmpty())
             throw new IllegalStateException("Description is required");
         this.description = description;
@@ -78,13 +81,13 @@ public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTas
     }
 
     @Override
-    public AdvancementTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public AdvancementTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         return new AdvancementTaskResolved(this.advancements.get(ctx.getRandom().nextInt(this.advancements.size())), this.reset, this.playerPredicate);
     }
 
     public record AdvancementTaskResolved(DescriptiveValue<ResourceLocation> advancement, boolean reset,
-                                          EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                          @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final MapCodec<AdvancementTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
                 instance.group(DescriptiveValue.codec(ResourceLocation.CODEC).fieldOf("advancement").forGetter(d -> d.advancement),

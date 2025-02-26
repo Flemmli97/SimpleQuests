@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
@@ -49,6 +50,7 @@ public class ItemTask implements QuestTask<ItemTask.ItemTaskResolved> {
     private final List<DescriptiveValue<ItemPredicate>> predicates;
     private final NumberProvider amount;
     private final boolean consume;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
     public ItemTask(List<DescriptiveValue<ItemPredicate>> predicates, NumberProvider amount, String description, boolean consume, @Nullable EntityPredicate playerPredicate) {
@@ -80,14 +82,14 @@ public class ItemTask implements QuestTask<ItemTask.ItemTaskResolved> {
     }
 
     @Override
-    public ItemTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public ItemTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<ItemPredicate> val = this.predicates.get(ctx.getRandom().nextInt(this.predicates.size()));
         return new ItemTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.consume, this.playerPredicate);
     }
 
     public record ItemTaskResolved(DescriptiveValue<ItemPredicate> predicate, int amount, boolean consumeItems,
-                                   EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                   @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final MapCodec<ItemTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
                 instance.group(DescriptiveValue.withTranslation(ItemPredicate.CODEC).fieldOf("predicate").forGetter(d -> d.predicate),

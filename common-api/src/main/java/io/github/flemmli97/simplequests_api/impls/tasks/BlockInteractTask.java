@@ -59,11 +59,12 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
     private final List<DescriptiveValue<ItemPredicate>> itemPredicates;
     private final NumberProvider amount;
     private final boolean use, consume, allowDupes;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
     public BlockInteractTask(List<DescriptiveValue<BlockPredicate>> blockPredicates, List<DescriptiveValue<ItemPredicate>> itemPredicates,
                              NumberProvider amount, boolean use, boolean consume, boolean allowDupes, String description,
-                             EntityPredicate playerPredicate) {
+                             @Nullable EntityPredicate playerPredicate) {
         this.description = description;
         this.blockPredicates = blockPredicates;
         this.itemPredicates = itemPredicates;
@@ -104,7 +105,7 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
     }
 
     @Override
-    public BlockInteractTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public BlockInteractTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<ItemPredicate> val = this.itemPredicates.isEmpty() ? null : this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
         DescriptiveValue<BlockPredicate> block = this.blockPredicates.isEmpty() ? null : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
@@ -118,7 +119,7 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
     public record BlockInteractTaskResolved(DescriptiveValue<ItemPredicate> heldItem,
                                             DescriptiveValue<BlockPredicate> blockPredicate, int amount,
                                             boolean use, boolean consumeItem, boolean allowDupes,
-                                            EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                            @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final MapCodec<BlockInteractTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
                 instance.group(DescriptiveValue.withTranslation(BlockPredicate.CODEC).optionalFieldOf("block").forGetter(d -> Optional.ofNullable(d.blockPredicate)),
