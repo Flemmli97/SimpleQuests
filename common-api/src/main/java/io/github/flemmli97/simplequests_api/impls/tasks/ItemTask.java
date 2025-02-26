@@ -97,10 +97,10 @@ public class ItemTask implements QuestTask<ItemTask.ItemTaskResolved> {
                 ).apply(instance, (pred, amount, consume, player) -> new ItemTaskResolved(pred, amount, consume, player.orElse(null))));
 
         public static String key(String base, ItemPredicate pred, boolean consume) {
-            List<MutableComponent> formattedItems = ((PredicateTranslation) pred).translation();
-            if (formattedItems.isEmpty())
+            List<MutableComponent> formattedItems = ((PredicateTranslation) pred).translation(true);
+            if (formattedItems == null || formattedItems.isEmpty())
                 base += ".empty";
-            if (formattedItems.size() == 1) {
+            else if (formattedItems.size() == 1) {
                 base += ".single" + (consume ? "" : ".keep");
             } else {
                 base += ".multi" + (consume ? "" : ".keep");

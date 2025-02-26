@@ -71,7 +71,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
                     MutableComponent translation = Component.translatable(SimpleQuestsAPI.MODID + ".task.formatter",
-                            e.getValue().translation(player).withStyle(QuestGui.TASK_STYLE))
+                                    e.getValue().translation(player).withStyle(QuestGui.TASK_STYLE))
                             .withStyle(QuestGui.DESCRIPTION_STYLE);
                     if (comp == null)
                         lore.add(StringTag.valueOf(Component.Serializer.toJson(translation)));

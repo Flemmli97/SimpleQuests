@@ -45,7 +45,7 @@ public class JsonCodecs {
     public static <E> Codec<List<E>> nonEmptyList(Codec<E> codec, String error) {
         Function<List<E>, DataResult<List<E>>> function = list -> {
             if (list.isEmpty())
-                return DataResult.error(()->error);
+                return DataResult.error(() -> error);
             return DataResult.success(list);
         };
         return codec.listOf().flatXmap(function, function);

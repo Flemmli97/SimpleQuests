@@ -124,7 +124,7 @@ public class PlayerData implements PlayerQuestData {
                 case PARTIAL_COMPLETE -> {
                     completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
                     this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                            prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 }
                 case PARTIAL -> {
@@ -166,7 +166,7 @@ public class PlayerData implements PlayerQuestData {
             } else if (state == QuestState.PARTIAL_COMPLETE) {
                 completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
                 this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                        prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
             }
         });
@@ -195,7 +195,7 @@ public class PlayerData implements PlayerQuestData {
         this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getQuest().category.isSilent)
             this.player.sendSystemMessage(Component.translatable("simplequests.finish",
-                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                            prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
             prog.getQuest().neededParentQuests.forEach(res -> {
@@ -334,7 +334,7 @@ public class PlayerData implements PlayerQuestData {
                     return true;
                 }
                 case PARTIAL_COMPLETE -> this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                        prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 case NO -> fulfilled.getSecond().forEach(e -> {
                     if (!prog.getQuest().category.isSilent)

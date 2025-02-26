@@ -41,14 +41,14 @@ public abstract class ItemPredicateAccessor implements PredicateTranslation {
     private boolean simplequests_api$computed;
 
     @Override
-    public List<MutableComponent> translation() {
+    public List<MutableComponent> translation(boolean cache) {
         if ((Object) this == ItemPredicate.ANY)
             return List.of(Component.literal(""));
         if (this.items == null && this.tag == null)
             return null;
         if (this.simplequests_api$computedTranslation != null || this.simplequests_api$computed)
             return this.simplequests_api$computedTranslation;
-        this.simplequests_api$computed = true;
+        this.simplequests_api$computed = cache;
         JsonElement element = this.serializeToJson();
         if (element.isJsonObject()) {
             JsonObject obj = element.getAsJsonObject();
@@ -60,6 +60,8 @@ public abstract class ItemPredicateAccessor implements PredicateTranslation {
                 if (this.tag != null) {
                     formattedItems.add(QuestUtils.tagsComponent(this.tag, BuiltInRegistries.ITEM, i -> Component.translatable(i.getDescriptionId())));
                 }
+                if (!cache)
+                    return formattedItems;
                 this.simplequests_api$computedTranslation = formattedItems;
             }
         }

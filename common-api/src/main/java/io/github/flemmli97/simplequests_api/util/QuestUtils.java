@@ -119,20 +119,20 @@ public class QuestUtils {
     public static <T> MutableComponent tagsComponent(TagKey<T> tagKey, Registry<T> registry, Function<T, MutableComponent> translation) {
         List<MutableComponent> tagEntries = new ArrayList<>();
         registry.getTag(tagKey).ifPresent(n -> n.forEach(h -> tagEntries.add(translation.apply(h.value()))));
+        MutableComponent comp = Component.literal("[#" + tagKey.location() + "]");
         if (tagEntries.isEmpty()) {
-            return Component.translatable("simplequest_api.empty_tag");
-        }
-        MutableComponent comp =  Component.literal("[#" + tagKey.location() + "]");
-        if (tagEntries.size() == 1) {
+            comp.setStyle(Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("simplequests_api.empty_tag"))));
+        } else if (tagEntries.size() == 1) {
             comp.setStyle(Style.EMPTY
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tagEntries.get(0).withStyle(ChatFormatting.AQUA))));
         } else {
             MutableComponent items = null;
             for (MutableComponent c : tagEntries) {
                 if (items == null)
-                    items =  Component.literal("[").append(c);
+                    items = Component.literal("[").append(c);
                 else
-                    items.append( ", ").append(c);
+                    items.append(", ").append(c);
             }
             items.append("]");
             comp.setStyle(Style.EMPTY
