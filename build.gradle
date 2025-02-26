@@ -4,3 +4,12 @@ plugins {
 }
 
 apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/main.gradle"
+
+tasks.register("publishAPI") {
+    group = 'publishing'
+    var clean = [":common-api:clean", ":fabric-api:clean", ":neoforge-api:clean"]
+    dependsOn clean
+    var publish = [":common-api:publish", ":fabric-api:publish", ":neoforge-api:publish"]
+    publish.each { tasks.findByPath(it).mustRunAfter clean }
+    dependsOn publish
+}
