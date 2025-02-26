@@ -9,6 +9,8 @@ Simple Quests 2.1.0
   - Submitting task that checks for a player predicate
 - Removed location and position task
   - Replaced by `simplequests:ticking_predicates` which takes an entity predicate
+- Added command `/simplequest admin` and when in admin mode allows you to view/accept otherwise hidden subquests
+  - Previously this was done with a permission string which defaulted to true
 
 Simple Quests 2.0.0
 ================
