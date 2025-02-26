@@ -111,11 +111,11 @@ public class QuestUtils {
     public static <T> MutableComponent tagsComponent(HolderSet.Named<T> holders, Function<T, MutableComponent> translation) {
         List<MutableComponent> tagEntries = new ArrayList<>();
         holders.forEach(h -> tagEntries.add(translation.apply(h.value())));
-        if (tagEntries.isEmpty()) {
-            return Component.translatable("simplequest_api.empty_tag");
-        }
         MutableComponent comp = Component.literal("[#" + holders.key().location() + "]");
-        if (tagEntries.size() == 1) {
+        if (tagEntries.isEmpty()) {
+            comp.setStyle(Style.EMPTY
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("simplequests_api.empty_tag"))));
+        } else if (tagEntries.size() == 1) {
             comp.setStyle(Style.EMPTY
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tagEntries.get(0).withStyle(ChatFormatting.AQUA))));
         } else {

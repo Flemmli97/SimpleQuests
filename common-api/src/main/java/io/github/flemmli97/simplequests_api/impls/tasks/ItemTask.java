@@ -100,9 +100,9 @@ public class ItemTask implements QuestTask<ItemTask.ItemTaskResolved> {
 
         public static String key(String base, ItemPredicate pred, boolean consume) {
             List<MutableComponent> formattedItems = PredicateTranslation.translation(pred);
-            if (formattedItems.isEmpty())
+            if (formattedItems == null || formattedItems.isEmpty())
                 base += ".empty";
-            if (formattedItems.size() == 1) {
+            else if (formattedItems.size() == 1) {
                 base += ".single" + (consume ? "" : ".keep");
             } else {
                 base += ".multi" + (consume ? "" : ".keep");
