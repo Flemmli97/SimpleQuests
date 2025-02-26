@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
@@ -104,9 +105,9 @@ public class SequentialQuest extends QuestBase {
     }
 
     @Override
-    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int idx) {
+    public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, QuestProgress progress, int idx) {
         QuestBase base = this.resolveToQuest(data.getPlayer(), idx);
-        return base == null ? Map.of() : base.resolveTasks(data, 0);
+        return base == null ? Map.of() : base.resolveTasks(data, progress, 0);
     }
 
     public static class Builder extends BuilderBase<Builder> {

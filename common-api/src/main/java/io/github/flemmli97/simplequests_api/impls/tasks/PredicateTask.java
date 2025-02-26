@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
@@ -62,7 +63,7 @@ public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResol
     }
 
     @Override
-    public PredicateTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public PredicateTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<EntityPredicate> val = this.predicates.get(ctx.getRandom().nextInt(this.predicates.size()));
         return new PredicateTaskResolved(val, this.submit);
