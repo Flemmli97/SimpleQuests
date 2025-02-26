@@ -366,6 +366,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "item_example_category_2"),
                 "Example for an item quest with category 2",
                 new ResourceLocation("chests/abandoned_mineshaft"))
+                .withCategory(category2)
                 .setRepeatDelay(36000)
                 .withIcon(new ItemStack(Items.ANDESITE))
                 .addTaskEntry("andesite", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.ANDESITE).build()).build(), ConstantValue.exactly(15), "Give 15 andesite", true, null)));

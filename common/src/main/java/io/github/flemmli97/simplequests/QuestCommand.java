@@ -189,7 +189,7 @@ public class QuestCommand {
         ServerPlayer player = context.getSource().getPlayerOrException();
         PlayerData data = PlayerData.get(player);
         data.setAdminMode(!data.isAdminMode());
-        player.displayClientMessage(new TranslatableComponent("simplequests.adminMode", data.isAdminMode()).withStyle(ChatFormatting.GOLD), false);
+        player.displayClientMessage(Component.translatable("simplequests.adminMode", data.isAdminMode()).withStyle(ChatFormatting.GOLD), false);
         return Command.SINGLE_SUCCESS;
     }
 
