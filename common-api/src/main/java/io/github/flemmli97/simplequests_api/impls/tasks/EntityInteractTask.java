@@ -53,6 +53,7 @@ public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityIn
     private final List<DescriptiveValue<ItemPredicate>> itemPredicates;
     private final NumberProvider amount;
     private final boolean consume;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
     public EntityInteractTask(DescriptiveValue<EntityPredicate> entityPredicates, DescriptiveValue<ItemPredicate> itemPredicates, int amount, boolean consume, String description, @Nullable EntityPredicate playerPredicate) {
@@ -89,7 +90,7 @@ public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityIn
     }
 
     @Override
-    public EntityInteractTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public EntityInteractTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<EntityPredicate> entity = this.entityPredicates.isEmpty() ? DescriptiveValue.of(EntityPredicate.ANY) : this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
         DescriptiveValue<ItemPredicate> item = this.itemPredicates.isEmpty() ? DescriptiveValue.of(ItemPredicate.ANY) : this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
@@ -99,7 +100,7 @@ public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityIn
     public record EntityInteractTaskResolved(DescriptiveValue<EntityPredicate> entityPredicate,
                                              DescriptiveValue<ItemPredicate> heldItem, int amount,
                                              boolean consume,
-                                             EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                             @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final Codec<EntityInteractTaskResolved> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.util.QuestUtils;
@@ -278,7 +279,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public void onReset(ServerPlayer player) {
     }
 
-    public abstract Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, int questIndex);
+    public abstract Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, QuestProgress progress, int questIndex);
 
     public boolean isDynamic() {
         return false;

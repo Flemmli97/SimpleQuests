@@ -43,6 +43,7 @@ public class CraftingTask implements QuestTask<CraftingTask.CraftingTaskResolved
 
     private final List<DescriptiveValue<ItemPredicate>> itemPredicates;
     private final NumberProvider amount;
+    @Nullable
     private final EntityPredicate playerPredicate;
 
     public CraftingTask(List<DescriptiveValue<ItemPredicate>> itemPredicates, NumberProvider amount, String description, @Nullable EntityPredicate playerPredicate) {
@@ -73,14 +74,15 @@ public class CraftingTask implements QuestTask<CraftingTask.CraftingTaskResolved
     }
 
     @Override
-    public CraftingTaskResolved resolve(PlayerQuestData data, QuestBase base) {
+    public CraftingTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
         LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
         DescriptiveValue<ItemPredicate> val = this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
         return new CraftingTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
     }
 
     public record CraftingTaskResolved(DescriptiveValue<ItemPredicate> item,
-                                       int amount, EntityPredicate playerPredicate) implements ResolvedQuestTask {
+                                       int amount,
+                                       @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
 
         public static final Codec<CraftingTaskResolved> CODEC = RecordCodecBuilder.create((instance) ->
                 instance.group(DescriptiveValue.withTranslation(JsonCodecs.ITEM_PREDICATE_CODEC).fieldOf("item").forGetter(d -> d.item),
