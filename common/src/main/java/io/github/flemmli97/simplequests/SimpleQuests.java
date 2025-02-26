@@ -1,5 +1,6 @@
 package io.github.flemmli97.simplequests;
 
+import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,12 +17,12 @@ public class SimpleQuests {
     public static boolean PERMISSION_API;
 
     public static boolean canAcceptQuest(CommandSourceStack src, QuestBase base) {
-        return (LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.ACCEPTADMIN, true) || base.getVisibility() != QuestBase.Visibility.NEVER)
+        return (!(src.getEntity() instanceof ServerPlayer player) || PlayerData.get(player).isAdminMode() || base.getVisibility() != QuestBase.Visibility.NEVER)
                 && base.category.matchesContext(null);
     }
 
     public static boolean canAcceptQuest(ServerPlayer src, QuestBase base) {
-        return (LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.ACCEPTADMIN, true) || base.getVisibility() != QuestBase.Visibility.NEVER)
+        return (PlayerData.get(src).isAdminMode() || base.getVisibility() != QuestBase.Visibility.NEVER)
                 && base.category.matchesContext(null);
     }
 }

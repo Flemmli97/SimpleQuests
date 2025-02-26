@@ -55,6 +55,7 @@ public class QuestCommand {
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetAll)))
                 .then(Commands.literal("resetCooldown").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RESET_COOLDOWN, true))
                         .then(Commands.argument("target", EntityArgument.players()).executes(QuestCommand::resetCooldown)))
+                .then(Commands.literal("admin").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.ADMIN_MODE, true)).executes(QuestCommand::switchAdminMode))
                 .then(Commands.literal("reload").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.RELOAD, true)).executes(QuestCommand::reload))
                 .then(Commands.literal("unlock").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.UNLOCK, true))
                         .then(Commands.argument("target", EntityArgument.players())
@@ -182,6 +183,14 @@ public class QuestCommand {
             i++;
         }
         return i;
+    }
+
+    private static int switchAdminMode(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        PlayerData data = PlayerData.get(player);
+        data.setAdminMode(!data.isAdminMode());
+        player.displayClientMessage(Component.translatable("simplequests.adminMode", data.isAdminMode()).withStyle(ChatFormatting.GOLD), false);
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int unlock(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
