@@ -37,14 +37,14 @@ public abstract class EntityPredicateMixin implements PredicateTranslation {
     private boolean simplequests_api$computed;
 
     @Override
-    public List<MutableComponent> translation() {
+    public List<MutableComponent> translation(boolean cache) {
         if ((Object) this == EntityTypePredicate.ANY)
             return List.of(new TextComponent(""));
         if (this.entityType == EntityTypePredicate.ANY)
             return null;
         if (this.simplequests_api$computedTranslation != null || this.simplequests_api$computed)
             return this.simplequests_api$computedTranslation;
-        this.simplequests_api$computed = true;
+        this.simplequests_api$computed = cache;
         JsonElement element = this.serializeToJson();
         if (element.isJsonObject()) {
             JsonObject obj = element.getAsJsonObject();
@@ -58,6 +58,8 @@ public abstract class EntityPredicateMixin implements PredicateTranslation {
                 } else {
                     formattedItems.add(new TranslatableComponent(Util.makeDescriptionId("entity", new ResourceLocation(s))));
                 }
+                if (!cache)
+                    return formattedItems;
                 this.simplequests_api$computedTranslation = formattedItems;
             }
         }

@@ -44,7 +44,7 @@ public abstract class BlockPredicateMixin implements PredicateTranslation {
     private List<MutableComponent> simplequests_api$computedTranslation;
 
     @Override
-    public List<MutableComponent> translation() {
+    public List<MutableComponent> translation(boolean cache) {
         if ((Object) this == BlockPredicate.ANY)
             return List.of(new TextComponent(""));
         if ((this.blocks == null && this.tag == null) || this.properties != StatePropertiesPredicate.ANY || this.nbt != NbtPredicate.ANY)
@@ -57,6 +57,8 @@ public abstract class BlockPredicateMixin implements PredicateTranslation {
         if (this.tag != null) {
             formattedItems.add(QuestUtils.tagsComponent(this.tag, Registry.BLOCK, Block::getName));
         }
+        if (!cache)
+            return formattedItems;
         this.simplequests_api$computedTranslation = formattedItems;
         return this.simplequests_api$computedTranslation;
     }

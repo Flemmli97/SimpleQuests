@@ -35,6 +35,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -126,6 +127,14 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                 .addDescription("This is an example description")
                 .addDescription("This is another example description")
                 .addTaskEntry("fish", new ItemTask(DescriptiveValue.list((ItemPredicate.Builder.item().of(Items.COD).build())).build(), ConstantValue.exactly(15), "Give 15 cods", true, null)));
+        this.addQuest(new Quest.Builder(new ResourceLocation("example", "item_tag_example"),
+                "Example for an item tag quest",
+                new ResourceLocation("chests/abandoned_mineshaft"))
+                .setRepeatDelay(36000)
+                .withIcon(new ItemStack(Items.OAK_LOG))
+                .addDescription("This is an example description")
+                .addDescription("This is another example description")
+                .addTaskEntry("fish", new ItemTask(DescriptiveValue.list((ItemPredicate.Builder.item().of(ItemTags.LOGS).build())).build(), ConstantValue.exactly(15), "", true, null)));
         this.addQuest(new Quest.Builder(new ResourceLocation("example", "multi/item_example_multi"),
                 "Example for a multi item quest",
                 new ResourceLocation("chests/abandoned_mineshaft"))
