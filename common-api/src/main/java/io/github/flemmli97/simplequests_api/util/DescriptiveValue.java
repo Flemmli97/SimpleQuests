@@ -18,12 +18,12 @@ public class DescriptiveValue<T> {
 
     private final T value;
     private final String description;
-    private final Function<T, List<MutableComponent>> translations;
+    private final Function<T, List<MutableComponent>> translation;
 
     public DescriptiveValue(T value, String description, @Nullable Function<T, List<MutableComponent>> translation) {
         this.value = value;
         this.description = description;
-        this.translations = translation == null ? t -> null : translation;
+        this.translation = translation == null ? t -> null : translation;
     }
 
     public static <T> DescriptiveValue<T> of(T val) {
@@ -102,7 +102,7 @@ public class DescriptiveValue<T> {
     public MutableComponent getTranslation(String alt, Object... args) {
         String key = !this.description.isEmpty() ? this.description : alt;
         MutableComponent translation = null;
-        List<MutableComponent> translations = this.translations.apply(this.value);
+        List<MutableComponent> translations = this.translation.apply(this.value);
         if (translations != null && !translations.isEmpty()) {
             if (translations.size() == 1)
                 translation = translations.get(0);
