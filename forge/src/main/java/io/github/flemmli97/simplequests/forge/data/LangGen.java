@@ -48,6 +48,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.reset.all", "Reset all progress for %s");
         this.add("simplequests.unlock", "Unlocked quest %2$s for players %1$s");
         this.add("simplequests.unlock.fail", "No such quest %s");
+        this.add("simplequests.adminMode", "Admin mode: %s");
 
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
         this.add("simplequests.quest.is_selection", "Quest with id %s is a selection-quest!");

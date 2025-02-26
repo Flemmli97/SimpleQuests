@@ -62,6 +62,8 @@ public class PlayerData implements PlayerQuestData {
 
     private int interactionCooldown;
 
+    private boolean adminMode;
+
     public static PlayerData get(ServerPlayer player) {
         return ((SimpleQuestDataGet) player).simpleQuestPlayerData();
     }
@@ -233,7 +235,8 @@ public class PlayerData implements PlayerQuestData {
             return;
         } else if (forced || this.player.level().getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable("simplequests.reset", prog.getName(this.player)).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable("simplequests.reset", prog.getName(this.player)
+                        .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
             this.removeTickableQuestProgress(prog);
             prog.getQuest().onReset(this.player);
@@ -282,6 +285,14 @@ public class PlayerData implements PlayerQuestData {
     @Override
     public ServerPlayer getPlayer() {
         return this.player;
+    }
+
+    public boolean isAdminMode() {
+        return this.adminMode;
+    }
+
+    public void setAdminMode(boolean adminMode) {
+        this.adminMode = adminMode;
     }
 
     @Override
