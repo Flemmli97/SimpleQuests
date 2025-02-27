@@ -13,6 +13,7 @@ Simple Quests 2.1.0
   - Replaced by `simplequests:ticking_predicates` which takes an entity predicate
 - Added command `/simplequest admin` and when in admin mode allows you to view/accept otherwise hidden subquests
   - Previously this was done with a permission string which defaulted to true
+- Add ModernFix compat (broke translations)
 
 Simple Quests 1.5.8
 ================
