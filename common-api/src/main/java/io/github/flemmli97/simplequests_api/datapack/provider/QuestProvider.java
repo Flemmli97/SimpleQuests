@@ -3,9 +3,12 @@ package io.github.flemmli97.simplequests_api.datapack.provider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -46,20 +49,22 @@ public abstract class QuestProvider implements DataProvider {
     @Override
     public void run(HashCache cache) {
         this.add();
-        this.categories.forEach((res, builder) -> {
+        this.categories.forEach((res, category) -> {
             Path path = this.gen.getOutputFolder().resolve("data/" + res.getNamespace() + "/" + QuestsManager.CATEGORY_LOCATION + "/" + res.getPath() + ".json");
             try {
-                JsonElement obj = builder.serialize(this.full);
-                DataProvider.save(GSON, cache, obj, path);
+                JsonElement obj = QuestCategory.CODEC.apply(this.full)
+                        .encodeStart(JsonOps.INSTANCE, category)
+                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);                DataProvider.save(GSON, cache, obj, path);
             } catch (IOException e) {
                 LOGGER.error("Couldn't save quest category {}", path, e);
             }
         });
-        this.quests.forEach((res, builder) -> {
+        this.quests.forEach((res, quest) -> {
             Path path = this.gen.getOutputFolder().resolve("data/" + res.getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + res.getPath() + ".json");
             try {
-                JsonElement obj = builder.serialize(false, this.full);
-                DataProvider.save(GSON, cache, obj, path);
+                JsonElement obj = QuestBaseRegistry.CODEC.apply(false, this.full)
+                        .encodeStart(JsonOps.INSTANCE, quest)
+                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);                DataProvider.save(GSON, cache, obj, path);
             } catch (IOException e) {
                 LOGGER.error("Couldn't save quest {}", path, e);
             }
@@ -71,7 +76,7 @@ public abstract class QuestProvider implements DataProvider {
         return "Quests";
     }
 
-    public void addQuest(QuestBase.BuilderBase<?> builder) {
+    public void addQuest(QuestBase.BuilderBase<?, ?> builder) {
         QuestBase quest = builder.build();
         if (quest.category != QuestCategory.DEFAULT_CATEGORY) {
             QuestCategory prev = this.categories.get(quest.category.id);

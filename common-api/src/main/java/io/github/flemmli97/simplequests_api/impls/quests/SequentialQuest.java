@@ -1,7 +1,8 @@
 package io.github.flemmli97.simplequests_api.impls.quests;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
@@ -9,16 +10,18 @@ import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
+import net.minecraft.Util;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 /**
  * Quest containing multiple quests that need to be fininshed
@@ -26,6 +29,16 @@ import java.util.Map;
 public class SequentialQuest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "sequential_quest");
+
+    public static final BiFunction<Boolean, Boolean, Codec<SequentialQuest>> CODEC = Util.memoize((withId, full) ->
+            QuestBase.buildCodec(QuestData.CODEC
+                    .forGetter(q -> new QuestData(q.quests, q.loot,
+                            q.command.isEmpty() || full ? Optional.of(q.command) : Optional.empty())), withId, full, (id, task, data) -> {
+                Builder builder = new Builder(id, task, data.loot);
+                data.quests.forEach(builder::addQuest);
+                data.command.ifPresent(builder::withCommand);
+                return builder;
+            }));
 
     private final List<ResourceLocation> quests;
 
@@ -41,28 +54,9 @@ public class SequentialQuest extends QuestBase {
         this.command = command;
     }
 
-    public static SequentialQuest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
-        return QuestBase.of(task -> {
-            SequentialQuest.Builder builder = new SequentialQuest.Builder(id, task, new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")))
-                    .withCommand(GsonHelper.getAsString(obj, "command", ""));
-            JsonArray entries = GsonHelper.getAsJsonArray(obj, "quests");
-            entries.forEach(ent -> builder.addQuest(new ResourceLocation(ent.getAsString())));
-            return builder;
-        }, category, obj).build();
-    }
-
     @Override
-    public JsonObject serialize(boolean withId, boolean full) {
-        SimpleQuestsAPI.LOGGER.debug("Serializing {} with id {}", ID, this.id);
-        JsonObject obj = super.serialize(withId, full);
-        obj.addProperty("loot_table", this.loot.toString());
-        if (!this.command.isEmpty() || full)
-            obj.addProperty("command", this.command);
-        JsonArray entries = new JsonArray();
-        this.quests.forEach(res -> entries.add(res.toString()));
-        obj.add("quests", entries);
-        obj.addProperty(QuestBase.TYPE_ID, ID.toString());
-        return obj;
+    public ResourceLocation getTypeId() {
+        return ID;
     }
 
     @Override
@@ -110,7 +104,7 @@ public class SequentialQuest extends QuestBase {
         return base == null ? Map.of() : base.resolveTasks(data, progress, 0);
     }
 
-    public static class Builder extends BuilderBase<Builder> {
+    public static class Builder extends BuilderBase<SequentialQuest, Builder> {
 
         protected final List<ResourceLocation> compositeQuests = new ArrayList<>();
         protected final ResourceLocation loot;
@@ -144,5 +138,14 @@ public class SequentialQuest extends QuestBase {
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }
+    }
+
+    private record QuestData(List<ResourceLocation> quests, ResourceLocation loot, Optional<String> command) {
+        static final MapCodec<QuestData> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                        ResourceLocation.CODEC.listOf().fieldOf("quests").forGetter(d -> d.quests),
+                        ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot),
+                        Codec.STRING.optionalFieldOf("command").forGetter(d -> d.command)
+                ).apply(inst, QuestData::new)
+        );
     }
 }

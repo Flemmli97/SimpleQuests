@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
@@ -99,7 +100,8 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
             if (el.isJsonObject()) {
                 JsonObject obj = el.getAsJsonObject();
                 if (!obj.keySet().isEmpty()) {
-                    categoryBuilder.put(res, QuestCategory.of(res, obj));
+                    obj.addProperty("id", res.toString());
+                    categoryBuilder.put(res, QuestCategory.CODEC.apply(true).parse(JsonOps.INSTANCE, obj).getOrThrow(false, SimpleQuestsAPI.LOGGER::error));
                 }
             }
         });
@@ -120,7 +122,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                                 throw new JsonSyntaxException("Quest category of " + cat + " for quest " + res + " doesn't exist!");
                         }
                         ResourceLocation questType = new ResourceLocation(GsonHelper.getAsString(obj, QuestBase.TYPE_ID, Quest.ID.toString()));
-                        QuestBase base = QuestBaseRegistry.deserialize(questType, res, questCategory, obj);
+                        QuestBase base = QuestBaseRegistry.deserialize(JsonOps.INSTANCE, questType, res, questCategory, obj);
                         map.computeIfAbsent(questCategory, c -> new ImmutableMap.Builder<>())
                                 .put(res, base);
                     }

@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests_api.impls.quests;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
@@ -12,23 +12,38 @@ import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
+import net.minecraft.Util;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class Quest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "quest");
+
+    public static final BiFunction<Boolean, Boolean, Codec<Quest>> CODEC = Util.memoize((withId, full) ->
+            QuestBase.buildCodec(QuestData.CODEC
+                    .forGetter(q -> new QuestData(q.loot,
+                            q.command.isEmpty() || full ? Optional.of(q.command) : Optional.empty(),
+                            q.questSubmissionTrigger.isEmpty() || full ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
+                            q.entries)), withId, full, (id, task, data) -> {
+                Builder builder = new Builder(id, task, data.loot);
+                data.entries.forEach(builder::addTaskEntry);
+                builder.withSubmissionTrigger(data.questSubmissionTrigger.orElse(""));
+                builder.setCompletionCommand(data.command.orElse(""));
+                return builder;
+            }));
 
     private final Map<String, QuestTask<?>> entries;
 
@@ -48,36 +63,9 @@ public class Quest extends QuestBase {
         this.questSubmissionTrigger = questSubmissionTrigger;
     }
 
-    public static Quest of(ResourceLocation id, QuestCategory category, JsonObject obj) {
-        return QuestBase.of(task -> {
-            Quest.Builder builder = new Builder(id, task, new ResourceLocation(GsonHelper.getAsString(obj, "loot_table")))
-                    .withSubmissionTrigger(GsonHelper.getAsString(obj, "submission_trigger", ""))
-                    .setCompletionCommand(GsonHelper.getAsString(obj, "command", ""));
-            JsonObject entries = GsonHelper.getAsJsonObject(obj, "entries");
-            entries.entrySet().forEach(ent -> {
-                if (!ent.getValue().isJsonObject())
-                    throw new JsonSyntaxException("Expected JsonObject for " + ent.getKey() + " but was " + ent.getValue());
-                ResourceLocation entryID = new ResourceLocation(GsonHelper.getAsString(ent.getValue().getAsJsonObject(), "id"));
-                builder.addTaskEntry(ent.getKey(), QuestEntryRegistry.deserialize(entryID, ent.getValue().getAsJsonObject()));
-            });
-            return builder;
-        }, category, obj).build();
-    }
-
     @Override
-    public JsonObject serialize(boolean withId, boolean full) {
-        SimpleQuestsAPI.LOGGER.debug("Serializing {} with id {}", ID, this.id);
-        JsonObject obj = super.serialize(withId, full);
-        obj.addProperty("loot_table", this.loot.toString());
-        if (!this.command.isEmpty() || full)
-            obj.addProperty("command", this.command);
-        if (!this.questSubmissionTrigger.isEmpty() || full)
-            obj.addProperty("submission_trigger", this.questSubmissionTrigger);
-        JsonObject entries = new JsonObject();
-        this.entries.forEach((res, entry) -> entries.add(res, QuestEntryRegistry.ENTRY_CODEC.encodeStart(JsonOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry {}", e))));
-        obj.add("entries", entries);
-        obj.addProperty(QuestBase.TYPE_ID, ID.toString());
-        return obj;
+    public ResourceLocation getTypeId() {
+        return ID;
     }
 
     @Override
@@ -123,7 +111,7 @@ public class Quest extends QuestBase {
         return builder.build();
     }
 
-    public static class Builder extends BuilderBase<Builder> {
+    public static class Builder extends BuilderBase<Quest, Builder> {
 
         protected final Map<String, QuestTask<?>> entries = new LinkedHashMap<>();
 
@@ -166,5 +154,16 @@ public class Quest extends QuestBase {
             quest.setDelayString(this.repeatDelayString);
             return quest;
         }
+    }
+
+    private record QuestData(ResourceLocation loot, Optional<String> command,
+                             Optional<String> questSubmissionTrigger, Map<String, QuestTask<?>> entries) {
+        static final MapCodec<QuestData> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                        ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot),
+                        Codec.STRING.optionalFieldOf("command").forGetter(d -> d.command),
+                        Codec.STRING.optionalFieldOf("submission_trigger").forGetter(d -> d.questSubmissionTrigger),
+                        Codec.unboundedMap(Codec.STRING, QuestEntryRegistry.ENTRY_CODEC).fieldOf("entries").forGetter(d -> d.entries)
+                ).apply(inst, QuestData::new)
+        );
     }
 }

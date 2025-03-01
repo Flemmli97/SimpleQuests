@@ -2,7 +2,6 @@ package io.github.flemmli97.simplequests_api.player;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
@@ -13,7 +12,6 @@ import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
-import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -209,13 +207,15 @@ public class QuestProgress {
         CompoundTag tag = new CompoundTag();
         if (this.base.isDynamic()) {
             tag.putBoolean("DynamicQuest", true);
-            tag.put("DynamicQuest", JsonCodecs.NullableJsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, this.base.serialize(true, false)));
+            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(true, false)
+                    .encodeStart(NbtOps.INSTANCE, this.base).getOrThrow(false, SimpleQuestsAPI.LOGGER::error));
         } else {
             tag.putString("Quest", this.base.id.toString());
         }
         tag.putInt("QuestIndex", this.questIndex);
         CompoundTag entries = new CompoundTag();
-        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't save quest entry {}", e))));
+        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC
+                .encodeStart(NbtOps.INSTANCE, entry).getOrThrow(false, SimpleQuestsAPI.LOGGER::error)));
         tag.put("QuestEntries", entries);
 
         ListTag list = new ListTag();
@@ -234,9 +234,12 @@ public class QuestProgress {
 
     public void load(CompoundTag tag, PlayerQuestData data) {
         if (tag.contains("DynamicQuest")) {
-            JsonElement e = NbtOps.INSTANCE.convertTo(JsonCodecs.NullableJsonOps.INSTANCE, tag.getCompound("DynamicQuest"));
             try {
-                this.base = QuestBaseRegistry.deserializeFull(e.getAsJsonObject());
+                this.base = QuestBaseRegistry.CODEC.apply(true, true).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
+                        .get().map(v -> v, s -> {
+                            SimpleQuestsAPI.LOGGER.error("Couldn't read dynamic quest {}", s.message());
+                            throw new IllegalStateException();
+                        });
             } catch (Exception ex) {
                 SimpleQuestsAPI.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
                 throw new IllegalStateException();

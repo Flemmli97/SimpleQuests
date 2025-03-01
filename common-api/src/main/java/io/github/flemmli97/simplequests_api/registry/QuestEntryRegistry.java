@@ -1,8 +1,6 @@
 package io.github.flemmli97.simplequests_api.registry;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.AdvancementTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.BlockInteractTask;
@@ -28,9 +26,9 @@ public class QuestEntryRegistry {
 
     private static final Map<ResourceLocation, TaskCodec<ResolvedQuestTask>> MAP = new HashMap<>();
     public static final Codec<ResolvedQuestTask> RESOLVED_QUEST_ENTRY_CODEC = ResourceLocation.CODEC
-            .dispatch("id", e -> e.getId().id(), id -> MAP.get(id).taskCodec());
+            .dispatch("id", e -> e.getId().id(), id -> getCodec(id).taskCodec());
     public static final Codec<QuestTask<?>> ENTRY_CODEC = ResourceLocation.CODEC
-            .dispatch("id", e -> e.getId().id(), id -> MAP.get(id).taskHolderCodec());
+            .dispatch("id", e -> e.getId().id(), id -> getCodec(id).taskHolderCodec());
 
     public static void register() {
         registerSerializer(ItemTask.ID, ItemTask.CODEC, ItemTask.ItemTaskResolved.CODEC);
@@ -54,13 +52,13 @@ public class QuestEntryRegistry {
         MAP.put(id.id(), (TaskCodec<ResolvedQuestTask>) new TaskCodec<>(deserializer, entrySerializer));
     }
 
-    public static QuestTask<?> deserialize(ResourceLocation res, JsonObject obj) {
+    public static TaskCodec<ResolvedQuestTask> getCodec(ResourceLocation res) {
         TaskCodec<ResolvedQuestTask> d = MAP.get(res);
         // Legacy
         if (d == null && res.getNamespace().equals("simplequests"))
             d = MAP.get(new ResourceLocation(SimpleQuestsAPI.MODID, res.getPath()));
         if (d != null)
-            return d.taskHolderCodec().parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> SimpleQuestsAPI.LOGGER.error("Couldn't deserialize QuestEntry from json {}", e));
+            return d;
         throw new IllegalStateException("Missing entry for key " + res);
     }
 
