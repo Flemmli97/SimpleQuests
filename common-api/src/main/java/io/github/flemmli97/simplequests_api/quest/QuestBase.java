@@ -1,13 +1,14 @@
 package io.github.flemmli97.simplequests_api.quest;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.util.JsonCodecs;
 import io.github.flemmli97.simplequests_api.util.QuestUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -16,7 +17,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +55,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     private final ItemStack icon;
 
-    private String repeatDelayString;
+    String repeatDelayString;
 
     protected final EntityPredicate unlockCondition;
 
@@ -85,99 +85,63 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack().withPermission(4), command);
     }
 
-    public static <B extends BuilderBase<B>> B of(Function<String, B> questBuilder,
-                                                  QuestCategory category, JsonObject obj) {
-        B questbuilder = questBuilder.apply(GsonHelper.getAsString(obj, "name"));
-        questbuilder.withCategory(category);
-        JsonElement descEl = obj.get("description");
-        if (descEl != null) {
-            if (descEl.isJsonPrimitive() && !descEl.getAsString().isEmpty())
-                questbuilder.addDescription(descEl.getAsString());
-            else if (descEl.isJsonArray()) {
-                descEl.getAsJsonArray().forEach(ea -> {
-                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
-                        questbuilder.addDescription(ea.getAsString());
-                    }
-                });
-            }
-        }
-        JsonElement e = obj.get("parent_id");
-        if (e != null) {
-            if (e.isJsonPrimitive() && !e.getAsString().isEmpty())
-                questbuilder.addParent(new ResourceLocation(e.getAsString()));
-            else if (e.isJsonArray()) {
-                e.getAsJsonArray().forEach(ea -> {
-                    if (ea.isJsonPrimitive() && !ea.getAsString().isEmpty()) {
-                        questbuilder.addParent(new ResourceLocation(ea.getAsString()));
-                    }
-                });
-            }
-        }
-        if (GsonHelper.getAsBoolean(obj, "redo_parent", false))
-            questbuilder.setRedoParent();
-        if (GsonHelper.getAsBoolean(obj, "need_unlock", false))
-            questbuilder.needsUnlocking();
-        questbuilder.withIcon(QuestUtils.icon(obj, "icon", Items.PAPER));
-        questbuilder.setRepeatDelay(QuestUtils.tryParseTime(obj, "repeat_delay", 0));
-        questbuilder.setMaxDaily(GsonHelper.getAsInt(obj, "repeat_daily", 0));
-        questbuilder.withSortingNum(GsonHelper.getAsInt(obj, "sorting_id", 0));
-        if (GsonHelper.getAsBoolean(obj, "daily_quest", false))
-            questbuilder.setDailyQuest();
-        questbuilder.withUnlockCondition(EntityPredicate.fromJson(GsonHelper.getAsJsonObject(obj, "unlock_condition", null)));
-        questbuilder.setVisibility(Visibility.valueOf(GsonHelper.getAsString(obj, "visibility", Visibility.DEFAULT.toString())));
-        return questbuilder;
+    public static <T extends QuestBase, R, B extends BuilderBase<T, B>> Codec<T> buildCodec(RecordCodecBuilder<T, R> codec, boolean withId, boolean full, QuestBuildFactory<R, B> fact) {
+        return RecordCodecBuilder.create(instance -> instance.group(
+                        Codec.BOOL.optionalFieldOf("daily_quest").forGetter(q -> q.isDailyQuest || full ? Optional.of(q.isDailyQuest) : Optional.empty()),
+                        Codec.STRING.optionalFieldOf("visibility")
+                                .xmap(opt -> opt.map(Visibility::valueOf).orElse(Visibility.DEFAULT), vis -> vis != Visibility.DEFAULT || full ? Optional.of(vis.toString()) : Optional.empty()).forGetter(q -> q.visibility),
+                        codec,
+
+                        JsonCodecs.ITEM_STACK_CODEC.optionalFieldOf("icon").forGetter(q -> QuestUtils.defaultChecked(q.getIcon(), full ? null : Items.PAPER)),
+                        Codec.either(Codec.INT, Codec.STRING).optionalFieldOf("repeat_delay")
+                                .forGetter(q -> {
+                                    if (q.repeatDelayString != null)
+                                        return Optional.of(Either.right(q.repeatDelayString));
+                                    return q.repeatDelay != 0 || full ? Optional.of(Either.left(q.repeatDelay)) : Optional.empty();
+                                }),
+                        Codec.INT.optionalFieldOf("repeat_daily").forGetter(q -> q.repeatDaily != 0 || full ? Optional.of(q.repeatDaily) : Optional.empty()),
+                        Codec.INT.optionalFieldOf("sorting_id").forGetter(q -> q.sortingId != 0 || full ? Optional.of(q.sortingId) : Optional.empty()),
+
+                        JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> q.neededParentQuests.isEmpty() || full ? Optional.of(q.neededParentQuests) : Optional.empty()),
+                        Codec.BOOL.optionalFieldOf("redo_parent").forGetter(q -> q.redoParent || full ? Optional.of(q.redoParent) : Optional.empty()),
+                        Codec.BOOL.optionalFieldOf("need_unlock").forGetter(q -> q.needsUnlock || full ? Optional.of(q.needsUnlock) : Optional.empty()),
+                        JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("unlock_condition").forGetter(q -> Optional.ofNullable(q.unlockCondition)),
+
+                        ResourceLocation.CODEC.optionalFieldOf("id").forGetter(q -> withId ? Optional.of(q.id) : Optional.empty()),
+                        ResourceLocation.CODEC.optionalFieldOf("category").forGetter(q -> q.category != QuestCategory.DEFAULT_CATEGORY ? Optional.of(q.category.id) : Optional.empty()),
+                        Codec.STRING.fieldOf("name").forGetter(q -> q.name),
+                        JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> q.description.isEmpty() || full ? Optional.of(q.description) : Optional.empty())
+                ).apply(instance, (isDaily, visibility, r, icon, repeatDelay, daily, sort, parent, redo_parent, unlock, unlockCondition, id, cat, task, desc) -> {
+                    B builder = fact.create(id.orElseThrow(), task, r);
+                    builder.withCategory(cat.map(c -> QuestsManager.instance().getQuestCategory(c)).orElse(QuestCategory.DEFAULT_CATEGORY));
+                    desc.orElse(List.of())
+                            .forEach(builder::addDescription);
+                    parent.orElse(List.of())
+                            .forEach(builder::addParent);
+                    if (redo_parent.orElse(false))
+                        builder.setRedoParent();
+                    if (unlock.orElse(false))
+                        builder.needsUnlocking();
+                    builder.withIcon(icon.orElse(new ItemStack(Items.PAPER)));
+                    repeatDelay.ifPresent(d -> {
+                        d.ifLeft(builder::setRepeatDelay);
+                        d.ifRight(builder::setRepeatDelay);
+                    });
+                    daily.ifPresent(builder::setMaxDaily);
+                    sort.ifPresent(builder::withSortingNum);
+                    if (isDaily.orElse(false))
+                        builder.setDailyQuest();
+                    unlockCondition.ifPresent(builder::withUnlockCondition);
+                    builder.setVisibility(visibility);
+                    return builder.build();
+                })
+        );
     }
 
-    public JsonObject serialize(boolean withId, boolean full) {
-        JsonObject obj = new JsonObject();
-        if (withId)
-            obj.addProperty("id", this.id.toString());
-        if (this.category != QuestCategory.DEFAULT_CATEGORY)
-            obj.addProperty("category", this.category.id.toString());
-        obj.addProperty("name", this.name);
-        if (!this.description.isEmpty() || full) {
-            if (this.description.size() == 1)
-                obj.addProperty("description", this.description.get(0));
-            else {
-                JsonArray arr = new JsonArray();
-                this.description.forEach(arr::add);
-                obj.add("description", arr);
-            }
-        }
-        if (!this.neededParentQuests.isEmpty() || full) {
-            if (this.neededParentQuests.size() == 1)
-                obj.addProperty("parent_id", this.neededParentQuests.get(0).toString());
-            else {
-                JsonArray arr = new JsonArray();
-                this.neededParentQuests.forEach(r -> arr.add(r.toString()));
-                obj.add("parent_id", arr);
-            }
-        }
-        if (this.redoParent || full)
-            obj.addProperty("redo_parent", this.redoParent);
-        if (this.needsUnlock || full)
-            obj.addProperty("need_unlock", this.needsUnlock);
-        if (this.unlockCondition != EntityPredicate.ANY || full)
-            obj.add("unlock_condition", this.unlockCondition.serializeToJson());
-        QuestUtils.writeItemStackToJson(this.icon, full ? null : Items.PAPER)
-                .ifPresent(icon -> obj.add("icon", icon));
-        if (this.repeatDelayString != null)
-            obj.addProperty("repeat_delay", this.repeatDelayString);
-        else if (this.repeatDelay != 0 || full)
-            obj.addProperty("repeat_delay", this.repeatDelay);
-        if (this.repeatDaily != 0 || full)
-            obj.addProperty("repeat_daily", this.repeatDaily);
-        if (this.sortingId != 0 || full)
-            obj.addProperty("sorting_id", this.sortingId);
-        if (this.isDailyQuest || full)
-            obj.addProperty("daily_quest", this.isDailyQuest);
-        if (this.visibility != Visibility.DEFAULT || full)
-            obj.addProperty("visibility", this.visibility.toString());
-        return obj;
-    }
+    public abstract ResourceLocation getTypeId();
 
     public boolean isUnlocked(ServerPlayer player) {
-        return this.unlockCondition.matches(player, player);
+        return this.unlockCondition == null || this.unlockCondition.matches(player, player);
     }
 
     public Visibility getVisibility() {
@@ -302,7 +266,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         return Integer.compare(this.sortingId, quest.sortingId);
     }
 
-    public static abstract class BuilderBase<T extends BuilderBase<T>> {
+    public static abstract class BuilderBase<Q extends QuestBase, T extends BuilderBase<Q, T>> {
 
         protected final ResourceLocation id;
         protected QuestCategory category = QuestCategory.DEFAULT_CATEGORY;
@@ -318,7 +282,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         protected int sortingId;
 
-        protected EntityPredicate unlockCondition = EntityPredicate.ANY;
+        protected EntityPredicate unlockCondition = null;
 
         protected ItemStack icon = new ItemStack(Items.PAPER);
 
@@ -397,7 +361,12 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         protected abstract T asThis();
 
-        public abstract QuestBase build();
+        public abstract Q build();
+    }
+
+    public interface QuestBuildFactory<R, B> {
+
+        B create(ResourceLocation id, String task, R data);
     }
 
     public enum Visibility {

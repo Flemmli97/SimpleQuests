@@ -6,9 +6,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.serialization.JsonOps;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -57,12 +60,16 @@ public abstract class QuestProvider implements DataProvider {
         return CompletableFuture.allOf(
                 CompletableFuture.allOf(this.categories.entrySet().stream().map(entry -> {
                     Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.CATEGORY_LOCATION + "/" + entry.getKey().getPath() + ".json");
-                    JsonElement obj = entry.getValue().serialize(this.full);
+                    JsonElement obj = QuestCategory.CODEC.apply(this.full)
+                            .encodeStart(JsonOps.INSTANCE, entry.getValue())
+                            .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);
                     return saveStable(cache, obj, path);
                 }).toArray(CompletableFuture<?>[]::new)),
                 CompletableFuture.allOf(this.quests.entrySet().stream().map(entry -> {
                     Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + entry.getKey().getPath() + ".json");
-                    JsonElement obj = entry.getValue().serialize(false, this.full);
+                    JsonElement obj = QuestBaseRegistry.CODEC.apply(false, this.full)
+                            .encodeStart(JsonOps.INSTANCE, entry.getValue())
+                            .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);
                     return saveStable(cache, obj, path);
                 }).toArray(CompletableFuture<?>[]::new))
         );
@@ -73,7 +80,7 @@ public abstract class QuestProvider implements DataProvider {
         return "Quests";
     }
 
-    public void addQuest(QuestBase.BuilderBase<?> builder) {
+    public void addQuest(QuestBase.BuilderBase<?, ?> builder) {
         QuestBase quest = builder.build();
         if (quest.category != QuestCategory.DEFAULT_CATEGORY) {
             QuestCategory prev = this.categories.get(quest.category.id);
