@@ -240,7 +240,9 @@ public class QuestProgress {
                 .registryAccess().createSerializationContext(NbtOps.INSTANCE);
         if (tag.contains("DynamicQuest")) {
             try {
-                this.base = QuestBaseRegistry.CODEC.apply(true, true).parse(ops, tag.getCompound("DynamicQuest"))
+                this.base = QuestBaseRegistry.CODEC.apply(true, true).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
+                        .mapError(e -> "Couldn't read dynamic quest " + e).getOrThrow();
+                QuestBaseRegistry.CODEC.apply(true, true).parse(ops, tag.getCompound("DynamicQuest"))
                         .getOrThrow();
             } catch (Exception ex) {
                 SimpleQuestsAPI.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
@@ -259,7 +261,7 @@ public class QuestProgress {
             ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
             CompoundTag entries = tag.getCompound("QuestEntries");
             entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.parse(ops, entries.getCompound(key))
-                    .mapError(e -> "Couldn't read quest entry" + e).getOrThrow()));
+                    .mapError(e -> "Couldn't read quest entry " + e).getOrThrow()));
             this.questEntries = builder.build();
         } else {
             this.questEntries = this.quest.resolveTasks(data, this, this.questIndex);

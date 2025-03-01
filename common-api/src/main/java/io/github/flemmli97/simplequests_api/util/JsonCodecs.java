@@ -6,8 +6,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
@@ -17,13 +15,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class JsonCodecs {
-
-    // The default BlockPos Codec writes to an array, this writes to a map of x, y, z
-    public static Codec<BlockPos> BLOCK_POS_CODEC = RecordCodecBuilder.create((instance) ->
-            instance.group(Codec.INT.fieldOf("x").forGetter(Vec3i::getX),
-                    Codec.INT.fieldOf("y").forGetter(Vec3i::getY),
-                    Codec.INT.fieldOf("z").forGetter(Vec3i::getZ)
-            ).apply(instance, BlockPos::new));
 
     /**
      * Custom ItemStack Codec that tries to minimize data saved

@@ -53,7 +53,7 @@ public class SimpleQuestsAPI {
             } catch (NoSuchMethodException e) {
                 SimpleQuestsAPI.LOGGER.fatal("Implementation of {} needs to provide an no arg constructor", clss);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                SimpleQuestsAPI.LOGGER.error(e);
             }
         }
         throw new IllegalStateException("Couldn't create an instance of " + abstractClss);
