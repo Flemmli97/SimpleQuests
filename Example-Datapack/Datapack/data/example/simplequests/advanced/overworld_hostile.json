@@ -5,8 +5,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "icon": {
-    "item": "minecraft:diamond_sword",
-    "count": 1,
+    "id": "minecraft:diamond_sword",
     "tag": {
       "Damage": 0
     }
@@ -19,7 +18,7 @@
   "loot_table": "minecraft:chests/end_city_treasure",
   "command": "",
   "submission_trigger": "",
-  "entries": {
+  "tasks": {
     "zombies": {
       "predicates": [
         {
@@ -27,7 +26,7 @@
         }
       ],
       "amount": 10,
-      "id": "simplequests_api:entity"
+      "id": "simplequests_api:kill"
     },
     "zombies_baby": {
       "predicates": [
@@ -42,7 +41,7 @@
         }
       ],
       "amount": 3,
-      "id": "simplequests_api:entity"
+      "id": "simplequests_api:kill"
     },
     "skeleton": {
       "predicates": [
@@ -51,7 +50,7 @@
         }
       ],
       "amount": 10,
-      "id": "simplequests_api:entity"
+      "id": "simplequests_api:kill"
     },
     "spiders": {
       "predicates": [
@@ -60,7 +59,7 @@
         }
       ],
       "amount": 5,
-      "id": "simplequests_api:entity"
+      "id": "simplequests_api:kill"
     },
     "xp": {
       "amount": 5,

@@ -13,7 +13,7 @@
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
-  "entries": {
+  "tasks": {
     "cows": {
       "predicates": [
         {
@@ -21,7 +21,7 @@
         }
       ],
       "amount": 15,
-      "id": "simplequests_api:entity"
+      "id": "simplequests_api:kill"
     }
   },
   "type": "simplequests_api:quest"

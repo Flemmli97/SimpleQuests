@@ -13,7 +13,7 @@
   "loot_table": "minecraft:chests/end_city_treasure",
   "command": "",
   "submission_trigger": "",
-  "entries": {
+  "tasks": {
     "sword": {
       "predicates": [
         {
