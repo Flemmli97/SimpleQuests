@@ -30,7 +30,7 @@ import java.util.Optional;
 
 public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
 
-    public static final QuestEntryKey<KillTask> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "entity"));
+    public static final QuestEntryKey<KillTask> ID = new QuestEntryKey<>(new ResourceLocation(SimpleQuestsAPI.MODID, "kill"));
     public static final Codec<KillTask> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(JsonCodecs.nonEmptyList(DescriptiveValue.withTranslation(JsonCodecs.ENTITY_PREDICATE_CODEC), "predicates can't be empty").fieldOf("predicates").forGetter(d -> d.predicates),
                     JsonCodecs.NUMBER_PROVIDER_CODEC.fieldOf("amount").forGetter(d -> d.amount),

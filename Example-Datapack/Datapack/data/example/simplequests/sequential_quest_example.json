@@ -11,11 +11,11 @@
   "sorting_id": 0,
   "daily_quest": false,
   "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "command": "",
   "quests": [
     "example:hidden/sequential_a",
     "example:hidden/sequential_b"
   ],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
   "type": "simplequests_api:sequential_quest"
 }

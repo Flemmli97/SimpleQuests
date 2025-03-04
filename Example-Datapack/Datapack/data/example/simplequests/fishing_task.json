@@ -5,8 +5,7 @@
   "redo_parent": false,
   "need_unlock": false,
   "icon": {
-    "item": "minecraft:fishing_rod",
-    "count": 1,
+    "id": "minecraft:fishing_rod",
     "tag": {
       "Damage": 0
     }
@@ -19,7 +18,7 @@
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
-  "entries": {
+  "tasks": {
     "cod": {
       "item_predicates": [
         {
