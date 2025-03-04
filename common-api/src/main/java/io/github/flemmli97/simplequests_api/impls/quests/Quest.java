@@ -40,15 +40,15 @@ public class Quest extends QuestBase {
                     .forGetter(q -> new QuestData(q.loot.location(),
                             q.command.isEmpty() || full ? Optional.of(q.command) : Optional.empty(),
                             q.questSubmissionTrigger.isEmpty() || full ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
-                            q.entries)), withId, full, (id, task, data) -> {
+                            q.tasks)), withId, full, (id, task, data) -> {
                 Builder builder = new Builder(id, task, data.loot);
-                data.entries.forEach(builder::addTaskEntry);
+                data.tasks.forEach(builder::addTaskEntry);
                 builder.withSubmissionTrigger(data.questSubmissionTrigger.orElse(""));
                 builder.setCompletionCommand(data.command.orElse(""));
                 return builder;
             }));
 
-    private final Map<String, QuestTask<?>> entries;
+    private final Map<String, QuestTask<?>> tasks;
 
     private final ResourceKey<LootTable> loot;
     private final String command;
@@ -56,11 +56,11 @@ public class Quest extends QuestBase {
     public final String questSubmissionTrigger;
 
     protected Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestTask<?>> entries,
+                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestTask<?>> tasks,
                     boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command, Visibility visibility) {
         super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock,
                 icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
-        this.entries = entries;
+        this.tasks = tasks;
         this.loot = ResourceKey.create(Registries.LOOT_TABLE, loot);
         this.command = command;
         this.questSubmissionTrigger = questSubmissionTrigger;
@@ -74,7 +74,7 @@ public class Quest extends QuestBase {
     @Override
     public List<MutableComponent> getTasks(ServerPlayer player, Style taskStyle) {
         List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, QuestTask<?>> e : this.entries.entrySet()) {
+        for (Map.Entry<String, QuestTask<?>> e : this.tasks.entrySet()) {
             list.add(Component.translatable(SimpleQuestsAPI.MODID + ".task.formatter", e.getValue().translation(player).withStyle(taskStyle)));
         }
         return list;
@@ -106,7 +106,7 @@ public class Quest extends QuestBase {
     @Override
     public Map<String, ResolvedQuestTask> resolveTasks(PlayerQuestData data, QuestProgress progress, int questIndex) {
         ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
-        for (Map.Entry<String, QuestTask<?>> i : this.entries.entrySet()) {
+        for (Map.Entry<String, QuestTask<?>> i : this.tasks.entrySet()) {
             ResolvedQuestTask task = i.getValue().resolve(data, progress, this);
             if (task != null)
                 builder.put(i.getKey(), task);
@@ -160,12 +160,12 @@ public class Quest extends QuestBase {
     }
 
     private record QuestData(ResourceLocation loot, Optional<String> command,
-                             Optional<String> questSubmissionTrigger, Map<String, QuestTask<?>> entries) {
+                             Optional<String> questSubmissionTrigger, Map<String, QuestTask<?>> tasks) {
         static final MapCodec<QuestData> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                         ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot),
                         Codec.STRING.optionalFieldOf("command").forGetter(d -> d.command),
                         Codec.STRING.optionalFieldOf("submission_trigger").forGetter(d -> d.questSubmissionTrigger),
-                        Codec.unboundedMap(Codec.STRING, QuestEntryRegistry.ENTRY_CODEC).fieldOf("entries").forGetter(d -> d.entries)
+                        Codec.unboundedMap(Codec.STRING, QuestEntryRegistry.ENTRY_CODEC).fieldOf("tasks").forGetter(d -> d.tasks)
                 ).apply(inst, QuestData::new)
         );
     }

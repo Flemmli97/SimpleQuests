@@ -13,7 +13,7 @@
   "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
-  "entries": {
+  "tasks": {
     "xp": {
       "amount": {
         "min": 5.0,
