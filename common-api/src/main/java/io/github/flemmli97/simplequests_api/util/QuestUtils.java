@@ -55,6 +55,8 @@ public class QuestUtils {
     }
 
     public static Optional<ItemStack> defaultChecked(ItemStack stack, Item defaultValue) {
+        if (stack.isEmpty())
+            return Optional.empty();
         if (stack.getCount() == 1 && stack.getComponentsPatch().isEmpty() && defaultValue != null && stack.getItem() == defaultValue)
             return Optional.empty();
         return Optional.of(stack);
