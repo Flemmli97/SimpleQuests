@@ -46,7 +46,7 @@ public class JsonCodecs {
                             s -> s.getTag() == null && s.getCount() == 1 ? DataResult.success(s.getItem()) : DataResult.error(() -> "Not default itemstack")),
             RecordCodecBuilder.create(inst -> inst.group(
                     BuiltInRegistries.ITEM.byNameCodec().fieldOf("id").forGetter(ItemStack::getItem),
-                    ExtraCodecs.POSITIVE_INT.optionalFieldOf("count").forGetter(stack -> stack.getCount() == 1 ? Optional.empty() : Optional.of(stack.getCount())),
+                    ExtraCodecs.POSITIVE_INT.optionalFieldOf("Count").forGetter(stack -> stack.getCount() == 1 ? Optional.empty() : Optional.of(stack.getCount())),
                     CompoundTag.CODEC.optionalFieldOf("tag").forGetter((stack) -> Optional.ofNullable(stack.getTag()))
             ).apply(inst, (s, count, tag) -> {
                 ItemStack stack = new ItemStack(s, count.orElse(1));
