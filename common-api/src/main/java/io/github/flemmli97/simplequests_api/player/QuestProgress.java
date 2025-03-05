@@ -207,7 +207,7 @@ public class QuestProgress {
         CompoundTag tag = new CompoundTag();
         if (this.base.isDynamic()) {
             tag.putBoolean("DynamicQuest", true);
-            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(true, false)
+            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID)
                     .encodeStart(NbtOps.INSTANCE, this.base).getOrThrow(false, SimpleQuestsAPI.LOGGER::error));
         } else {
             tag.putString("Quest", this.base.id.toString());
@@ -235,7 +235,7 @@ public class QuestProgress {
     public void load(CompoundTag tag, PlayerQuestData data) {
         if (tag.contains("DynamicQuest")) {
             try {
-                this.base = QuestBaseRegistry.CODEC.apply(true, true).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
+                this.base = QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
                         .get().map(v -> v, s -> {
                             SimpleQuestsAPI.LOGGER.error("Couldn't read dynamic quest {}", s.message());
                             throw new IllegalStateException();
