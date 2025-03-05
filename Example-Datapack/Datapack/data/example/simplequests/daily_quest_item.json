@@ -7,6 +7,7 @@
   "icon": "minecraft:dirt",
   "repeat_delay": 0,
   "repeat_daily": 0,
+  "max_repeat": 0,
   "sorting_id": 0,
   "daily_quest": true,
   "visibility": "DEFAULT",

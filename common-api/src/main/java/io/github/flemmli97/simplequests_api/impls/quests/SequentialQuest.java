@@ -49,9 +49,10 @@ public class SequentialQuest extends QuestBase {
     private final String command;
 
     protected SequentialQuest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                              ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, boolean isDailyQuest, EntityPredicate unlockCondition,
+                              ItemStack icon, int repeatDelay, int repeatDaily, int maxRepeat,
+                              int sortingId, boolean isDailyQuest, EntityPredicate unlockCondition,
                               List<ResourceLocation> compositeQuests, ResourceLocation loot, String command, Visibility visibility) {
-        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
+        super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock, icon, repeatDelay, repeatDaily, maxRepeat, sortingId, isDailyQuest, unlockCondition, visibility);
         this.quests = compositeQuests;
         this.loot = ResourceKey.create(Registries.LOOT_TABLE, loot);
         this.command = command;
@@ -136,7 +137,7 @@ public class SequentialQuest extends QuestBase {
         @Override
         public SequentialQuest build() {
             SequentialQuest quest = new SequentialQuest(this.id, this.category, this.name, this.description, this.neededParentQuests, this.redoParent, this.needsUnlock,
-                    this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.isDailyQuest,
+                    this.icon, this.repeatDelay, this.repeatDaily, this.maxRepeat, this.sortingId, this.isDailyQuest,
                     this.unlockCondition, this.compositeQuests, this.loot, this.command, this.visibility);
             quest.setDelayString(this.repeatDelayString);
             return quest;

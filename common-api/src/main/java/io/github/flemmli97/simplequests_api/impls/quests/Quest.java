@@ -56,10 +56,11 @@ public class Quest extends QuestBase {
     public final String questSubmissionTrigger;
 
     protected Quest(ResourceLocation id, QuestCategory category, String questTaskString, List<String> questTaskDesc, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int sortingId, Map<String, QuestTask<?>> tasks,
+                    ResourceLocation loot, ItemStack icon, int repeatDelay, int repeatDaily, int maxRepeat,
+                    int sortingId, Map<String, QuestTask<?>> tasks,
                     boolean isDailyQuest, String questSubmissionTrigger, EntityPredicate unlockCondition, String command, Visibility visibility) {
         super(id, category, questTaskString, questTaskDesc, parents, redoParent, needsUnlock,
-                icon, repeatDelay, repeatDaily, sortingId, isDailyQuest, unlockCondition, visibility);
+                icon, repeatDelay, repeatDaily, maxRepeat, sortingId, isDailyQuest, unlockCondition, visibility);
         this.tasks = tasks;
         this.loot = ResourceKey.create(Registries.LOOT_TABLE, loot);
         this.command = command;
@@ -152,7 +153,7 @@ public class Quest extends QuestBase {
         @Override
         public Quest build() {
             Quest quest = new Quest(this.id, this.category, this.name, this.description, this.neededParentQuests, this.redoParent, this.needsUnlock,
-                    this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.sortingId, this.entries, this.isDailyQuest,
+                    this.loot, this.icon, this.repeatDelay, this.repeatDaily, this.maxRepeat, this.sortingId, this.entries, this.isDailyQuest,
                     this.submissionTrigger, this.unlockCondition, this.command, this.visibility);
             quest.setDelayString(this.repeatDelayString);
             return quest;
