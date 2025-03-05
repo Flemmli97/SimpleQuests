@@ -6,7 +6,7 @@
   "need_unlock": false,
   "icon": {
     "id": "minecraft:map",
-    "count": 5
+    "Count": 5
   },
   "repeat_delay": 36000,
   "repeat_daily": 0,
