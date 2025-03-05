@@ -6,14 +6,16 @@ Simple Quests 2.1.0
   - All fields in json are now snake_case
   - Multi quest task and single ones are now merged together
   - Active quests for players will be reset
-  - See https://gist.github.com/Flemmli97/2b542ed19c65156d7f80521edb19c13c for information of how to update
-- Added new quest task: `simplequests:predicate`
+  - Use https://flemmli97.github.io/misode.github.io/simplequests_convert/ to convert your old datapacks (mostly)
+- Added new quest task: `simplequests:predicates`
   - Submitting task that checks for a player predicate
 - Removed location and position task
-  - Replaced by `simplequests:ticking_predicates` which takes an entity predicate
+  - Replaced by `simplequests:predicates` which is more flexible
 - Added command `/simplequest admin` and when in admin mode allows you to view/accept otherwise hidden subquests
   - Previously this was done with a permission string which defaulted to true
-- Add ModernFix compat (broke translations)
+- Added `max_repeat` field to quests:
+  - Allows to limit the amount of times a quest can be repeated. Default 0 = unlimited
+- LinguaBib: Add ModernFix compat (broke translations)
 
 Simple Quests 1.5.8
 ================
