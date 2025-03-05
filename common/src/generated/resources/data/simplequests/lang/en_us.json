@@ -25,6 +25,7 @@
   "simplequests.accept.daily": "You can't repeat this quest again today",
   "simplequests.accept.delay": "Quest on cooldown for %s",
   "simplequests.accept.onetime": "This is a onetime quest",
+  "simplequests.accept.max": "You cannot repeat this quest anymore",
   "simplequests.accept.yes": "Quest acceptable",
   "simplequests.accept.locked": "You can't accept this quest",
   "simplequests.gui.main": "Quests",

@@ -273,6 +273,8 @@ public class PlayerData implements PlayerQuestData {
             return AcceptType.DAILYFULL;
         if (quest.category.maxDaily > 0 && this.dailyQuestsCategoryTracker.getOrDefault(quest.category.id, 0) >= quest.category.maxDaily)
             return AcceptType.DAILYFULL;
+        if (quest.maxRepeat > 0 && this.finishedQuestsTracker.getOrDefault(quest.category.id, 0) >= quest.maxRepeat)
+            return AcceptType.MAX;
         //One time quests
         if (quest.repeatDelay < 0 && this.cooldownTracker.containsKey(quest.id))
             return AcceptType.ONETIME;
@@ -484,6 +486,7 @@ public class PlayerData implements PlayerQuestData {
         REQUIREMENTS("simplequests.accept.requirements"),
         DAILYFULL("simplequests.accept.daily"),
         DELAY("simplequests.accept.delay"),
+        MAX("simplequests.accept.max"),
         ONETIME("simplequests.accept.onetime"),
         ACCEPT("simplequests.accept.yes"),
         LOCKED("simplequests.accept.locked");
@@ -496,6 +499,14 @@ public class PlayerData implements PlayerQuestData {
 
         public String langKey() {
             return this.lang;
+        }
+
+        public boolean guiVisible(ServerPlayer player) {
+            if (PlayerData.get(player).adminMode) {
+                return true;
+            }
+            return this == AcceptType.REQUIREMENTS || this == AcceptType.ONETIME
+                    || this == AcceptType.MAX || this == AcceptType.LOCKED;
         }
     }
 }

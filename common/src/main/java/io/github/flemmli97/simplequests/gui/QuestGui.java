@@ -115,9 +115,9 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         for (MutableComponent comp : questComponents(data, quest, type))
             lore.add(StringTag.valueOf(Component.Serializer.toJson(comp)));
         MutableComponent requirement = switch (type) {
-            case REQUIREMENTS, ONETIME, DAILYFULL, LOCKED ->
+            case ACCEPT, DELAY -> null;
+            default ->
                     Component.translatable(type.langKey()).withStyle(Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.DARK_RED));
-            default -> null;
         };
         if (requirement != null)
             lore.add(StringTag.valueOf(Component.Serializer.toJson(requirement)));
@@ -153,9 +153,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
             QuestBase quest = questMap.get(res);
             if (!SimpleQuests.canAcceptQuest(serverPlayer, quest))
                 return true;
-            PlayerData.AcceptType type = PlayerData.get(serverPlayer).canAcceptQuest(quest);
-            return type == PlayerData.AcceptType.REQUIREMENTS || type == PlayerData.AcceptType.ONETIME
-                    || type == PlayerData.AcceptType.DAILYFULL || type == PlayerData.AcceptType.LOCKED;
+            return PlayerData.get(serverPlayer).canAcceptQuest(quest).guiVisible(serverPlayer);
         });
         this.maxPages = (this.quests.size() - 1) / QUEST_PER_PAGE;
         int page = Mth.clamp(data.page, 0, this.maxPages);

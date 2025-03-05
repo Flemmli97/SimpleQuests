@@ -45,7 +45,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public final QuestCategory category;
     public final List<ResourceLocation> neededParentQuests;
 
-    public final int repeatDelay, repeatDaily;
+    public final int repeatDelay, repeatDaily, maxRepeat;
 
     protected final String name;
     protected final List<String> description;
@@ -63,7 +63,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
     public final Visibility visibility;
 
     public QuestBase(ResourceLocation id, QuestCategory category, String name, List<String> description, List<ResourceLocation> parents, boolean redoParent, boolean needsUnlock,
-                     ItemStack icon, int repeatDelay, int repeatDaily, int sortingId,
+                     ItemStack icon, int repeatDelay, int repeatDaily, int maxRepeat, int sortingId,
                      boolean isDailyQuest, EntityPredicate unlockCondition, Visibility visibility) {
         this.id = id;
         this.category = category == null ? QuestCategory.DEFAULT_CATEGORY : category;
@@ -74,6 +74,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         this.needsUnlock = needsUnlock;
         this.repeatDelay = repeatDelay;
         this.repeatDaily = repeatDaily;
+        this.maxRepeat = maxRepeat;
         this.sortingId = sortingId;
         this.icon = icon;
         this.isDailyQuest = isDailyQuest;
@@ -88,6 +89,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
     public static <T extends QuestBase, R, B extends BuilderBase<T, B>> Codec<T> buildCodec(RecordCodecBuilder<T, R> codec, QuestBaseRegistry.CodecContext codecType, QuestBuildFactory<R, B> fact) {
         return RecordCodecBuilder.create(instance -> instance.group(
+                        Codec.INT.optionalFieldOf("sorting_id").forGetter(q -> q.sortingId != 0 || codecType.full() ? Optional.of(q.sortingId) : Optional.empty()),
                         Codec.BOOL.optionalFieldOf("daily_quest").forGetter(q -> q.isDailyQuest || codecType.full() ? Optional.of(q.isDailyQuest) : Optional.empty()),
                         Codec.STRING.optionalFieldOf("visibility")
                                 .xmap(opt -> opt.map(Visibility::valueOf).orElse(Visibility.DEFAULT), vis -> vis != Visibility.DEFAULT || codecType.full() ? Optional.of(vis.toString()) : Optional.empty()).forGetter(q -> q.visibility),
@@ -101,7 +103,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
                                     return q.repeatDelay != 0 || codecType.full() ? Optional.of(Either.left(q.repeatDelay)) : Optional.empty();
                                 }),
                         Codec.INT.optionalFieldOf("repeat_daily").forGetter(q -> q.repeatDaily != 0 || codecType.full() ? Optional.of(q.repeatDaily) : Optional.empty()),
-                        Codec.INT.optionalFieldOf("sorting_id").forGetter(q -> q.sortingId != 0 || codecType.full() ? Optional.of(q.sortingId) : Optional.empty()),
+                        Codec.INT.optionalFieldOf("max_repeat").forGetter(q -> q.maxRepeat != 0 || codecType.full() ? Optional.of(q.maxRepeat) : Optional.empty()),
 
                         JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> q.neededParentQuests.isEmpty() || codecType.full() ? Optional.of(q.neededParentQuests) : Optional.empty()),
                         Codec.BOOL.optionalFieldOf("redo_parent").forGetter(q -> q.redoParent || codecType.full() ? Optional.of(q.redoParent) : Optional.empty()),
@@ -112,7 +114,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
                         ResourceLocation.CODEC.optionalFieldOf("category").forGetter(q -> q.category != QuestCategory.DEFAULT_CATEGORY ? Optional.of(q.category.id) : Optional.empty()),
                         Codec.STRING.fieldOf("name").forGetter(q -> q.name),
                         JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> q.description.isEmpty() || codecType.full() ? Optional.of(q.description) : Optional.empty())
-                ).apply(instance, (isDaily, visibility, r, icon, repeatDelay, daily, sort, parent, redo_parent, unlock, unlockCondition, id, cat, task, desc) -> {
+                ).apply(instance, (sort, isDaily, visibility, r, icon, repeatDelay, daily, maxRepeat, parent, redo_parent, unlock, unlockCondition, id, cat, task, desc) -> {
                     B builder = fact.create(id.orElseThrow(), task, r);
                     builder.withCategory(cat.map(c -> QuestsManager.instance().getQuestCategory(c)).orElse(QuestCategory.DEFAULT_CATEGORY));
                     desc.orElse(List.of())
@@ -273,7 +275,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
         protected QuestCategory category = QuestCategory.DEFAULT_CATEGORY;
         protected final List<ResourceLocation> neededParentQuests = new ArrayList<>();
 
-        protected int repeatDelay, repeatDaily;
+        protected int repeatDelay, repeatDaily, maxRepeat;
         protected String repeatDelayString;
 
         protected final String name;
@@ -337,6 +339,11 @@ public abstract class QuestBase implements Comparable<QuestBase> {
 
         public T setMaxDaily(int max) {
             this.repeatDaily = max;
+            return this.asThis();
+        }
+
+        public T setMaxRepeat(int max) {
+            this.maxRepeat = max;
             return this.asThis();
         }
 

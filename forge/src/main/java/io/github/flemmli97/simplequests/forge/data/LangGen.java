@@ -62,6 +62,7 @@ public class LangGen implements DataProvider {
         this.add(PlayerData.AcceptType.DAILYFULL.langKey(), "You can't repeat this quest again today");
         this.add(PlayerData.AcceptType.DELAY.langKey(), "Quest on cooldown for %s");
         this.add(PlayerData.AcceptType.ONETIME.langKey(), "This is a onetime quest");
+        this.add(PlayerData.AcceptType.MAX.langKey(), "You cannot repeat this quest anymore");
         this.add(PlayerData.AcceptType.ACCEPT.langKey(), "Quest acceptable");
         this.add(PlayerData.AcceptType.LOCKED.langKey(), "You can't accept this quest");
 

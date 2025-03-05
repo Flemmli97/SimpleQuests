@@ -12,6 +12,7 @@
   },
   "repeat_delay": "1w",
   "repeat_daily": 0,
+  "max_repeat": 0,
   "sorting_id": 0,
   "daily_quest": false,
   "visibility": "DEFAULT",
