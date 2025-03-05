@@ -8,7 +8,7 @@ import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
-import net.minecraft.Util;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * A quest containing multiple quests which can be selected
@@ -29,13 +29,13 @@ public class CompositeQuest extends QuestBase {
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "composite_quest");
 
-    public static final BiFunction<Boolean, Boolean, MapCodec<CompositeQuest>> CODEC = Util.memoize((withId, full) ->
+    public static final Function<QuestBaseRegistry.CodecContext, MapCodec<CompositeQuest>> CODEC = ctx ->
             QuestBase.buildCodec(ResourceLocation.CODEC.listOf().fieldOf("quests")
-                    .forGetter(q -> q.compositeQuests), withId, full, (id, task, quests) -> {
+                    .forGetter(q -> q.compositeQuests), ctx, (id, task, quests) -> {
                 Builder builder = new Builder(id, task);
                 quests.forEach(builder::addQuest);
                 return builder;
-            }));
+            });
 
     private final List<ResourceLocation> compositeQuests;
 

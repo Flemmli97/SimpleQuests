@@ -10,7 +10,7 @@ import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
-import net.minecraft.Util;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Quest containing multiple quests that need to be fininshed
@@ -33,15 +33,15 @@ public class SequentialQuest extends QuestBase {
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "sequential_quest");
 
-    public static final BiFunction<Boolean, Boolean, MapCodec<SequentialQuest>> CODEC = Util.memoize((withId, full) ->
+    public static final Function<QuestBaseRegistry.CodecContext, MapCodec<SequentialQuest>> CODEC = ctx ->
             QuestBase.buildCodec(QuestData.CODEC
                     .forGetter(q -> new QuestData(q.quests, q.loot.location(),
-                            q.command.isEmpty() || full ? Optional.of(q.command) : Optional.empty())), withId, full, (id, task, data) -> {
+                            q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty())), ctx, (id, task, data) -> {
                 Builder builder = new Builder(id, task, data.loot);
                 data.quests.forEach(builder::addQuest);
                 data.command.ifPresent(builder::withCommand);
                 return builder;
-            }));
+            });
 
     private final List<ResourceLocation> quests;
 

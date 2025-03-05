@@ -71,7 +71,7 @@ public abstract class QuestProvider implements DataProvider {
                 }).toArray(CompletableFuture<?>[]::new)),
                 CompletableFuture.allOf(this.quests.entrySet().stream().map(entry -> {
                     Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + entry.getKey().getPath() + ".json");
-                    JsonElement obj = QuestBaseRegistry.CODEC.apply(false, this.full)
+                    JsonElement obj = QuestBaseRegistry.CODEC.apply(this.full ? QuestBaseRegistry.DATAGEN : QuestBaseRegistry.DEFAULT)
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();
                     return saveStable(cache, obj, path);

@@ -210,7 +210,7 @@ public class QuestProgress {
         DynamicOps<Tag> ops = lookup.createSerializationContext(NbtOps.INSTANCE);
         if (this.base.isDynamic()) {
             tag.putBoolean("DynamicQuest", true);
-            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(true, false)
+            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID)
                     .encodeStart(ops, this.base).getOrThrow());
         } else {
             tag.putString("Quest", this.base.id.toString());
@@ -240,10 +240,8 @@ public class QuestProgress {
                 .registryAccess().createSerializationContext(NbtOps.INSTANCE);
         if (tag.contains("DynamicQuest")) {
             try {
-                this.base = QuestBaseRegistry.CODEC.apply(true, true).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
+                this.base = QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
                         .mapError(e -> "Couldn't read dynamic quest " + e).getOrThrow();
-                QuestBaseRegistry.CODEC.apply(true, true).parse(ops, tag.getCompound("DynamicQuest"))
-                        .getOrThrow();
             } catch (Exception ex) {
                 SimpleQuestsAPI.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
                 throw new IllegalStateException();
