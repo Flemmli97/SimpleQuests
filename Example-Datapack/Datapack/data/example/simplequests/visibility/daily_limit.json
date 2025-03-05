@@ -18,9 +18,11 @@
     "fish": {
       "predicates": [
         {
-          "items": [
-            "minecraft:cod"
-          ]
+          "value": {
+            "items": [
+              "minecraft:cod"
+            ]
+          }
         }
       ],
       "amount": 15,

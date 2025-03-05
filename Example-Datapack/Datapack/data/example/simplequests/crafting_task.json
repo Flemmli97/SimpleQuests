@@ -18,9 +18,11 @@
     "sticks": {
       "item_predicates": [
         {
-          "items": [
-            "minecraft:stick"
-          ]
+          "value": {
+            "items": [
+              "minecraft:stick"
+            ]
+          }
         }
       ],
       "amount": 3,
