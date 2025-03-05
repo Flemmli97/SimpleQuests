@@ -11,6 +11,8 @@ Simple Quests 2.1.0
   - Replaced by `simplequests:ticking_predicates` which takes an entity predicate
 - Added command `/simplequest admin` and when in admin mode allows you to view/accept otherwise hidden subquests
   - Previously this was done with a permission string which defaulted to true
+- Added `max_repeat` field to quests:
+  - Allows to limit the amount of times a quest can be repeated. Default 0
 
 Simple Quests 2.0.0
 ================

@@ -10,6 +10,7 @@
   "icon": "minecraft:cobblestone",
   "repeat_delay": 36000,
   "repeat_daily": 0,
+  "max_repeat": 0,
   "sorting_id": 0,
   "daily_quest": false,
   "visibility": "DEFAULT",
