@@ -134,7 +134,7 @@ public class QuestCategory implements Comparable<QuestCategory> {
         private boolean isVisible = true, isSilent;
         private boolean sameCategoryOnly;
         private int maxConcurrentQuests = -1;
-        private int maxDaily = -1;
+        private int maxDaily;
 
         private final List<ResourceLocation> requiredContext = new ArrayList<>();
 

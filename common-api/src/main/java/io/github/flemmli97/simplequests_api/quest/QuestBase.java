@@ -107,7 +107,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
                         Codec.INT.optionalFieldOf("repeat_daily").forGetter(q -> q.repeatDaily != 0 || codecType.full() ? Optional.of(q.repeatDaily) : Optional.empty()),
                         Codec.INT.optionalFieldOf("max_repeat").forGetter(q -> q.maxRepeat != 0 || codecType.full() ? Optional.of(q.maxRepeat) : Optional.empty()),
 
-                        JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> q.neededParentQuests.isEmpty() || codecType.full() ? Optional.of(q.neededParentQuests) : Optional.empty()),
+                        JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> !q.neededParentQuests.isEmpty() || codecType.full() ? Optional.of(q.neededParentQuests) : Optional.empty()),
                         Codec.BOOL.optionalFieldOf("redo_parent").forGetter(q -> q.redoParent || codecType.full() ? Optional.of(q.redoParent) : Optional.empty()),
                         Codec.BOOL.optionalFieldOf("need_unlock").forGetter(q -> q.needsUnlock || codecType.full() ? Optional.of(q.needsUnlock) : Optional.empty()),
                         EntityPredicate.CODEC.optionalFieldOf("unlock_condition").forGetter(q -> Optional.ofNullable(q.unlockCondition)),
@@ -115,7 +115,7 @@ public abstract class QuestBase implements Comparable<QuestBase> {
                         ResourceLocation.CODEC.optionalFieldOf(ID_FIELD).forGetter(q -> codecType.withId() ? Optional.of(q.id) : Optional.empty()),
                         ResourceLocation.CODEC.optionalFieldOf("category").forGetter(q -> q.category != QuestCategory.DEFAULT_CATEGORY ? Optional.of(q.category.id) : Optional.empty()),
                         Codec.STRING.fieldOf("name").forGetter(q -> q.name),
-                        JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> q.description.isEmpty() || codecType.full() ? Optional.of(q.description) : Optional.empty())
+                        JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> !q.description.isEmpty() || codecType.full() ? Optional.of(q.description) : Optional.empty())
                 ).apply(instance, (sort, isDaily, visibility, r, icon, repeatDelay, daily, maxRepeat, parent, redo_parent, unlock, unlockCondition, id, cat, task, desc) -> {
                     B builder = fact.create(id.orElseThrow(), task, r);
                     builder.withCategory(cat.map(c -> QuestsManager.instance().getQuestCategory(c)).orElse(QuestCategory.DEFAULT_CATEGORY));

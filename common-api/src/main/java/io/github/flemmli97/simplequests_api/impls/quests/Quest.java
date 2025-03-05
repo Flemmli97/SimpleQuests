@@ -38,8 +38,8 @@ public class Quest extends QuestBase {
     public static final Function<QuestBaseRegistry.CodecContext, MapCodec<Quest>> CODEC = ctx ->
             QuestBase.buildCodec(QuestData.CODEC
                     .forGetter(q -> new QuestData(q.loot.location(),
-                            q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty(),
-                            q.questSubmissionTrigger.isEmpty() || ctx.full() ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
+                            !q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty(),
+                            !q.questSubmissionTrigger.isEmpty() || ctx.full() ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
                             q.tasks)), ctx, (id, task, data) -> {
                 Builder builder = new Builder(id, task, data.loot);
                 data.tasks.forEach(builder::addTaskEntry);

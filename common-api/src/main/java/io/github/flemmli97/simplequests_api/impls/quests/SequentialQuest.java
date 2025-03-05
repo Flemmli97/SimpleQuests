@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +37,7 @@ public class SequentialQuest extends QuestBase {
     public static final Function<QuestBaseRegistry.CodecContext, MapCodec<SequentialQuest>> CODEC = ctx ->
             QuestBase.buildCodec(QuestData.CODEC
                     .forGetter(q -> new QuestData(q.quests, q.loot.location(),
-                            q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty())), ctx, (id, task, data) -> {
+                            !q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty())), ctx, (id, task, data) -> {
                 Builder builder = new Builder(id, task, data.loot);
                 data.quests.forEach(builder::addQuest);
                 data.command.ifPresent(builder::withCommand);
@@ -146,7 +147,7 @@ public class SequentialQuest extends QuestBase {
 
     private record QuestData(List<ResourceLocation> quests, ResourceLocation loot, Optional<String> command) {
         static final MapCodec<QuestData> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                        ResourceLocation.CODEC.listOf().fieldOf("quests").forGetter(d -> d.quests),
+                        ExtraCodecs.nonEmptyList(ResourceLocation.CODEC.listOf()).fieldOf("quests").forGetter(d -> d.quests),
                         ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot),
                         Codec.STRING.optionalFieldOf("command").forGetter(d -> d.command)
                 ).apply(inst, QuestData::new)
