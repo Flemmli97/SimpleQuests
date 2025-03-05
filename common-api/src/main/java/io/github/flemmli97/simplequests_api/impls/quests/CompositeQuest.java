@@ -12,6 +12,7 @@ import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +29,7 @@ public class CompositeQuest extends QuestBase {
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "composite_quest");
 
     public static final Function<QuestBaseRegistry.CodecContext, Codec<CompositeQuest>> CODEC = ctx ->
-            QuestBase.buildCodec(ResourceLocation.CODEC.listOf().fieldOf("quests")
+            QuestBase.buildCodec(ExtraCodecs.nonEmptyList(ResourceLocation.CODEC.listOf()).fieldOf("quests")
                     .forGetter(q -> q.compositeQuests), ctx, (id, task, quests) -> {
                 Builder builder = new Builder(id, task);
                 quests.forEach(builder::addQuest);
