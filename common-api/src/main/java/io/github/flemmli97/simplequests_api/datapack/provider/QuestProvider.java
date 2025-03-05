@@ -54,7 +54,8 @@ public abstract class QuestProvider implements DataProvider {
             try {
                 JsonElement obj = QuestCategory.CODEC.apply(this.full)
                         .encodeStart(JsonOps.INSTANCE, category)
-                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);                DataProvider.save(GSON, cache, obj, path);
+                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);
+                DataProvider.save(GSON, cache, obj, path);
             } catch (IOException e) {
                 LOGGER.error("Couldn't save quest category {}", path, e);
             }
@@ -62,9 +63,12 @@ public abstract class QuestProvider implements DataProvider {
         this.quests.forEach((res, quest) -> {
             Path path = this.gen.getOutputFolder().resolve("data/" + res.getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + res.getPath() + ".json");
             try {
-                JsonElement obj = QuestBaseRegistry.CODEC.apply(false, this.full)
+                JsonElement obj = QuestBaseRegistry.CODEC.apply(this.full ? QuestBaseRegistry.DATAGEN : QuestBaseRegistry.DEFAULT)
                         .encodeStart(JsonOps.INSTANCE, quest)
-                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);                DataProvider.save(GSON, cache, obj, path);
+                        .getOrThrow(false, SimpleQuestsAPI.LOGGER::error);
+                if (obj.isJsonObject())
+                    obj.getAsJsonObject().remove(QuestBase.ID_FIELD);
+                DataProvider.save(GSON, cache, obj, path);
             } catch (IOException e) {
                 LOGGER.error("Couldn't save quest {}", path, e);
             }

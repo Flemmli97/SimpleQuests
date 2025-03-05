@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 public abstract class QuestBase implements Comparable<QuestBase> {
 
     public static final String TYPE_ID = "type";
+    public static final String ID_FIELD = "id";
 
     public final ResourceLocation id;
     public final QuestCategory category;
@@ -86,32 +87,32 @@ public abstract class QuestBase implements Comparable<QuestBase> {
             player.getServer().getCommands().performCommand(player.createCommandSourceStack().withPermission(4), command);
     }
 
-    public static <T extends QuestBase, R, B extends BuilderBase<T, B>> Codec<T> buildCodec(RecordCodecBuilder<T, R> codec, boolean withId, boolean full, QuestBuildFactory<R, B> fact) {
+    public static <T extends QuestBase, R, B extends BuilderBase<T, B>> Codec<T> buildCodec(RecordCodecBuilder<T, R> codec, QuestBaseRegistry.CodecContext codecType, QuestBuildFactory<R, B> fact) {
         return RecordCodecBuilder.create(instance -> instance.group(
-                        Codec.BOOL.optionalFieldOf("daily_quest").forGetter(q -> q.isDailyQuest || full ? Optional.of(q.isDailyQuest) : Optional.empty()),
+                        Codec.BOOL.optionalFieldOf("daily_quest").forGetter(q -> q.isDailyQuest || codecType.full() ? Optional.of(q.isDailyQuest) : Optional.empty()),
                         Codec.STRING.optionalFieldOf("visibility")
-                                .xmap(opt -> opt.map(Visibility::valueOf).orElse(Visibility.DEFAULT), vis -> vis != Visibility.DEFAULT || full ? Optional.of(vis.toString()) : Optional.empty()).forGetter(q -> q.visibility),
+                                .xmap(opt -> opt.map(Visibility::valueOf).orElse(Visibility.DEFAULT), vis -> vis != Visibility.DEFAULT || codecType.full() ? Optional.of(vis.toString()) : Optional.empty()).forGetter(q -> q.visibility),
                         codec,
 
-                        JsonCodecs.ITEM_STACK_CODEC.optionalFieldOf("icon").forGetter(q -> QuestUtils.defaultChecked(q.getIcon(), full ? null : Items.PAPER)),
+                        JsonCodecs.ITEM_STACK_CODEC.optionalFieldOf("icon").forGetter(q -> QuestUtils.defaultChecked(q.getIcon(), codecType.full() ? null : Items.PAPER)),
                         Codec.either(Codec.INT, Codec.STRING).optionalFieldOf("repeat_delay")
                                 .forGetter(q -> {
                                     if (q.repeatDelayString != null)
                                         return Optional.of(Either.right(q.repeatDelayString));
-                                    return q.repeatDelay != 0 || full ? Optional.of(Either.left(q.repeatDelay)) : Optional.empty();
+                                    return q.repeatDelay != 0 || codecType.full() ? Optional.of(Either.left(q.repeatDelay)) : Optional.empty();
                                 }),
-                        Codec.INT.optionalFieldOf("repeat_daily").forGetter(q -> q.repeatDaily != 0 || full ? Optional.of(q.repeatDaily) : Optional.empty()),
-                        Codec.INT.optionalFieldOf("sorting_id").forGetter(q -> q.sortingId != 0 || full ? Optional.of(q.sortingId) : Optional.empty()),
+                        Codec.INT.optionalFieldOf("repeat_daily").forGetter(q -> q.repeatDaily != 0 || codecType.full() ? Optional.of(q.repeatDaily) : Optional.empty()),
+                        Codec.INT.optionalFieldOf("sorting_id").forGetter(q -> q.sortingId != 0 || codecType.full() ? Optional.of(q.sortingId) : Optional.empty()),
 
-                        JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> q.neededParentQuests.isEmpty() || full ? Optional.of(q.neededParentQuests) : Optional.empty()),
-                        Codec.BOOL.optionalFieldOf("redo_parent").forGetter(q -> q.redoParent || full ? Optional.of(q.redoParent) : Optional.empty()),
-                        Codec.BOOL.optionalFieldOf("need_unlock").forGetter(q -> q.needsUnlock || full ? Optional.of(q.needsUnlock) : Optional.empty()),
+                        JsonCodecs.listOrInline(ResourceLocation.CODEC).optionalFieldOf("parent_id").forGetter(q -> q.neededParentQuests.isEmpty() || codecType.full() ? Optional.of(q.neededParentQuests) : Optional.empty()),
+                        Codec.BOOL.optionalFieldOf("redo_parent").forGetter(q -> q.redoParent || codecType.full() ? Optional.of(q.redoParent) : Optional.empty()),
+                        Codec.BOOL.optionalFieldOf("need_unlock").forGetter(q -> q.needsUnlock || codecType.full() ? Optional.of(q.needsUnlock) : Optional.empty()),
                         JsonCodecs.ENTITY_PREDICATE_CODEC.optionalFieldOf("unlock_condition").forGetter(q -> Optional.ofNullable(q.unlockCondition)),
 
-                        ResourceLocation.CODEC.optionalFieldOf("id").forGetter(q -> withId ? Optional.of(q.id) : Optional.empty()),
+                        ResourceLocation.CODEC.optionalFieldOf(ID_FIELD).forGetter(q -> codecType.withId() ? Optional.of(q.id) : Optional.empty()),
                         ResourceLocation.CODEC.optionalFieldOf("category").forGetter(q -> q.category != QuestCategory.DEFAULT_CATEGORY ? Optional.of(q.category.id) : Optional.empty()),
                         Codec.STRING.fieldOf("name").forGetter(q -> q.name),
-                        JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> q.description.isEmpty() || full ? Optional.of(q.description) : Optional.empty())
+                        JsonCodecs.listOrInline(Codec.STRING).optionalFieldOf("description").forGetter(q -> q.description.isEmpty() || codecType.full() ? Optional.of(q.description) : Optional.empty())
                 ).apply(instance, (isDaily, visibility, r, icon, repeatDelay, daily, sort, parent, redo_parent, unlock, unlockCondition, id, cat, task, desc) -> {
                     B builder = fact.create(id.orElseThrow(), task, r);
                     builder.withCategory(cat.map(c -> QuestsManager.instance().getQuestCategory(c)).orElse(QuestCategory.DEFAULT_CATEGORY));

@@ -11,8 +11,8 @@ import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
+import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
-import net.minecraft.Util;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -26,24 +26,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Quest extends QuestBase {
 
     public static final ResourceLocation ID = new ResourceLocation(SimpleQuestsAPI.MODID, "quest");
 
-    public static final BiFunction<Boolean, Boolean, Codec<Quest>> CODEC = Util.memoize((withId, full) ->
+    public static final Function<QuestBaseRegistry.CodecContext, Codec<Quest>> CODEC = ctx ->
             QuestBase.buildCodec(QuestData.CODEC
                     .forGetter(q -> new QuestData(q.loot,
-                            q.command.isEmpty() || full ? Optional.of(q.command) : Optional.empty(),
-                            q.questSubmissionTrigger.isEmpty() || full ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
-                            q.tasks)), withId, full, (id, task, data) -> {
+                            q.command.isEmpty() || ctx.full() ? Optional.of(q.command) : Optional.empty(),
+                            q.questSubmissionTrigger.isEmpty() || ctx.full() ? Optional.of(q.questSubmissionTrigger) : Optional.empty(),
+                            q.tasks)), ctx, (id, task, data) -> {
                 Builder builder = new Builder(id, task, data.loot);
                 data.tasks.forEach(builder::addTaskEntry);
                 builder.withSubmissionTrigger(data.questSubmissionTrigger.orElse(""));
                 builder.setCompletionCommand(data.command.orElse(""));
                 return builder;
-            }));
+            });
 
     private final Map<String, QuestTask<?>> tasks;
 
