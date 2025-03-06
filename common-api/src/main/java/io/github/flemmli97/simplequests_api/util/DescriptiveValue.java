@@ -43,7 +43,7 @@ public class DescriptiveValue<T> {
 
     public static <T> Codec<DescriptiveValue<T>> codec(Codec<T> codec) {
         return Codec.mapPair(codec.fieldOf("value"), Codec.STRING.optionalFieldOf("description")).codec()
-                .xmap(v -> new DescriptiveValue<>(v.getFirst(), "", null),
+                .xmap(v -> new DescriptiveValue<>(v.getFirst(), v.getSecond().orElse(""), null),
                         v -> Pair.of(v.value(), v.description.isEmpty() ? Optional.empty() : Optional.of(v.description)));
     }
 
