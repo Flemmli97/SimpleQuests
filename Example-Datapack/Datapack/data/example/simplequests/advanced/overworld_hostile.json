@@ -18,7 +18,9 @@
     "zombies": {
       "predicates": [
         {
-          "type": "minecraft:zombie"
+          "value": {
+            "type": "minecraft:zombie"
+          }
         }
       ],
       "amount": 10.0,
@@ -42,7 +44,9 @@
     "skeleton": {
       "predicates": [
         {
-          "type": "minecraft:skeleton"
+          "value": {
+            "type": "minecraft:skeleton"
+          }
         }
       ],
       "amount": 10.0,
@@ -51,7 +55,9 @@
     "spiders": {
       "predicates": [
         {
-          "type": "minecraft:spider"
+          "value": {
+            "type": "minecraft:spider"
+          }
         }
       ],
       "amount": 5.0,

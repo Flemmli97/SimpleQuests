@@ -20,9 +20,15 @@
   "tasks": {
     "trade": {
       "advancements": [
-        "minecraft:adventure/trade",
-        "minecraft:adventure/bullseye",
-        "minecraft:adventure/ol_betsy"
+        {
+          "value": "minecraft:adventure/trade"
+        },
+        {
+          "value": "minecraft:adventure/bullseye"
+        },
+        {
+          "value": "minecraft:adventure/ol_betsy"
+        }
       ],
       "reset": true,
       "description": "Task Description. Will select one of the following advancements: adventure/trade, adventure/bullseye, adventure/ol_betsy",

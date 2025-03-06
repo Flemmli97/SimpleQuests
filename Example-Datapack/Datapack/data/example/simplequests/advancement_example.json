@@ -20,7 +20,9 @@
   "tasks": {
     "trade": {
       "advancements": [
-        "minecraft:adventure/trade"
+        {
+          "value": "minecraft:adventure/trade"
+        }
       ],
       "reset": true,
       "id": "simplequests_api:advancement"

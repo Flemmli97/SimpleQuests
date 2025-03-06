@@ -19,7 +19,9 @@
     "andesite": {
       "predicates": [
         {
-          "items": "minecraft:andesite"
+          "value": {
+            "items": "minecraft:andesite"
+          }
         }
       ],
       "amount": 15.0,

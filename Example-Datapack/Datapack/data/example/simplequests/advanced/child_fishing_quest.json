@@ -18,7 +18,9 @@
     "fish": {
       "predicates": [
         {
-          "items": "minecraft:cod"
+          "value": {
+            "items": "minecraft:cod"
+          }
         }
       ],
       "amount": 15.0,
@@ -29,7 +31,9 @@
     "fish_2": {
       "predicates": [
         {
-          "items": "minecraft:salmon"
+          "value": {
+            "items": "minecraft:salmon"
+          }
         }
       ],
       "amount": 15.0,

@@ -1,6 +1,5 @@
 package io.github.flemmli97.simplequests_api.util;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -11,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DescriptiveValue<T> {
@@ -18,14 +18,6 @@ public class DescriptiveValue<T> {
     private final T value;
     private final String description;
     private final Function<T, List<MutableComponent>> translation;
-
-    private DescriptiveValue(T value) {
-        this(value, "", null);
-    }
-
-    public DescriptiveValue(T value, String description) {
-        this(value, description, null);
-    }
 
     public DescriptiveValue(T value, String description, @Nullable Function<T, List<MutableComponent>> translation) {
         this.value = value;
@@ -50,15 +42,9 @@ public class DescriptiveValue<T> {
     }
 
     public static <T> Codec<DescriptiveValue<T>> codec(Codec<T> codec) {
-        return Codec.either(Codec.mapPair(codec.fieldOf("value"), Codec.STRING.fieldOf("description")).codec(), codec)
-                .xmap(e -> e.map(v -> new DescriptiveValue<>(v.getFirst(), v.getSecond(), null),
-                                v -> new DescriptiveValue<>(v, "", null)),
-                        v -> {
-                            String desc = v.description;
-                            if (desc.isEmpty())
-                                return Either.right(v.value());
-                            return Either.left(Pair.of(v.value(), desc));
-                        });
+        return Codec.mapPair(codec.fieldOf("value"), Codec.STRING.optionalFieldOf("description")).codec()
+                .xmap(v -> new DescriptiveValue<>(v.getFirst(), "", null),
+                        v -> Pair.of(v.value(), v.description.isEmpty() ? Optional.empty() : Optional.of(v.description)));
     }
 
     public static <T> Codec<DescriptiveValue<T>> codecDesc(Codec<T> codec) {
@@ -77,20 +63,22 @@ public class DescriptiveValue<T> {
 
     public static <T> Codec<DescriptiveValue<T>> withTranslation(Codec<T> codec) {
         Function<T, List<MutableComponent>> translation = PredicateTranslation::translation;
-        return Codec.either(Codec.mapPair(codec.fieldOf("value"), Codec.STRING.fieldOf("description")).codec(), codec)
-                .flatXmap(e -> e.map(v -> DataResult.success(new DescriptiveValue<>(v.getFirst(), v.getSecond(), translation)),
-                                v -> {
-                                    if (translation.apply(v) == null)
-                                        return DataResult.error(() -> "Description required. Element too complicated for default description");
-                                    return DataResult.success(new DescriptiveValue<>(v, "", translation));
-                                }),
+        // Selfnote: Do not use either codec!
+        // If a structs that has all optional fields (e.g. EntityPredicate) fails it will create an empty one and
+        // throw a missing description error (since all field there are optional)
+        // The real error gets swallowed
+        return Codec.mapPair(codec.fieldOf("value"), Codec.STRING.optionalFieldOf("description")).codec()
+                .flatXmap(v -> {
+                            String desc = v.getSecond().orElse("");
+                            if (desc.isEmpty() && translation.apply(v.getFirst()) == null)
+                                return DataResult.error(() -> "Description required. Element too complicated for default description");
+                            return DataResult.success(new DescriptiveValue<>(v.getFirst(), desc, translation));
+                        },
                         v -> {
                             String desc = v.description;
-                            if (translation.apply(v.value()) == null && v.description.isEmpty())
+                            if (v.description.isEmpty() && translation.apply(v.value()) == null)
                                 return DataResult.error(() -> "Description required. Element too complicated for default description");
-                            if (desc.isEmpty())
-                                return DataResult.success(Either.right(v.value()));
-                            return DataResult.success(Either.left(Pair.of(v.value(), desc)));
+                            return DataResult.success(Pair.of(v.value(), desc.isEmpty() ? Optional.empty() : Optional.of(desc)));
                         });
     }
 

@@ -18,12 +18,16 @@
     "break": {
       "block_predicates": [
         {
-          "blocks": "minecraft:diamond_ore"
+          "value": {
+            "blocks": "minecraft:diamond_ore"
+          }
         }
       ],
       "item_predicates": [
         {
-          "items": "minecraft:diamond_pickaxe"
+          "value": {
+            "items": "minecraft:diamond_pickaxe"
+          }
         }
       ],
       "amount": 3.0,

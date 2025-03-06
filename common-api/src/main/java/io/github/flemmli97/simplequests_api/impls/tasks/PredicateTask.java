@@ -74,7 +74,7 @@ public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResol
                                         boolean submit) implements ResolvedQuestTask {
 
         public static final MapCodec<PredicateTaskResolved> CODEC = RecordCodecBuilder.mapCodec((instance) ->
-                instance.group(DescriptiveValue.codec(EntityPredicate.CODEC).fieldOf("predicate").forGetter(d -> d.predicate),
+                instance.group(DescriptiveValue.codecDesc(EntityPredicate.CODEC).fieldOf("predicate").forGetter(d -> d.predicate),
                         Codec.BOOL.fieldOf("submit").forGetter(d -> d.submit)
                 ).apply(instance, PredicateTaskResolved::new));
 

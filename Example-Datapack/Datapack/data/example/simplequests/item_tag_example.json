@@ -21,7 +21,9 @@
     "fish": {
       "predicates": [
         {
-          "items": "#minecraft:logs"
+          "value": {
+            "items": "#minecraft:logs"
+          }
         }
       ],
       "amount": 15.0,

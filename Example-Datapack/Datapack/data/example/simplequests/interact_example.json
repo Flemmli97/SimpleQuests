@@ -18,12 +18,16 @@
     "interact": {
       "entity_predicates": [
         {
-          "type": "minecraft:chicken"
+          "value": {
+            "type": "minecraft:chicken"
+          }
         }
       ],
       "item_predicates": [
         {
-          "items": "minecraft:name_tag"
+          "value": {
+            "items": "minecraft:name_tag"
+          }
         }
       ],
       "amount": 2.0,

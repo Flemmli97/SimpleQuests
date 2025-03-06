@@ -18,7 +18,9 @@
     "cows": {
       "predicates": [
         {
-          "type": "minecraft:cow"
+          "value": {
+            "type": "minecraft:cow"
+          }
         },
         {
           "description": "Kill %2$s plains cow",

@@ -18,7 +18,9 @@
     "piglin": {
       "predicates": [
         {
-          "type": "minecraft:zombified_piglin"
+          "value": {
+            "type": "minecraft:zombified_piglin"
+          }
         }
       ],
       "amount": 15.0,
@@ -27,7 +29,9 @@
     "blaze": {
       "predicates": [
         {
-          "type": "minecraft:blaze"
+          "value": {
+            "type": "minecraft:blaze"
+          }
         }
       ],
       "amount": 5.0,
@@ -36,7 +40,9 @@
     "wither_skeleton": {
       "predicates": [
         {
-          "type": "minecraft:wither_skeleton"
+          "value": {
+            "type": "minecraft:wither_skeleton"
+          }
         }
       ],
       "amount": 5.0,
@@ -44,7 +50,9 @@
     },
     "fortress": {
       "advancements": [
-        "minecraft:nether/find_fortress"
+        {
+          "value": "minecraft:nether/find_fortress"
+        }
       ],
       "reset": false,
       "id": "simplequests_api:advancement"

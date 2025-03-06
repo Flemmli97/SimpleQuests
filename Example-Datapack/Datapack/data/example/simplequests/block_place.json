@@ -19,7 +19,9 @@
       "block_predicates": [],
       "item_predicates": [
         {
-          "items": "minecraft:emerald_block"
+          "value": {
+            "items": "minecraft:emerald_block"
+          }
         }
       ],
       "amount": 3.0,
