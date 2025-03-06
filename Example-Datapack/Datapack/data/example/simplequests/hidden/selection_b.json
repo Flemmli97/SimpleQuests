@@ -18,9 +18,11 @@
     "granite": {
       "predicates": [
         {
-          "items": [
-            "minecraft:granite"
-          ]
+          "value": {
+            "items": [
+              "minecraft:granite"
+            ]
+          }
         }
       ],
       "amount": 15,

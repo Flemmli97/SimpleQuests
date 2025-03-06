@@ -5,7 +5,7 @@
   "only_same_category": false,
   "max_concurrent_quests": -1,
   "sorting_id": 0,
-  "max_daily": -1,
+  "max_daily": 0,
   "required_context": [],
   "is_visible": true,
   "is_silent": false

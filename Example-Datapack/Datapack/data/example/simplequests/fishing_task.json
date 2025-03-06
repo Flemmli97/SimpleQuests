@@ -23,9 +23,11 @@
     "cod": {
       "item_predicates": [
         {
-          "items": [
-            "minecraft:cod"
-          ]
+          "value": {
+            "items": [
+              "minecraft:cod"
+            ]
+          }
         }
       ],
       "amount": 3,

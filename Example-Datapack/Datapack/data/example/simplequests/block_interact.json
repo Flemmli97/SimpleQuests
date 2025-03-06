@@ -18,9 +18,11 @@
     "task": {
       "block_predicates": [
         {
-          "blocks": [
-            "minecraft:chest"
-          ]
+          "value": {
+            "blocks": [
+              "minecraft:chest"
+            ]
+          }
         }
       ],
       "amount": 3,

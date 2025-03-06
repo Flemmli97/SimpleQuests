@@ -1,6 +1,5 @@
 package io.github.flemmli97.simplequests_api.util;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -12,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DescriptiveValue<T> {
@@ -43,15 +43,9 @@ public class DescriptiveValue<T> {
     }
 
     public static <T> Codec<DescriptiveValue<T>> codec(Codec<T> codec) {
-        return Codec.either(Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e))), codec)
-                .xmap(e -> e.map(v -> new DescriptiveValue<>(v.getFirst(), v.getSecond(), null),
-                                v -> new DescriptiveValue<>(v, "", null)),
-                        v -> {
-                            String desc = v.description;
-                            if (desc.isEmpty())
-                                return Either.right(v.value());
-                            return Either.left(Pair.of(v.value(), desc));
-                        });
+        return Codec.mapPair(codec.fieldOf("value"), Codec.STRING.optionalFieldOf("description")).codec()
+                .xmap(v -> new DescriptiveValue<>(v.getFirst(), v.getSecond().orElse(""), null),
+                        v -> Pair.of(v.value(), v.description.isEmpty() ? Optional.empty() : Optional.of(v.description)));
     }
 
     public static <T> Codec<DescriptiveValue<T>> codecDesc(Codec<T> codec) {
@@ -74,20 +68,22 @@ public class DescriptiveValue<T> {
                 return t.translation(true);
             return null;
         };
-        return Codec.either(Codec.STRING.dispatch("description", Pair::getSecond, e -> Codec.pair(codec, Codec.unit(e))), codec)
-                .flatXmap(e -> e.map(v -> DataResult.success(new DescriptiveValue<>(v.getFirst(), v.getSecond(), translation)),
-                                v -> {
-                                    if (v instanceof PredicateTranslation t && t.translation(false) == null)
-                                        return DataResult.error("Description required. Element too complicated for default description");
-                                    return DataResult.success(new DescriptiveValue<>(v, "", translation));
-                                }),
+        // Selfnote: Do not use either codec!
+        // If a structs that has all optional fields (e.g. EntityPredicate) fails it will create an empty one and
+        // throw a missing description error (since all field there are optional)
+        // The real error gets swallowed
+        return Codec.mapPair(codec.fieldOf("value"), Codec.STRING.optionalFieldOf("description")).codec()
+                .flatXmap(v -> {
+                            String desc = v.getSecond().orElse("");
+                            if (desc.isEmpty() && v.getFirst() instanceof PredicateTranslation t && t.translation(false) == null)
+                                return DataResult.error("Description required. Element too complicated for default description");
+                            return DataResult.success(new DescriptiveValue<>(v.getFirst(), desc, translation));
+                        },
                         v -> {
                             String desc = v.description;
                             if (v.description.isEmpty() && v instanceof PredicateTranslation t && t.translation(false) == null)
                                 return DataResult.error("Description required. Element too complicated for default description");
-                            if (desc.isEmpty())
-                                return DataResult.success(Either.right(v.value()));
-                            return DataResult.success(Either.left(Pair.of(v.value(), desc)));
+                            return DataResult.success(Pair.of(v.value(), desc.isEmpty() ? Optional.empty() : Optional.of(desc)));
                         });
     }
 

@@ -73,7 +73,7 @@ public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResol
                                         boolean submit) implements ResolvedQuestTask {
 
         public static final Codec<PredicateTaskResolved> CODEC = RecordCodecBuilder.create((instance) ->
-                instance.group(DescriptiveValue.codec(JsonCodecs.ENTITY_PREDICATE_CODEC).fieldOf("predicate").forGetter(d -> d.predicate),
+                instance.group(DescriptiveValue.codecDesc(JsonCodecs.ENTITY_PREDICATE_CODEC).fieldOf("predicate").forGetter(d -> d.predicate),
                         Codec.BOOL.fieldOf("submit").forGetter(d -> d.submit)
                 ).apply(instance, PredicateTaskResolved::new));
 
