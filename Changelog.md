@@ -1,3 +1,7 @@
+Simple Quests 2.1.1
+================
+- Update translation lib
+
 Simple Quests 2.1.0
 ================
 - Merged changes from 1.18 branch
