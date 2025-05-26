@@ -21,6 +21,6 @@ side="BOTH"
 [[dependencies.simplequests]]
 modId="neoforge"
 type="required"
-versionRange="[${forge_version},)"
+versionRange = "[${neoforge_version},)"
 ordering="NONE"
 side="BOTH"

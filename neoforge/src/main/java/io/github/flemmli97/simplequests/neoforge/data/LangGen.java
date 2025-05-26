@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests.forge.data;
+package io.github.flemmli97.simplequests.neoforge.data;
 
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;

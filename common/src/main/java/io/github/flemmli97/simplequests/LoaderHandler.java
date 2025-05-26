@@ -10,7 +10,7 @@ public interface LoaderHandler {
 
     LoaderHandler INSTANCE = SimpleQuestsAPI.getPlatformInstance(LoaderHandler.class,
             "io.github.flemmli97.simplequests.fabric.LoaderImpl",
-            "io.github.flemmli97.simplequests.forge.LoaderImpl");
+            "io.github.flemmli97.simplequests.neoforge.LoaderImpl");
 
     Path getConfigPath();
 

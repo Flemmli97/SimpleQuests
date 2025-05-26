@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.forge;
+package io.github.flemmli97.simplequests_api.neoforge;
 
 import io.github.flemmli97.simplequests_api.APIPlatform;
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
@@ -28,6 +28,6 @@ public class APIPlatformImpl implements APIPlatform {
 
     @Override
     public LootNumberProviderType getQuestContextProvider() {
-        return SimpleQuestAPIForge.CONTEXT_MULTIPLIER.get();
+        return SimpleQuestAPINeoForge.CONTEXT_MULTIPLIER.get();
     }
 }

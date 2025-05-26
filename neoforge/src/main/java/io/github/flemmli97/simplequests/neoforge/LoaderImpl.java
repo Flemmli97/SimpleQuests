@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests.forge;
+package io.github.flemmli97.simplequests.neoforge;
 
 import dev.ftb.mods.ftbranks.api.FTBRanksAPI;
 import io.github.flemmli97.simplequests.LoaderHandler;

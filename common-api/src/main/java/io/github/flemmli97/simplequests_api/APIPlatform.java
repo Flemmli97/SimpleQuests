@@ -10,7 +10,7 @@ public interface APIPlatform {
 
     APIPlatform INSTANCE = SimpleQuestsAPI.getPlatformInstance(APIPlatform.class,
             "io.github.flemmli97.simplequests_api.fabric.APIPlatformImpl",
-            "io.github.flemmli97.simplequests_api.forge.APIPlatformImpl");
+            "io.github.flemmli97.simplequests_api.neoforge.APIPlatformImpl");
 
     void registerQuestCompleteHandler(OnQuestComplete handler);
 

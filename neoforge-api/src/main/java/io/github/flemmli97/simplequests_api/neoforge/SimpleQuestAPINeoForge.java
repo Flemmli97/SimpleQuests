@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.forge;
+package io.github.flemmli97.simplequests_api.neoforge;
 
 import io.github.flemmli97.simplequests_api.CommonEvents;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
@@ -22,18 +22,18 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 @Mod(value = SimpleQuestsAPI.MODID)
-public class SimpleQuestAPIForge {
+public class SimpleQuestAPINeoForge {
 
     private static final DeferredRegister<LootNumberProviderType> NUMBER_PROVIDERS = DeferredRegister.create(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, SimpleQuestsAPI.MODID);
     public static final DeferredHolder<LootNumberProviderType, LootNumberProviderType> CONTEXT_MULTIPLIER = NUMBER_PROVIDERS.register("context_multiplier", () -> new LootNumberProviderType(QuestNumberProvider.ContextMultiplierNumberProvider.CODEC));
 
-    public SimpleQuestAPIForge(IEventBus modBus) {
+    public SimpleQuestAPINeoForge(IEventBus modBus) {
         NUMBER_PROVIDERS.register(modBus);
-        NeoForge.EVENT_BUS.addListener(SimpleQuestAPIForge::addReload);
-        NeoForge.EVENT_BUS.addListener(SimpleQuestAPIForge::kill);
-        NeoForge.EVENT_BUS.addListener(SimpleQuestAPIForge::interactSpecific);
-        NeoForge.EVENT_BUS.addListener(SimpleQuestAPIForge::interactBlock);
-        NeoForge.EVENT_BUS.addListener(SimpleQuestAPIForge::breakBlock);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::addReload);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::kill);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::interactSpecific);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::interactBlock);
+        NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::breakBlock);
 
         QuestBaseRegistry.register();
         QuestEntryRegistry.register();

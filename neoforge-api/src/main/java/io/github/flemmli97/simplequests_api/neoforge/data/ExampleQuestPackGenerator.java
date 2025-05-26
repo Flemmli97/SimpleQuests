@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.forge.data;
+package io.github.flemmli97.simplequests_api.neoforge.data;
 
 import com.google.gson.JsonParser;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;

@@ -1,4 +1,4 @@
-package io.github.flemmli97.simplequests_api.forge;
+package io.github.flemmli97.simplequests_api.neoforge;
 
 import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
