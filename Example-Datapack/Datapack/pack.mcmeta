@@ -1,11 +1,6 @@
 {
   "pack": {
-    "description": [
-      {
-        "color": "gold",
-        "text": "Example Quests"
-      }
-    ],
-    "pack_format": 34
+    "description": "Example Quests",
+    "pack_format": 48
   }
 }

@@ -19,6 +19,7 @@ import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
+import net.minecraft.SharedConstants;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -60,7 +61,9 @@ import java.util.concurrent.CompletableFuture;
 @EventBusSubscriber(modid = SimpleQuestsAPI.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class ExampleQuestPackGenerator extends QuestProvider {
 
-    private static final String PACK_META = "{\"pack\": {\"pack_format\": 9,\"description\": [{\"text\":\"Example Quests\",\"color\":\"gold\"}]}}";
+    @SuppressWarnings("deprecation")
+    private static final String PACK_META = "{\"pack\": {\"pack_format\": ${format},\"description\": \"Example Quests\"}}"
+            .replace("${format}", "" + SharedConstants.DATA_PACK_FORMAT);
 
     public ExampleQuestPackGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, boolean full) {
         super(createGenerator(output), lookup, full);
