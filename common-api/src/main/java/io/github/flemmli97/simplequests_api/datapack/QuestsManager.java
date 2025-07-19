@@ -110,7 +110,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
                     if (!obj.keySet().isEmpty()) {
                         obj.addProperty(QuestBase.ID_FIELD, res.toString());
                         QuestBase base = QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.DATA_LOAD)
-                                .parse(JsonOps.INSTANCE, obj).getOrThrow();
+                                .parse(ops, obj).getOrThrow();
                         map.computeIfAbsent(base.category, c -> new ImmutableMap.Builder<>())
                                 .put(res, base);
                     }
