@@ -1,3 +1,8 @@
+Simple Quests 2.1.2
+================
+- Update translation lib
+- Fix registry ops not used during parsing so quests didn't work
+
 Simple Quests 2.1.1
 ================
 - Update translation lib
