@@ -1,3 +1,11 @@
+Simple Quests 2.2.0
+================
+- Fix holder lookup not including tags during reload
+- Datapack directory now updated
+  - `simplequests` -> `simplequests_api/quest`
+  - `simplequests_categories` -> `simplequests_api/category`
+  - This will make old datapacks not work anymore!
+
 Simple Quests 2.1.2
 ================
 - Update translation lib
