@@ -1,0 +1,40 @@
+{
+  "name": "Example of using multi block place task",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:emerald_block",
+  "repeat_delay": "1w:5d:3h:2m",
+  "repeat_daily": 0,
+  "max_repeat": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "tasks": {
+    "place": {
+      "block_predicates": [],
+      "item_predicates": [
+        {
+          "description": "Place Emerald Blocks %2$sx",
+          "value": {
+            "items": "minecraft:emerald_block"
+          }
+        }
+      ],
+      "amount": {
+        "min": 3.0,
+        "max": 5.0,
+        "type": "minecraft:uniform"
+      },
+      "consume": false,
+      "use": true,
+      "description": "Place the blocks from the quest",
+      "id": "simplequests_api:block_interact"
+    }
+  },
+  "type": "simplequests_api:quest"
+}

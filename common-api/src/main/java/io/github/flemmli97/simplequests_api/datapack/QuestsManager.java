@@ -35,13 +35,16 @@ import java.util.Set;
  */
 public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.ResourceResult> {
 
-    public static final String CATEGORY_LOCATION = "simplequests_categories";
-    public static final String QUEST_LOCATION = "simplequests";
+    public static final ResourceLocation QUEST_ID = ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "quest");
+    public static final ResourceLocation CATEGORY_ID = ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "category");
+
+    public static final String QUEST_DIRECTORY = String.format("%s/%s", QUEST_ID.getNamespace(), QUEST_ID.getPath());
+    public static final String CATEGORY_DIRECTORY = String.format("%s/%s", CATEGORY_ID.getNamespace(), CATEGORY_ID.getPath());
 
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
 
     private static final Gson GSON = new GsonBuilder().create();
-    public static QuestsManager INSTANCE;
+    private static QuestsManager INSTANCE;
 
     private final HolderLookup.Provider provider;
     private Map<ResourceLocation, QuestCategory> categories;
@@ -56,14 +59,19 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         this.provider = provider;
     }
 
+    public static QuestsManager create(HolderLookup.Provider provider) {
+        QuestsManager.INSTANCE = new QuestsManager(provider);
+        return instance();
+    }
+
     public static QuestsManager instance() {
         return INSTANCE;
     }
 
     @Override
     protected ResourceResult prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-        return new ResourceResult(this.readFiles(resourceManager, CATEGORY_LOCATION),
-                this.readFiles(resourceManager, QUEST_LOCATION));
+        return new ResourceResult(this.readFiles(resourceManager, CATEGORY_DIRECTORY),
+                this.readFiles(resourceManager, QUEST_DIRECTORY));
     }
 
     private Map<ResourceLocation, JsonElement> readFiles(ResourceManager resourceManager, String directory) {

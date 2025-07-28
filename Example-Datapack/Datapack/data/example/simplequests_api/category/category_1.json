@@ -1,0 +1,12 @@
+{
+  "name": "Example category 1",
+  "description": [],
+  "icon": "minecraft:diamond_block",
+  "only_same_category": false,
+  "max_concurrent_quests": -1,
+  "sorting_id": 0,
+  "max_daily": 0,
+  "required_context": [],
+  "is_visible": true,
+  "is_silent": false
+}

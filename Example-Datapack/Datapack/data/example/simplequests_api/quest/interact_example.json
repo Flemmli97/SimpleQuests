@@ -1,0 +1,40 @@
+{
+  "name": "Example for an entity interaction quest",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:dirt",
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "max_repeat": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "tasks": {
+    "interact": {
+      "entity_predicates": [
+        {
+          "value": {
+            "type": "minecraft:chicken"
+          }
+        }
+      ],
+      "item_predicates": [
+        {
+          "value": {
+            "items": "minecraft:name_tag"
+          }
+        }
+      ],
+      "amount": 2.0,
+      "consume": true,
+      "description": "Use nametag on 2 chickens",
+      "id": "simplequests_api:entity_interact"
+    }
+  },
+  "type": "simplequests_api:quest"
+}

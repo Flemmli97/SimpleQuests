@@ -1,0 +1,41 @@
+{
+  "name": "Example of use of a fishing task",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:fishing_rod",
+  "repeat_delay": "1d",
+  "repeat_daily": 0,
+  "max_repeat": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "tasks": {
+    "fish": {
+      "item_predicates": [
+        {
+          "value": {
+            "items": "minecraft:cod"
+          }
+        },
+        {
+          "value": {
+            "items": "minecraft:salmon"
+          }
+        }
+      ],
+      "amount": {
+        "min": 3.0,
+        "max": 5.0,
+        "type": "minecraft:uniform"
+      },
+      "description": "Fish some fishes",
+      "id": "simplequests_api:fishing"
+    }
+  },
+  "type": "simplequests_api:quest"
+}

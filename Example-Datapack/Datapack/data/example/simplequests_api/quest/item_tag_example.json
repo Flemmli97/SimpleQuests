@@ -1,0 +1,35 @@
+{
+  "name": "Example for an item tag quest",
+  "description": [
+    "This is an example description",
+    "This is another example description"
+  ],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:oak_log",
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "max_repeat": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "submission_trigger": "",
+  "tasks": {
+    "fish": {
+      "predicates": [
+        {
+          "value": {
+            "items": "#minecraft:logs"
+          }
+        }
+      ],
+      "amount": 15.0,
+      "consume_items": true,
+      "id": "simplequests_api:item"
+    }
+  },
+  "type": "simplequests_api:quest"
+}

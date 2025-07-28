@@ -63,14 +63,14 @@ public abstract class QuestProvider implements DataProvider {
             return provider;
         }).thenCompose(provider -> CompletableFuture.allOf(
                 CompletableFuture.allOf(this.categories.entrySet().stream().map(entry -> {
-                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.CATEGORY_LOCATION + "/" + entry.getKey().getPath() + ".json");
+                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.CATEGORY_DIRECTORY + "/" + entry.getKey().getPath() + ".json");
                     JsonElement obj = QuestCategory.CODEC.apply(this.full)
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();
                     return saveStable(cache, obj, path);
                 }).toArray(CompletableFuture<?>[]::new)),
                 CompletableFuture.allOf(this.quests.entrySet().stream().map(entry -> {
-                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_LOCATION + "/" + entry.getKey().getPath() + ".json");
+                    Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_DIRECTORY + "/" + entry.getKey().getPath() + ".json");
                     JsonElement obj = QuestBaseRegistry.CODEC.apply(this.full ? QuestBaseRegistry.DATAGEN : QuestBaseRegistry.DEFAULT)
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();

@@ -1,0 +1,72 @@
+{
+  "name": "Slay mobs",
+  "description": [],
+  "parent_id": [],
+  "redo_parent": false,
+  "need_unlock": false,
+  "icon": "minecraft:diamond_sword",
+  "repeat_delay": "1w",
+  "repeat_daily": 0,
+  "max_repeat": 0,
+  "sorting_id": 0,
+  "daily_quest": false,
+  "visibility": "DEFAULT",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "command": "",
+  "submission_trigger": "",
+  "tasks": {
+    "zombies": {
+      "predicates": [
+        {
+          "value": {
+            "type": "minecraft:zombie"
+          }
+        }
+      ],
+      "amount": 10.0,
+      "id": "simplequests_api:kill"
+    },
+    "zombies_baby": {
+      "predicates": [
+        {
+          "description": "Baby Zombie",
+          "value": {
+            "flags": {
+              "is_baby": true
+            },
+            "type": "minecraft:zombie"
+          }
+        }
+      ],
+      "amount": 3.0,
+      "id": "simplequests_api:kill"
+    },
+    "skeleton": {
+      "predicates": [
+        {
+          "value": {
+            "type": "minecraft:skeleton"
+          }
+        }
+      ],
+      "amount": 10.0,
+      "id": "simplequests_api:kill"
+    },
+    "spiders": {
+      "predicates": [
+        {
+          "value": {
+            "type": "minecraft:spider"
+          }
+        }
+      ],
+      "amount": 5.0,
+      "id": "simplequests_api:kill"
+    },
+    "xp": {
+      "amount": 5.0,
+      "id": "simplequests_api:xp"
+    }
+  },
+  "type": "simplequests_api:quest"
+}
