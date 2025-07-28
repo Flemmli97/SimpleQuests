@@ -41,7 +41,7 @@ public class SimpleQuestAPINeoForge {
     }
 
     public static void addReload(AddReloadListenerEvent event) {
-        event.addListener(QuestsManager.INSTANCE = new QuestsManager(event.getRegistryAccess()));
+        event.addListener(QuestsManager.create(event.getServerResources().getRegistryLookup()));
     }
 
     public static void kill(LivingDeathEvent event) {

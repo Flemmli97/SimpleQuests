@@ -4,8 +4,7 @@
   "package": "io.github.flemmli97.simplequests_api.fabric.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "LivingEntityMixin",
-    "ReloadableServerResourcesMixin"
+    "LivingEntityMixin"
   ],
   "server": [
   ],
