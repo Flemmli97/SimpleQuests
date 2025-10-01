@@ -23,7 +23,7 @@ dependencies {
     //Fabric/Loom==========    
     modImplementation("io.github.flemmli97:simplequests:${minecraft_version}-${mod_version}-${mod_loader}")
     
-    //NeoForge/Forge==========    
-    compile fg.deobf("io.github.flemmli97:simplequests:${minecraft_version}-${mod_version}-${mod_loader}")
+    //NeoForge==========    
+    implementation("io.github.flemmli97:simplequests:${minecraft_version}-${mod_version}-${mod_loader}")
 }
 ```
