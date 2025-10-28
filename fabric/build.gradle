@@ -1,18 +1,18 @@
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/fabric.gradle"
+plugins {
+    id 'fabric-loom'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.+'
+    id 'io.github.flemmli97.multiloader.platform-fabric'
+}
 
 repositories {
     mavenCentral()
     maven {
         name = 'Fabric-Permission-API'
         url 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
-    maven {
-        name = "FTB"
-        url = "https://maven.ftb.dev/releases"
-    }
-    maven {
-        name = "LinguaBib"
-        url "https://maven.blazing-coop.net/releases"
+        content {
+            includeGroup 'me.lucko'
+        }
     }
 }
 
@@ -23,6 +23,6 @@ dependencies {
 
     // Jar-Jar only in the remapped jar but we cant use that
     modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-fabric"
-    compileOnly(include(project(path: ":fabric-api")))
-    runtimeOnly(project(path: ":fabric-api", configuration: "shadowBundle"))
+    implementation(project(path: ":fabric-api", configuration: "namedElements"))
+    include(project(path: ":fabric-api"))
 }

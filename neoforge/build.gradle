@@ -1,37 +1,25 @@
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/neoforge.gradle"
+plugins {
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.+'
+    id 'io.github.flemmli97.multiloader.platform-neoforge'
+}
 
-loom {
+neoForge {
     runs {
+        var common = project(":common")
         data {
             data()
-            programArgs "--all", "--mod", "simplequests"
-            programArgs "--output", project(":common").file("src/generated/resources").absolutePath
-            property("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
+            programArguments.addAll "--all", "--mod", "simplequests"
+            programArguments.addAll "--output", common.file("src/generated/resources").absolutePath
+            systemProperty("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
         }
     }
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        name = "FTB"
-        url = "https://maven.ftb.dev/releases"
-    }
-    maven {
-        name = "LinguaBib"
-        url "https://maven.blazing-coop.net/releases"
-    }
-}
-
 dependencies {
-    modCompileOnly("dev.ftb.mods:ftb-ranks-neoforge:${ftb_ranks}")
+    compileOnly("dev.ftb.mods:ftb-ranks-neoforge:${ftb_ranks}")
 
     // Jar-Jar only in the remapped jar but we cant use that
-    modRuntimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge"
-    compileOnly(include(project(path: ":neoforge-api")))
-    runtimeOnly(project(path: ":neoforge-api", configuration: "shadowBundle"))
-}
-
-shadowJar {
-    exclude "**/forge/test/**"
+    runtimeOnly "io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge"
+    jarJar(implementation(project(path: ":neoforge-api")))
 }

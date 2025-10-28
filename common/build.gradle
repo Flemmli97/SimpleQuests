@@ -1,7 +1,9 @@
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/common.gradle"
+plugins {
+    id 'io.github.flemmli97.multiloader.platform-common'
+}
 
 dependencies {
-    implementation(project(path:":common-api", configuration: "namedElements")) { transitive false }
+    commonDependency(project(path: ":common-api"))
 }
 
 sourceSets.main.resources {

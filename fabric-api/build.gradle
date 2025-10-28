@@ -1,27 +1,24 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath "group": "com.github.johnrengelman", "name": "shadow", "version": "8.+"
-    }
+plugins {
+    id 'fabric-loom'
+    id 'io.github.flemmli97.multiloader.changelog'
+    id 'io.github.flemmli97.multiloader.common-convention'
 }
 
-apply plugin: com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
-
-archivesBaseName = rootProject.api_base_name
+archivesBaseName = rootProject.api_mod_id
 version = "${project.minecraft_version}-${rootProject.api_version}-fabric"
 
-architectury {
-    platformSetupLoomIde()
-    fabric()
-}
-
 loom {
+    def aw = file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
     runs {
         client {
-            vmArgs "-Dmixin.debug.export=true"
+            client()
+            vmArgs '-Dmixin.debug.export=true'
+        }
+        server {
+            server()
         }
     }
 }
@@ -31,81 +28,71 @@ ext {
 }
 
 configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentFabric.extendsFrom common
-    developmentFabric.extendsFrom api
-    shadowBundle {
+    remapCommon {
         canBeConsumed = true
-        canBeResolved = true
     }
-}
-
-repositories {
-    maven {
-        name = "LinguaBib"
-        url "https://maven.blazing-coop.net/releases"
+    remapCommonArtifact {
+        canBeConsumed = true
     }
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
-
-    api(project(path: ":common-api", configuration: "namedElements")) { transitive false }
-    shadowBundle(project(path: ":common-api", configuration: "transformProductionFabric")) { transitive false }
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    compileOnly(project(':common-api'))
+    compileOnly(project(path: ':common-api', configuration: 'commonDependency'))
 
     modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
 }
 
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand mod_meta
+afterEvaluate {
+    artifacts {
+        configurations.named("compileClasspath").get().resolvedConfiguration.resolvedArtifacts.stream()
+                .filter { artifact ->
+                    configurations.named("remapCommon").get().incoming.dependencies.any {
+                        artifact.moduleVersion.id.group.contains(it.group) && it.name == artifact.moduleVersion.id.name && it.version == artifact.moduleVersion.id.version
+                    }
+                }.each { add("remapCommonArtifact", it.file) }
     }
+}
+
+processResources {
+    from(project(":common-api").sourceSets.main.resources)
+    exclude '**/accesstransformer.cfg'
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source(project(":common-api").sourceSets.main.allSource)
+}
+
+tasks.named('sourcesJar', Jar) {
+    from(project(":common-api").sourceSets.main.allSource)
     exclude '.cache'
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+tasks.register('cleanLocalPublish') {
+    group = 'publishing'
+    dependsOn ':common-api:clean', clean, publishToMavenLocal
+    publishToMavenLocal.mustRunAfter ':common-api:clean', clean
 }
 
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-}
-
-jar {
-    archiveClassifier = 'dev'
-}
-
-sourcesJar {
-    def commonSources = project(":common-api").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-    archiveClassifier.set("sources")
-}
-
-artifacts {
-    shadowBundle(shadowJar)
+tasks.register('cleanPublish') {
+    group = 'publishing'
+    dependsOn ':common-api:clean', clean, publish
+    publish.mustRunAfter ':common-api:clean', clean
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(remapJar) {
-                classifier null
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                classifier "sources"
-                builtBy remapSourcesJar
-            }
-            artifactId project.archivesBaseName
+            artifact(remapJar)
+            artifact(sourcesJar)
+            artifactId api_mod_id
         }
     }
 }

@@ -1,25 +1,12 @@
-archivesBaseName = rootProject.api_base_name
+plugins {
+    id 'io.github.flemmli97.multiloader.platform-common'
+}
+
+archivesBaseName = rootProject.api_mod_id
 version = "${project.minecraft_version}-${rootProject.api_version}-common"
 
-repositories {
-    mavenLocal()
-    maven {
-        name = "LinguaBib"
-        url "https://maven.blazing-coop.net/releases"
-    }
-}
-
 dependencies {
-    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-
-    modImplementation "io.github.flemmli97:lingua_bib:${lingua_bib}-common"
-}
-
-architectury {
-    injectInjectables = false
-    common(rootProject.enabled_platforms.split(","))
+    implementation "io.github.flemmli97:lingua_bib:${lingua_bib}-common"
 }
 
 sourceSets.main.resources {
@@ -29,15 +16,7 @@ sourceSets.main.resources {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(jar) {
-                classifier null
-                builtBy jar
-            }
-            artifact(sourcesJar) {
-                classifier "sources"
-                builtBy remapSourcesJar
-            }
-            artifactId project.archivesBaseName
+            artifactId api_mod_id
         }
     }
 }
