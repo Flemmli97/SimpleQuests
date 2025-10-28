@@ -105,8 +105,13 @@ public class QuestProgress {
     }
 
     public SubmitType submit(PlayerQuestData data, String trigger, Consumer<ResolvedQuestTask> cons) {
+        return this.submit(data, trigger, cons, Integer.MAX_VALUE);
+    }
+
+    public SubmitType submit(PlayerQuestData data, String trigger, Consumer<ResolvedQuestTask> cons, int amount) {
         boolean any = false;
         ServerPlayer player = data.getPlayer();
+        int count = 0;
         for (Map.Entry<String, ResolvedQuestTask> entry : this.questEntries.entrySet()) {
             if (this.entries.contains(entry.getKey()) && !this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger))
                 continue;
@@ -114,6 +119,10 @@ public class QuestProgress {
                 this.entries.add(entry.getKey());
                 cons.accept(entry.getValue());
                 any = true;
+                count++;
+                if (count >= amount) {
+                    break;
+                }
             }
         }
         return switch (this.tryComplete(data, trigger)) {
@@ -123,9 +132,14 @@ public class QuestProgress {
         };
     }
 
-    @SuppressWarnings("unchecked")
     public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
+        return this.tryFullFill(player, key, with, Integer.MAX_VALUE);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with, int amount) {
         Set<Pair<String, R>> fullfilled = new HashSet<>();
+        int count = 0;
         for (Map.Entry<String, ResolvedQuestTask> e : this.questEntries.entrySet()) {
             if (this.entries.contains(e.getKey()))
                 continue;
@@ -135,6 +149,10 @@ public class QuestProgress {
                 if (tracker.progress(player, this, with)) {
                     fullfilled.add(Pair.of(e.getKey(), entry));
                     this.entries.add(e.getKey());
+                    count++;
+                    if (count >= amount) {
+                        break;
+                    }
                 }
             }
         }
