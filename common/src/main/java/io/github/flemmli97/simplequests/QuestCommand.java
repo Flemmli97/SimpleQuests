@@ -66,9 +66,11 @@ public class QuestCommand {
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         List<QuestCategory> categories = QuestsManager.instance().categories(null);
-        if (categories.size() == 1)
+        if (categories.size() == 1) {
             QuestGui.openGui(player, categories.get(0), false, 0);
-        QuestCategoryGui.openGui(player);
+        } else {
+            QuestCategoryGui.openGui(player);
+        }
         return Command.SINGLE_SUCCESS;
     }
 

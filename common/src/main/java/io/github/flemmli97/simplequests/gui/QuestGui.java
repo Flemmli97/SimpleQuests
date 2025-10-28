@@ -334,6 +334,6 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         });
     }
 
-    record QuestGuiData(QuestCategory category, int page, boolean canGoBack) {
+    protected record QuestGuiData(QuestCategory category, int page, boolean canGoBack) {
     }
 }

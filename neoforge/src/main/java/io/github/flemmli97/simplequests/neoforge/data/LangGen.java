@@ -90,7 +90,7 @@ public class LangGen implements DataProvider {
                 try {
                     this.save(cache, this.gen.getPackOutput().getOutputFolder(PackOutput.Target.DATA_PACK).resolve(SimpleQuests.MODID).resolve("lang").resolve(this.locale + ".json"));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    SimpleQuests.LOGGER.error(e);
                 }
             }
         });
