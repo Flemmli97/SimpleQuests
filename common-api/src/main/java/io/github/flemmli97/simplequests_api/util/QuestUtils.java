@@ -29,10 +29,10 @@ public class QuestUtils {
             "(?:(?:^|:)(?<minutes>[0-9]{1,2})m)?" +
             "(?:(?:^|:)(?<seconds>[0-9]{1,2})s)?");
 
-    public static int tryParseTime(String time, String id) {
+    public static int tryParseTime(String time) {
         Matcher matcher = DATE_PATTERN.matcher(time);
         if (!matcher.matches()) {
-            throw new JsonSyntaxException("Malformed date time for " + id + ".");
+            throw new JsonSyntaxException("Malformed date time for " + time + ".");
         }
         int ticks = 0;
         ticks += asTicks(matcher, "weeks", 12096000);

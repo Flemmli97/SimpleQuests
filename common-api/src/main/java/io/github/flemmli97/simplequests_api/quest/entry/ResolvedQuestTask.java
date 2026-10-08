@@ -20,7 +20,7 @@ public interface ResolvedQuestTask {
      */
     boolean submit(ServerPlayer player);
 
-    QuestEntryKey<?> getId();
+    QuestTaskKey<?> getId();
 
     /**
      * Translation for this entry
@@ -30,8 +30,8 @@ public interface ResolvedQuestTask {
     /**
      * The progress of the player towards the completion of this entry
      */
-    default @Nullable
-    MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
+    @Nullable
+    default MutableComponent progress(ServerPlayer player, QuestProgress progress, String id) {
         return null;
     }
 

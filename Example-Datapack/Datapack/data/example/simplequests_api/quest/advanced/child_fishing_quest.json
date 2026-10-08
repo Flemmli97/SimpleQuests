@@ -1,17 +1,4 @@
 {
-  "name": "Catch lots of fishes! Needs parent quest completed before doing this quest",
-  "description": [],
-  "parent_id": "example:item_example",
-  "redo_parent": false,
-  "need_unlock": false,
-  "icon": "minecraft:cod",
-  "repeat_delay": "2h",
-  "repeat_daily": 0,
-  "max_repeat": 0,
-  "sorting_id": 0,
-  "daily_quest": false,
-  "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/end_city_treasure",
   "command": "",
   "submission_trigger": "",
   "tasks": {
@@ -42,5 +29,18 @@
       "id": "simplequests_api:item"
     }
   },
+  "sorting_id": 0,
+  "icon": "minecraft:cod",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": "example:item_example",
+  "redo_parent": false,
+  "repeat_delay": "2h",
+  "repeat_daily": 0,
+  "name": "Catch lots of fishes! Needs parent quest completed before doing this quest",
+  "description": [],
+  "loot_table": "minecraft:chests/end_city_treasure",
   "type": "simplequests_api:quest"
 }

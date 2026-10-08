@@ -5,7 +5,7 @@ import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -31,7 +31,7 @@ import java.util.Optional;
 
 public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
 
-    public static int QUEST_PER_PAGE = 12;
+    public static final int QUEST_PER_PAGE = 12;
 
     private int page, maxPages;
     private final ServerPlayer player;
@@ -60,14 +60,14 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
     }
 
     private ItemStack ofQuest(QuestProgress progress, ServerPlayer player) {
-        QuestBase quest = progress.getQuest();
+        QuestDefinition quest = progress.getRootQuest().source();
         ItemStack stack = quest.getIcon();
-        stack.set(DataComponents.CUSTOM_NAME, progress.getName(player).setStyle(QuestGui.NAME_STYLE));
+        stack.set(DataComponents.CUSTOM_NAME, progress.name(player).setStyle(QuestGui.NAME_STYLE));
         List<Component> lore = new ArrayList<>();
-        progress.getDescription(player).forEach(c -> lore.add(c.setStyle(QuestGui.DESCRIPTION_STYLE)));
+        progress.description(player).forEach(c -> lore.add(c.setStyle(QuestGui.DESCRIPTION_STYLE)));
         lore.add(Component.literal(""));
-        List<String> finished = progress.finishedTasks();
-        progress.getQuestEntries().entrySet().stream()
+        List<String> finished = progress.completedTasks();
+        progress.getTasks().entrySet().stream()
                 .filter(e -> !finished.contains(e.getKey()))
                 .forEach(e -> {
                     MutableComponent comp = e.getValue().progress(player, progress, e.getKey());
@@ -81,7 +81,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
                                 .setStyle(QuestGui.DESCRIPTION_STYLE));
                 });
         stack.set(DataComponents.LORE, new ItemLore(lore));
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id.toString()));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id().toString()));
         return stack;
     }
 
@@ -96,7 +96,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
         List<QuestProgress> questMap = PlayerData.get(serverPlayer).getCurrentQuest()
-                .stream().sorted(Comparator.comparing(QuestProgress::getQuest)).toList();
+                .stream().sorted(Comparator.comparing(QuestProgress::getRootDefinition)).toList();
         this.maxPages = (questMap.size() - 1) / QUEST_PER_PAGE;
         int page = 0;
         int id = 0;
@@ -124,7 +124,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
 
     private void flipPage() {
         List<QuestProgress> questMap = PlayerData.get(this.player).getCurrentQuest()
-                .stream().sorted(Comparator.comparing(QuestProgress::getQuest)).toList();
+                .stream().sorted(Comparator.comparing(QuestProgress::getRootDefinition)).toList();
         int id = this.page * QUEST_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -180,16 +180,16 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         if (opt.isEmpty())
             return false;
         ResourceLocation id = opt.get();
-        Optional<QuestProgress> questOpt = PlayerData.get(this.player).getCurrentQuest().stream().filter(p -> p.getQuest().id.equals(id)).findFirst();
+        Optional<QuestProgress> questOpt = PlayerData.get(this.player).getCurrentQuest().stream().filter(p -> p.getRootId().equals(id)).findFirst();
         if (questOpt.isEmpty()) {
             SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
-        QuestBase quest = questOpt.get().getQuest();
+        QuestDefinition quest = questOpt.get().getRootDefinition();
         ConfirmScreenHandler.openConfirmScreen(player, b -> {
             if (b) {
                 player.closeContainer();
-                PlayerData.get(player).reset(quest.id, true);
+                PlayerData.get(player).reset(quest.id(), true);
                 QuestGui.playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
             } else {
                 player.closeContainer();

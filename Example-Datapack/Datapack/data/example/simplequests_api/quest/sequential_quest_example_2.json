@@ -1,0 +1,23 @@
+{
+  "sorting_id": 0,
+  "icon": "minecraft:chest",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "category": "example:category_1",
+  "name": "Example for a nested sequential quest",
+  "description": [],
+  "quests": [
+    "example:sequential_quest_example_nested",
+    "example:hidden/sequential_c",
+    "example:hidden/sequential_d"
+  ],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "type": "simplequests_api:sequential_quest"
+}

@@ -43,7 +43,7 @@ public class ConfirmScreenHandler extends ServerOnlyScreenHandler<Object> {
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
-        if (!(player instanceof ServerPlayer serverPlayer))
+        if (!(player instanceof ServerPlayer))
             return;
         for (int i = 0; i < 9; i++) {
             switch (i) {

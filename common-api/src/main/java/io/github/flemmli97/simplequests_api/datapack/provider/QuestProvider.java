@@ -6,11 +6,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.serialization.Encoder;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinitionImpl;
+import io.github.flemmli97.simplequests_api.registry.QuestDefinitionRegistry;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
@@ -36,7 +38,7 @@ public abstract class QuestProvider implements DataProvider {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final Map<ResourceLocation, QuestCategory> categories = new HashMap<>();
-    private final Map<ResourceLocation, QuestBase> quests = new HashMap<>();
+    private final Map<ResourceLocation, QuestDefinition> quests = new HashMap<>();
 
     protected final PackOutput output;
     protected final boolean full;
@@ -46,7 +48,7 @@ public abstract class QuestProvider implements DataProvider {
      * Datagenerator for quests
      *
      * @param full If true will output all values for category and quests.
-     *             Some values are optional and can be left out in the final json.
+     *             Some values are optional and can be left out in the final JSON.
      */
     public QuestProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, boolean full) {
         this.output = output;
@@ -71,7 +73,8 @@ public abstract class QuestProvider implements DataProvider {
                 }).toArray(CompletableFuture<?>[]::new)),
                 CompletableFuture.allOf(this.quests.entrySet().stream().map(entry -> {
                     Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_DIRECTORY + "/" + entry.getKey().getPath() + ".json");
-                    JsonElement obj = QuestBaseRegistry.CODEC.apply(this.full ? QuestBaseRegistry.DATAGEN : QuestBaseRegistry.DEFAULT)
+                    Encoder<QuestDefinition> codec = this.full ? QuestDefinitionRegistry.CODEC : QuestDefinition.SIMPLIFIED_ENCODER;
+                    JsonElement obj = codec
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();
                     return saveStable(cache, obj, path);
@@ -84,18 +87,21 @@ public abstract class QuestProvider implements DataProvider {
         return "Quests";
     }
 
-    public void addQuest(QuestBase.BuilderBase<?, ?> builder) {
-        QuestBase quest = builder.build();
-        if (quest.category != QuestCategory.DEFAULT_CATEGORY) {
-            QuestCategory prev = this.categories.get(quest.category.id);
-            if (prev != null && prev != quest.category)
-                throw new IllegalStateException("Category with " + quest.category.id + " already registered. Try reusing the category instead of creating a new one.");
-            this.categories.put(quest.category.id, quest.category);
+    public void addQuest(ResourceLocation id, QuestDefinitionImpl.BuilderBase<?, ?> builder) {
+        this.addQuest(id, builder.build());
+    }
+
+    public void addQuest(ResourceLocation id, QuestDefinitionImpl quest) {
+        if (quest.category() != QuestCategory.DEFAULT_CATEGORY) {
+            QuestCategory prev = this.categories.get(quest.category().id);
+            if (prev != null && prev != quest.category())
+                throw new IllegalStateException("Category with " + quest.category().id + " already registered. Try reusing the category instead of creating a new one.");
+            this.categories.put(quest.category().id, quest.category());
         }
-        QuestBase prev = this.quests.get(quest.id);
+        QuestDefinition prev = this.quests.get(id);
         if (prev != null)
-            throw new IllegalStateException("Quest with " + quest.id + " already registered");
-        this.quests.put(quest.id, quest);
+            throw new IllegalStateException("Quest with " + id + " already registered");
+        this.quests.put(id, quest);
     }
 
     @SuppressWarnings("UnstableApiUsage")

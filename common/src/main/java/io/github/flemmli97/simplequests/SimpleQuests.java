@@ -1,7 +1,7 @@
 package io.github.flemmli97.simplequests;
 
 import io.github.flemmli97.simplequests.data.PlayerData;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.LogManager;
@@ -16,13 +16,13 @@ public class SimpleQuests {
     public static boolean FTB_RANKS;
     public static boolean PERMISSION_API;
 
-    public static boolean canAcceptQuest(CommandSourceStack src, QuestBase base) {
-        return (!(src.getEntity() instanceof ServerPlayer player) || PlayerData.get(player).isAdminMode() || base.getVisibility() != QuestBase.Visibility.NEVER)
-                && base.category.matchesContext(null);
+    public static boolean canAcceptQuest(CommandSourceStack src, QuestDefinition base) {
+        return (!(src.getEntity() instanceof ServerPlayer player) || PlayerData.get(player).isAdminMode() || base.visibility() != QuestDefinition.Visibility.NEVER)
+                && base.category().matchesContext(null);
     }
 
-    public static boolean canAcceptQuest(ServerPlayer src, QuestBase base) {
-        return (PlayerData.get(src).isAdminMode() || base.getVisibility() != QuestBase.Visibility.NEVER)
-                && base.category.matchesContext(null);
+    public static boolean canAcceptQuest(ServerPlayer src, QuestDefinition base) {
+        return (PlayerData.get(src).isAdminMode() || base.visibility() != QuestDefinition.Visibility.NEVER)
+                && base.category().matchesContext(null);
     }
 }

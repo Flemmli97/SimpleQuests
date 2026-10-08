@@ -37,7 +37,7 @@ public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>
     public boolean progress(ServerPlayer player, QuestProgress prog, Pair<BlockPos, Boolean> with) {
         if (this.questEntry().check(player, with.getFirst(), with.getSecond())) {
             if (!this.allowDupes && this.pos.contains(with.getFirst())) {
-                if (!prog.getQuest().category.isSilent)
+                if (!prog.getRootQuest().source().category().isSilent)
                     player.sendSystemMessage(Component.translatable(BlockInteractTask.ID + "block.dupe." + this.questEntry().use()).withStyle(ChatFormatting.DARK_RED));
                 return false;
             }

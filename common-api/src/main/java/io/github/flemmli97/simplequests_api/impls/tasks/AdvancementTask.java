@@ -4,11 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
@@ -29,7 +28,7 @@ import java.util.Optional;
 
 public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTaskResolved> {
 
-    public static final QuestEntryKey<AdvancementTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "advancement"));
+    public static final QuestTaskKey<AdvancementTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "advancement"));
     public static final MapCodec<AdvancementTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(JsonCodecs.nonEmptyList(DescriptiveValue.codec(ResourceLocation.CODEC), "Advancements list can't be empty").fieldOf("advancements").forGetter(d -> d.advancements),
                     Codec.BOOL.fieldOf("reset").forGetter(d -> d.reset),
@@ -58,7 +57,7 @@ public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTas
         AdvancementHolder advancement = server.getAdvancements().get(advancementID);
         Component adv;
         if (advancement == null)
-            adv = Component.translatable("simplequests.missing.advancement", advancementID);
+            adv = Component.translatable(MISSING_ADVANCEMENT, advancementID);
         else
             adv = Advancement.name(advancement);
         return adv;
@@ -76,13 +75,13 @@ public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTas
     }
 
     @Override
-    public QuestEntryKey<AdvancementTask> getId() {
+    public QuestTaskKey<AdvancementTask> getId() {
         return ID;
     }
 
     @Override
-    public AdvancementTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public AdvancementTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         return new AdvancementTaskResolved(this.advancements.get(ctx.getRandom().nextInt(this.advancements.size())), this.reset, this.playerPredicate);
     }
 
@@ -109,7 +108,7 @@ public class AdvancementTask implements QuestTask<AdvancementTask.AdvancementTas
         }
 
         @Override
-        public QuestEntryKey<AdvancementTask> getId() {
+        public QuestTaskKey<AdvancementTask> getId() {
             return ID;
         }
 

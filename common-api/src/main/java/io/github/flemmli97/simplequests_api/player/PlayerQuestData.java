@@ -1,5 +1,6 @@
 package io.github.flemmli97.simplequests_api.player;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.PlayerQuestDataRegistry;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Player data for handling quests.
@@ -29,5 +30,9 @@ public interface PlayerQuestData {
 
     int getTimesCompleted(ResourceLocation quest);
 
-    <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger);
+    <V, R extends ResolvedQuestTask> List<ProgressResult<R>> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger);
+
+    record ProgressResult<T extends ResolvedQuestTask>(QuestProgress progress, Set<Pair<String, T>> completedTasks,
+                                                       QuestState questState) {
+    }
 }

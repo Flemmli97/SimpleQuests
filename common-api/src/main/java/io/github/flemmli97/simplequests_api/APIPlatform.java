@@ -1,8 +1,8 @@
 package io.github.flemmli97.simplequests_api;
 
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
+import io.github.flemmli97.simplequests_api.events.OnQuestComplete;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.OnQuestComplete;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
 
@@ -14,7 +14,7 @@ public interface APIPlatform {
 
     void registerQuestCompleteHandler(OnQuestComplete handler);
 
-    boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress);
+    boolean onQuestComplete(ServerPlayer player, String trigger, ResolvedQuest quest, QuestProgress progress);
 
     LootNumberProviderType getQuestContextProvider();
 }

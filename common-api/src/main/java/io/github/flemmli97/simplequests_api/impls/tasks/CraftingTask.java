@@ -5,11 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.progression.CraftingTracker;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
@@ -33,7 +32,7 @@ import java.util.Optional;
 
 public class CraftingTask implements QuestTask<CraftingTask.CraftingTaskResolved> {
 
-    public static final QuestEntryKey<CraftingTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "crafting"));
+    public static final QuestTaskKey<CraftingTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "crafting"));
     public static final MapCodec<CraftingTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(JsonCodecs.nonEmptyList(DescriptiveValue.withTranslation(ItemPredicate.CODEC), "Item predicates can't be empty").fieldOf("item_predicates").forGetter(d -> d.itemPredicates),
                     NumberProviders.CODEC.fieldOf("amount").forGetter(d -> d.amount),
@@ -71,15 +70,15 @@ public class CraftingTask implements QuestTask<CraftingTask.CraftingTaskResolved
     }
 
     @Override
-    public QuestEntryKey<CraftingTask> getId() {
+    public QuestTaskKey<CraftingTask> getId() {
         return ID;
     }
 
     @Override
-    public CraftingTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public CraftingTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         DescriptiveValue<ItemPredicate> val = this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
-        return new CraftingTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
+        return new CraftingTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, progress.data(), quest.id()), this.playerPredicate);
     }
 
     public record CraftingTaskResolved(DescriptiveValue<ItemPredicate> item,
@@ -98,7 +97,7 @@ public class CraftingTask implements QuestTask<CraftingTask.CraftingTaskResolved
         }
 
         @Override
-        public QuestEntryKey<CraftingTask> getId() {
+        public QuestTaskKey<CraftingTask> getId() {
             return ID;
         }
 

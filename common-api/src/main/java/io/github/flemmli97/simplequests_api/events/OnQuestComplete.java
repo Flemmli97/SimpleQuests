@@ -1,8 +1,8 @@
-package io.github.flemmli97.simplequests_api.quest;
+package io.github.flemmli97.simplequests_api.events;
 
 import io.github.flemmli97.simplequests_api.APIPlatform;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import net.minecraft.server.level.ServerPlayer;
 
 public interface OnQuestComplete {
@@ -21,5 +21,5 @@ public interface OnQuestComplete {
      * @param progress     The current progress
      * @return false to prevent the completion of the quest
      */
-    boolean onComplete(ServerPlayer serverPlayer, String trigger, Quest quest, QuestProgress progress);
+    boolean onComplete(ServerPlayer serverPlayer, String trigger, ResolvedQuest quest, QuestProgress progress);
 }

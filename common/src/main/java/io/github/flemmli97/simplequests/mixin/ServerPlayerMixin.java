@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerMixin extends Player implements SimpleQuestDataGet {
 
     @Unique
-    private PlayerData simplequestData;
+    private PlayerData simplequest$Data;
 
     private ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
@@ -27,17 +27,17 @@ public abstract class ServerPlayerMixin extends Player implements SimpleQuestDat
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void initData(CallbackInfo info) {
-        this.simplequestData = new PlayerData((ServerPlayer) (Object) this);
+        this.simplequest$Data = new PlayerData((ServerPlayer) (Object) this);
     }
 
     @Inject(method = "restoreFrom", at = @At("RETURN"))
     private void copyOld(ServerPlayer oldPlayer, boolean alive, CallbackInfo info) {
-        this.simplequestData.clone(PlayerData.get(oldPlayer));
+        this.simplequest$Data.clone(PlayerData.get(oldPlayer));
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void save(CompoundTag compound, CallbackInfo info) {
-        this.simplequestData.load(compound.getCompound("SimpleQuestData"));
+        this.simplequest$Data.load(compound.getCompound("SimpleQuestData"));
     }
 
     @Inject(method = "tick", at = @At("RETURN"))
@@ -45,16 +45,16 @@ public abstract class ServerPlayerMixin extends Player implements SimpleQuestDat
         if (this.containerMenu instanceof QuestGui gui && this.tickCount % 20 == 0) {
             gui.update();
         }
-        this.simplequestData.tick();
+        this.simplequest$Data.tick();
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
     private void read(CompoundTag compound, CallbackInfo info) {
-        compound.put("SimpleQuestData", this.simplequestData.save());
+        compound.put("SimpleQuestData", this.simplequest$Data.save());
     }
 
     @Override
-    public PlayerData simpleQuestPlayerData() {
-        return this.simplequestData;
+    public PlayerData simpleQuest$PlayerData() {
+        return this.simplequest$Data;
     }
 }

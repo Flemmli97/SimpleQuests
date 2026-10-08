@@ -1,17 +1,4 @@
 {
-  "name": "Example for a predicate quest",
-  "description": [],
-  "parent_id": [],
-  "redo_parent": false,
-  "need_unlock": false,
-  "icon": "minecraft:map",
-  "repeat_delay": 0,
-  "repeat_daily": 0,
-  "max_repeat": 0,
-  "sorting_id": 1,
-  "daily_quest": false,
-  "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "tasks": {
@@ -44,5 +31,18 @@
       "id": "simplequests_api:predicates"
     }
   },
+  "sorting_id": 1,
+  "icon": "minecraft:map",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "name": "Example for a predicate quest",
+  "description": [],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "type": "simplequests_api:quest"
 }

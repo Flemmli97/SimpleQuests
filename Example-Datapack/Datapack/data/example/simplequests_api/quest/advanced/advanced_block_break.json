@@ -1,17 +1,4 @@
 {
-  "name": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
-  "description": [],
-  "parent_id": [],
-  "redo_parent": false,
-  "need_unlock": false,
-  "icon": "minecraft:diamond_pickaxe",
-  "repeat_delay": "1w:5d:3h:2m",
-  "repeat_daily": 0,
-  "max_repeat": 0,
-  "sorting_id": 0,
-  "daily_quest": false,
-  "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "tasks": {
@@ -52,5 +39,18 @@
       "id": "simplequests_api:block_interact"
     }
   },
+  "sorting_id": 0,
+  "icon": "minecraft:diamond_pickaxe",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": "1w:5d:3h:2m",
+  "repeat_daily": 0,
+  "name": "Mine a east facing quartz block with an unbreaking diamond pickaxe 3 times",
+  "description": [],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "type": "simplequests_api:quest"
 }

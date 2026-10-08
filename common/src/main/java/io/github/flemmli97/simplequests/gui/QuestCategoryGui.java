@@ -29,18 +29,13 @@ import java.util.Optional;
 public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
 
     public static final String STACK_NBT_ID = "SimpleQuestsCategory";
-    public static int ENTRY_PER_PAGE = 12;
+    public static final int ENTRY_PER_PAGE = 12;
 
     private int page, maxPages;
     private List<ResourceLocation> categories;
-    private final ServerPlayer player;
 
     protected QuestCategoryGui(int syncId, Inventory playerInventory) {
         super(syncId, playerInventory, 6, null);
-        if (playerInventory.player instanceof ServerPlayer)
-            this.player = (ServerPlayer) playerInventory.player;
-        else
-            throw new IllegalStateException("This is a server side container");
     }
 
     public static void openGui(ServerPlayer player) {
@@ -58,7 +53,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
         player.openMenu(fac);
     }
 
-    private ItemStack ofCategory(int i, QuestCategory category, ServerPlayer player) {
+    private ItemStack ofCategory(QuestCategory category) {
         ItemStack stack = category.getIcon();
         stack.set(DataComponents.CUSTOM_NAME, category.getName().setStyle(QuestGui.NAME_STYLE));
         List<Component> lore = new ArrayList<>();
@@ -77,8 +72,6 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
 
     @Override
     protected void fillInventoryWith(Player player, SeparateInv inv, Object additionalData) {
-        if (!(player instanceof ServerPlayer serverPlayer))
-            return;
         Map<ResourceLocation, QuestCategory> categoryMap = QuestsManager.instance().getSelectableCategories(null);
         this.categories = new ArrayList<>(categoryMap.keySet());
         this.categories.removeIf(res -> QuestsManager.instance().getQuestsForCategory(categoryMap.get(res)).isEmpty());
@@ -93,9 +86,9 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
                 inv.updateStack(i, emptyFiller());
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.categories.size()) {
-                    ItemStack stack = this.ofCategory(i, categoryMap.get(this.categories.get(id)), serverPlayer);
+                    ItemStack stack = this.ofCategory(categoryMap.get(this.categories.get(id)));
                     if (!stack.isEmpty()) {
-                        inv.updateStack(i, this.ofCategory(i, categoryMap.get(this.categories.get(id)), serverPlayer));
+                        inv.updateStack(i, this.ofCategory(categoryMap.get(this.categories.get(id))));
                         id++;
                     }
                 }
@@ -125,7 +118,7 @@ public class QuestCategoryGui extends ServerOnlyScreenHandler<Object> {
                 this.slots.get(i).set(emptyFiller());
             else if (i % 9 == 1 || i % 9 == 4 || i % 9 == 7) {
                 if (id < this.categories.size()) {
-                    this.slots.get(i).set(this.ofCategory(i, categoryMap.get(this.categories.get(id)), this.player));
+                    this.slots.get(i).set(this.ofCategory(categoryMap.get(this.categories.get(id))));
                     id++;
                 } else
                     this.slots.get(i).set(ItemStack.EMPTY);

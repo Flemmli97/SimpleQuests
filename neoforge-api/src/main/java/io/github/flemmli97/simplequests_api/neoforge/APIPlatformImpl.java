@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests_api.neoforge;
 
 import io.github.flemmli97.simplequests_api.APIPlatform;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
+import io.github.flemmli97.simplequests_api.events.OnQuestComplete;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.OnQuestComplete;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
 import net.neoforged.neoforge.common.NeoForge;
@@ -22,7 +22,7 @@ public class APIPlatformImpl implements APIPlatform {
     }
 
     @Override
-    public boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress) {
+    public boolean onQuestComplete(ServerPlayer player, String trigger, ResolvedQuest quest, QuestProgress progress) {
         return !NeoForge.EVENT_BUS.post(new QuestCompleteEvent(player, trigger, quest, progress)).isCanceled();
     }
 

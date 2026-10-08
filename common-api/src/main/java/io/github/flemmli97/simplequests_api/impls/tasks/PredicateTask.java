@@ -6,9 +6,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 
 public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResolved> {
 
-    public static final QuestEntryKey<PredicateTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "predicates"));
+    public static final QuestTaskKey<PredicateTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "predicates"));
     public static final MapCodec<PredicateTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(JsonCodecs.nonEmptyList(DescriptiveValue.codecDesc(EntityPredicate.CODEC), "entity predicates can't be empty").fieldOf("predicates").forGetter(d -> d.predicates),
                     Codec.STRING.optionalFieldOf("description").forGetter(d -> QuestUtils.optStr(d.description)),
@@ -59,13 +59,13 @@ public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResol
     }
 
     @Override
-    public QuestEntryKey<PredicateTask> getId() {
+    public QuestTaskKey<PredicateTask> getId() {
         return ID;
     }
 
     @Override
-    public PredicateTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public PredicateTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         DescriptiveValue<EntityPredicate> val = this.predicates.get(ctx.getRandom().nextInt(this.predicates.size()));
         return new PredicateTaskResolved(val, this.submit);
     }
@@ -84,7 +84,7 @@ public class PredicateTask implements QuestTask<PredicateTask.PredicateTaskResol
         }
 
         @Override
-        public QuestEntryKey<PredicateTask> getId() {
+        public QuestTaskKey<PredicateTask> getId() {
             return ID;
         }
 

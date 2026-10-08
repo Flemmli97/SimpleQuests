@@ -1,3 +1,16 @@
+Simple Quests 2.3.0
+================
+- SimpleQuest API 3.0.0
+  - Huge internal rewrite with large breaking changes
+  - Datapack and current player data are unaffected
+  - Split into QuestDefinition and ResolvedQuest instance
+    - QuestDefinition is the template
+    - ResolvedQuest is the used instance when player accepts a quest
+  - Allows defining sub quest in one file instead of needing id to point to other quests (Relevant for sequential and selection quests)
+    - Quests defined these way are not in the QuestManager so manually hiding them is not needed
+  - Allows subquests within subquests now.
+- Main mod reflects 3.0.0 changes
+
 Simple Quests 2.2.0
 ================
 - Fix holder lookup not including tags during reload

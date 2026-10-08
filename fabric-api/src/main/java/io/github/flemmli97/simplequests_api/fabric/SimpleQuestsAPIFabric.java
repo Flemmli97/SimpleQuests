@@ -3,9 +3,9 @@ package io.github.flemmli97.simplequests_api.fabric;
 import io.github.flemmli97.simplequests_api.CommonEvents;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.quest.OnQuestComplete;
+import io.github.flemmli97.simplequests_api.events.OnQuestComplete;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestDefinitionRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import net.fabricmc.api.ModInitializer;
@@ -45,17 +45,17 @@ public class SimpleQuestsAPIFabric implements ModInitializer {
     public void onInitialize() {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "reloader"),
                 provider -> new IdentifiableResourceReloadListener() {
-            @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return QuestsManager.create(provider).reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
-            }
+                    @Override
+                    public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                        return QuestsManager.create(provider).reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+                    }
 
-            @Override
-            public ResourceLocation getFabricId() {
-                return ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "reloader");
-            }
-        });
-        QuestBaseRegistry.register();
+                    @Override
+                    public ResourceLocation getFabricId() {
+                        return ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "reloader");
+                    }
+                });
+        QuestDefinitionRegistry.register();
         QuestEntryRegistry.register();
         ProgressionTrackerRegistry.register();
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {

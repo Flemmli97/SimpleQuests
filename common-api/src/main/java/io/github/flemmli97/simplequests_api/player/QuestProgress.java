@@ -2,18 +2,22 @@ package io.github.flemmli97.simplequests_api.player;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
+import io.github.flemmli97.simplequests_api.APIPlatform;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.InvalidQuestStateException;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
+import io.github.flemmli97.simplequests_api.quest.QuestHolder;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -22,6 +26,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,43 +35,48 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class QuestProgress {
 
-    private final Set<String> entries = new HashSet<>();
+    private final PlayerQuestData data;
+
+    private QuestDefinition rootDefinition;
+
+    private final List<QuestProgressState> questStack = new ArrayList<>();
+    private Map<String, ResolvedQuestTask> tasks;
+    private final Set<String> completedTasks = new HashSet<>();
 
     private final Map<ProgressionTrackerKey<?, ?>, Map<String, ProgressionTracker<?, ?>>> progressionTrackers = new HashMap<>();
 
     private final Map<String, Predicate<PlayerQuestData>> tickables = new HashMap<>();
 
-    private QuestBase base;
-    private int questIndex;
-    private QuestBase quest;
-    private Map<String, ResolvedQuestTask> questEntries;
-
-    public QuestProgress(QuestBase quest, PlayerQuestData data, int subQuestIndex) {
-        this.base = quest;
-        this.questIndex = subQuestIndex;
-        this.quest = quest.resolveToQuest(data.getPlayer(), this.questIndex);
-        this.questEntries = this.base.resolveTasks(data, this, this.questIndex);
-        this.setup(data);
-        if (!this.tickables.isEmpty())
-            data.addTickableProgress(this);
+    public QuestProgress(QuestDefinition quest, PlayerQuestData data, int subQuestIndex) {
+        this.data = data;
+        this.rootDefinition = quest;
+        QuestProgressState base = new QuestProgressState(quest, subQuestIndex);
+        if (base.quest() != null)
+            this.questStack.add(base);
+        List<QuestHolder> subQuests = quest.getSubQuests();
+        if (!quest.isValidAsRoot() && !subQuests.isEmpty() && subQuestIndex < subQuests.size()) {
+            quest = subQuests.get(subQuestIndex).getDefinition();
+            this.questStack.add(new QuestProgressState(quest, 0));
+        }
+        this.advanceQuest();
     }
 
     public QuestProgress(CompoundTag tag, PlayerQuestData data) {
-        this.load(tag, data);
-        this.setup(data);
+        this.data = data;
+        this.load(tag);
+        this.setup();
         if (!this.tickables.isEmpty())
             data.addTickableProgress(this);
     }
 
-    private void setup(PlayerQuestData data) {
-        this.questEntries.forEach((s, e) -> {
-            e.onAccept(data);
-            if (!this.entries.contains(s)) {
+    private void setup() {
+        this.tasks.forEach((s, e) -> {
+            e.onAccept(this.data);
+            if (!this.completedTasks.contains(s)) {
                 Predicate<PlayerQuestData> ticker = e.tickable();
                 if (ticker != null)
                     this.tickables.put(s, ticker);
@@ -74,113 +84,167 @@ public class QuestProgress {
         });
     }
 
-    public QuestBase getQuest() {
-        return this.base;
+    public QuestDefinition getRootDefinition() {
+        return this.rootDefinition;
     }
 
-    public MutableComponent getName(ServerPlayer player) {
-        return this.getQuest().getName(player, this.questIndex);
+    public ResourceLocation getRootId() {
+        return this.getRootQuest().id();
     }
 
-    public List<MutableComponent> getDescription(ServerPlayer player) {
-        return this.getQuest().getDescription(player, this.questIndex);
+    /**
+     * @return The quest that initiated this progress. This is not always equal to the {@link #getRootDefinition}.
+     * E.g. with Composite quests this is the quest that was selected
+     */
+    public ResolvedQuest getRootQuest() {
+        return this.questStack.getFirst().quest();
+    }
+
+    public int getRootProgressStage() {
+        return this.questStack.getFirst().index();
+    }
+
+    public boolean valid() {
+        return this.getRootQuest() != null;
+    }
+
+    public ResolvedQuest getActiveQuest() {
+        return this.questStack.getLast().quest();
+    }
+
+    private QuestDefinition getActiveDefinition() {
+        return this.questStack.isEmpty() ? this.rootDefinition : this.questStack.getLast().definition;
+    }
+
+    public PlayerQuestData data() {
+        return this.data;
+    }
+
+    public ServerPlayer player() {
+        return this.data().getPlayer();
+    }
+
+    public MutableComponent name(ServerPlayer player) {
+        return this.getRootQuest().name(player);
+    }
+
+    public List<MutableComponent> description(ServerPlayer player) {
+        return this.getRootQuest().description(player);
     }
 
     public List<MutableComponent> getTaskComponents(ServerPlayer player) {
         List<MutableComponent> list = new ArrayList<>();
-        for (Map.Entry<String, ResolvedQuestTask> e : this.getQuestEntries().entrySet()) {
+        for (Map.Entry<String, ResolvedQuestTask> e : this.getTasks().entrySet()) {
             list.add(e.getValue().translation(player));
         }
         return list;
     }
 
     public Collection<ResourceLocation> getCompletionID() {
-        if (this.base instanceof CompositeQuest)
-            return Set.of(this.base.id, this.quest.id);
-        return Set.of(this.base.id);
+        return new ImmutableSet.Builder<ResourceLocation>()
+                .add(this.rootDefinition.id())
+                .addAll(this.getRootQuest().completed()).build();
     }
 
-    public Map<String, ResolvedQuestTask> getQuestEntries() {
-        return this.questEntries;
+    public Map<String, ResolvedQuestTask> getTasks() {
+        return this.tasks;
     }
 
-    public SubmitType submit(PlayerQuestData data, String trigger, Consumer<ResolvedQuestTask> cons) {
-        return this.submit(data, trigger, cons, Integer.MAX_VALUE);
+    public Set<Pair<String, ResolvedQuestTask>> submit(String trigger) {
+        return this.submit(trigger, Integer.MAX_VALUE);
     }
 
-    public SubmitType submit(PlayerQuestData data, String trigger, Consumer<ResolvedQuestTask> cons, int amount) {
-        boolean any = false;
-        ServerPlayer player = data.getPlayer();
-        int count = 0;
-        for (Map.Entry<String, ResolvedQuestTask> entry : this.questEntries.entrySet()) {
-            if (this.entries.contains(entry.getKey()) && !this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger))
+    public Set<Pair<String, ResolvedQuestTask>> submit(String trigger, int amount) {
+        ServerPlayer player = this.data.getPlayer();
+        Set<Pair<String, ResolvedQuestTask>> fulfilled = new HashSet<>();
+        for (Map.Entry<String, ResolvedQuestTask> entry : this.tasks.entrySet()) {
+            if (this.completedTasks.contains(entry.getKey()) && !this.getRootQuest().submissionTrigger(player).equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
-                this.entries.add(entry.getKey());
-                cons.accept(entry.getValue());
-                any = true;
-                count++;
-                if (count >= amount) {
+                this.completedTasks.add(entry.getKey());
+                fulfilled.add(Pair.of(entry.getKey(), entry.getValue()));
+                if (fulfilled.size() >= amount) {
                     break;
                 }
             }
         }
-        return switch (this.tryComplete(data, trigger)) {
-            case COMPLETE -> SubmitType.COMPLETE;
-            case PARTIAL_COMPLETE -> SubmitType.PARTIAL_COMPLETE;
-            case NO -> any ? SubmitType.PARTIAL : SubmitType.NOTHING;
-        };
+        return fulfilled;
     }
 
-    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
-        return this.tryFullFill(player, key, with, Integer.MAX_VALUE);
+    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
+        return this.tryFulfill(player, key, with, Integer.MAX_VALUE);
     }
 
     @SuppressWarnings("unchecked")
-    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFullFill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with, int amount) {
-        Set<Pair<String, R>> fullfilled = new HashSet<>();
-        int count = 0;
-        for (Map.Entry<String, ResolvedQuestTask> e : this.questEntries.entrySet()) {
-            if (this.entries.contains(e.getKey()))
+    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with, int amount) {
+        Set<Pair<String, R>> fulfilled = new HashSet<>();
+        for (Map.Entry<String, ResolvedQuestTask> e : this.tasks.entrySet()) {
+            if (this.completedTasks.contains(e.getKey()))
                 continue;
-            if (e.getValue().getId().equals(key.questEntryKey())) {
+            if (e.getValue().getId().equals(key.questTaskKey())) {
                 R entry = (R) e.getValue();
                 ProgressionTracker<V, R> tracker = this.getOrCreateTracker(key, entry, e.getKey());
                 if (tracker.progress(player, this, with)) {
-                    fullfilled.add(Pair.of(e.getKey(), entry));
-                    this.entries.add(e.getKey());
-                    count++;
-                    if (count >= amount) {
+                    fulfilled.add(Pair.of(e.getKey(), entry));
+                    this.completedTasks.add(e.getKey());
+                    if (fulfilled.size() >= amount) {
                         break;
                     }
                 }
             }
         }
-        return fullfilled;
+        return fulfilled;
     }
 
-    public QuestState tryComplete(PlayerQuestData data, String trigger) {
-        ServerPlayer player = data.getPlayer();
-        boolean completed = this.getQuest().submissionTrigger(player, this.questIndex).equals(trigger) && this.entries.containsAll(this.questEntries.keySet());
-        QuestBase toResolve = this.getQuest() instanceof CompositeQuest ? this.quest : this.getQuest();
+    public QuestState tryComplete(String trigger) {
+        ServerPlayer player = this.data.getPlayer();
+        boolean completed = this.completedTasks.containsAll(this.tasks.keySet()) && this.getRootQuest().submissionTrigger(player).equals(trigger);
+        if (completed && !APIPlatform.INSTANCE.onQuestComplete(player, trigger, this.getRootQuest(), this))
+            completed = false;
         if (completed) {
-            QuestBase next = toResolve.resolveToQuest(player, this.questIndex + 1);
-            if (next != null) {
-                this.quest = next;
-                this.questEntries = toResolve.resolveTasks(data, this, this.questIndex + 1);
-                this.questIndex += 1;
-                this.resetTrackers();
-                this.setup(data);
-                if (!this.tickables.isEmpty())
-                    data.addTickableProgress(this);
+            if (this.advanceQuest()) {
                 return QuestState.PARTIAL_COMPLETE;
             }
         }
         return completed ? QuestState.COMPLETE : QuestState.NO;
     }
 
-    public List<String> finishedTasks() {
-        return ImmutableList.copyOf(this.entries);
+    /**
+     * Advances the quest down its progression based on subquests.
+     */
+    private boolean advanceQuest() {
+        if (this.questStack.isEmpty())
+            return false;
+        while (this.questStack.size() > 1 && !this.questStack.getLast().canAdvance())
+            this.questStack.removeLast();
+        return this.advanceRecursively();
+    }
+
+    private boolean advanceRecursively() {
+        if (this.questStack.getFirst().definition.getSubQuests().isEmpty()) {
+            this.tasks = this.getActiveQuest().resolveTasks(this);
+            this.resetTrackers();
+            this.setup();
+            return false;
+        }
+        QuestProgressState state = this.questStack.getLast();
+        QuestDefinition next = state.advance();
+        if (next != null) {
+            this.questStack.add(new QuestProgressState(next, 0));
+            if (!this.advanceRecursively()) {
+                this.tasks = this.getActiveQuest().resolveTasks(this);
+                this.resetTrackers();
+                this.setup();
+                if (!this.tickables.isEmpty())
+                    this.data.addTickableProgress(this);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public List<String> completedTasks() {
+        return ImmutableList.copyOf(this.completedTasks);
     }
 
     public MutableComponent progressComponent(ServerPlayer player, ProgressionTrackerKey<?, ?> key, String entry) {
@@ -204,45 +268,45 @@ public class QuestProgress {
         return (ProgressionTracker<T, R>) tracks.computeIfAbsent(entryName, (res) -> ProgressionTrackerRegistry.create(key, entry));
     }
 
-    public Pair<Boolean, Set<ResolvedQuestTask>> tickProgress(PlayerQuestData data) {
-        Set<ResolvedQuestTask> fullfilled = new HashSet<>();
+    public Pair<Boolean, Set<ResolvedQuestTask>> tickProgress() {
+        Set<ResolvedQuestTask> fulfilled = new HashSet<>();
         this.tickables.entrySet().removeIf(e -> {
-            if (e.getValue().test(data)) {
-                fullfilled.add(this.questEntries.get(e.getKey()));
-                this.entries.add(e.getKey());
+            if (e.getValue().test(this.data)) {
+                fulfilled.add(this.tasks.get(e.getKey()));
+                this.completedTasks.add(e.getKey());
                 return true;
             }
             return false;
         });
-        return Pair.of(this.tickables.isEmpty(), fullfilled);
+        return Pair.of(this.tickables.isEmpty(), fulfilled);
     }
 
     public void resetTrackers() {
-        this.entries.clear();
+        this.completedTasks.clear();
         this.progressionTrackers.clear();
         this.tickables.clear();
     }
 
-    public CompoundTag save(HolderLookup.Provider lookup) {
+    public CompoundTag save(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        DynamicOps<Tag> ops = lookup.createSerializationContext(NbtOps.INSTANCE);
-        if (this.base.isDynamic()) {
-            tag.putBoolean("DynamicQuest", true);
-            tag.put("DynamicQuest", QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID)
-                    .encodeStart(ops, this.base).getOrThrow());
-        } else {
-            tag.putString("Quest", this.base.id.toString());
-        }
-        tag.putInt("QuestIndex", this.questIndex);
+        DynamicOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
+        tag.putString("Quest", this.rootDefinition.id().toString());
+        ListTag states = new ListTag();
+        this.questStack.forEach(state -> {
+            CompoundTag statesTag = new CompoundTag();
+            statesTag.putString("Id", state.definition.id().toString());
+            statesTag.put("State", state.save(provider));
+            states.add(statesTag);
+        });
+        tag.put("QuestStates", states);
+
         CompoundTag entries = new CompoundTag();
-        this.questEntries.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.encodeStart(ops, entry)
+        this.tasks.forEach((id, entry) -> entries.put(id, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.encodeStart(ops, entry)
                 .mapError(e -> "Couldn't save quest entry " + e).getOrThrow()));
-        tag.put("QuestEntries", entries);
-
+        tag.put("QuestTasks", entries);
         ListTag list = new ListTag();
-        this.entries.forEach(res -> list.add(StringTag.valueOf(res)));
-        tag.put("FinishedEntries", list);
-
+        this.completedTasks.forEach(res -> list.add(StringTag.valueOf(res)));
+        tag.put("CompletedTasks", list);
         CompoundTag progressionTrackers = new CompoundTag();
         this.progressionTrackers.forEach((key, trackers) -> {
             CompoundTag trackerTag = new CompoundTag();
@@ -253,37 +317,43 @@ public class QuestProgress {
         return tag;
     }
 
-    public void load(CompoundTag tag, PlayerQuestData data) {
-        DynamicOps<Tag> ops = data.getPlayer().getServer()
-                .registryAccess().createSerializationContext(NbtOps.INSTANCE);
-        if (tag.contains("DynamicQuest")) {
-            try {
-                this.base = QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.WITH_ID).parse(NbtOps.INSTANCE, tag.getCompound("DynamicQuest"))
-                        .mapError(e -> "Couldn't read dynamic quest " + e).getOrThrow();
-            } catch (Exception ex) {
-                SimpleQuestsAPI.LOGGER.error("Couldn't reconstruct dynamic quest. Skipping");
-                throw new IllegalStateException();
+    public void load(CompoundTag tag) {
+        HolderLookup.Provider provider = this.data.getPlayer().getServer().registryAccess();
+        DynamicOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
+        this.rootDefinition = QuestsManager.instance().getQuest(ResourceLocation.parse(tag.getString("Quest")));
+        if (this.rootDefinition == null) {
+            throw new InvalidQuestStateException("Cant find quest with id " + tag.getString("Quest") + "!");
+        }
+        if (tag.contains("QuestIndex")) {
+            // Legacy Data
+            QuestDefinition quest = this.rootDefinition;
+            int subQuestIndex = tag.getInt("QuestIndex");
+            QuestProgressState base = new QuestProgressState(quest, subQuestIndex);
+            if (base.quest() != null)
+                this.questStack.add(base);
+            List<QuestHolder> subQuests = this.rootDefinition.getSubQuests();
+            if (!subQuests.isEmpty() && subQuestIndex < subQuests.size()) {
+                quest = subQuests.get(subQuestIndex).getDefinition();
+                this.questStack.add(new QuestProgressState(quest, 0));
             }
         } else {
-            this.base = QuestsManager.instance().getActualQuest(ResourceLocation.parse(tag.getString("Quest")), null);
-            if (this.base == null) {
-                SimpleQuestsAPI.LOGGER.error("Cant find quest with id {}. Skipping", tag.getString("Quest"));
-                throw new IllegalStateException();
-            }
+            ListTag states = tag.getList("QuestStates", Tag.TAG_COMPOUND);
+            states.forEach(t -> {
+                CompoundTag statesTag = (CompoundTag) t;
+                this.questStack.add(new QuestProgressState(statesTag.getString("Id"), statesTag.getCompound("State"), provider));
+            });
         }
-        this.questIndex = tag.getInt("QuestIndex");
-        this.quest = this.base.resolveToQuest(data.getPlayer(), this.questIndex);
-        if (tag.contains("QuestEntries")) {
+        if (tag.contains("QuestTasks") || tag.contains("QuestEntries")) {
             ImmutableMap.Builder<String, ResolvedQuestTask> builder = new ImmutableMap.Builder<>();
-            CompoundTag entries = tag.getCompound("QuestEntries");
+            CompoundTag entries = tag.contains("QuestTasks") ? tag.getCompound("QuestTasks") : tag.getCompound("QuestEntries");
             entries.getAllKeys().forEach(key -> builder.put(key, QuestEntryRegistry.RESOLVED_QUEST_ENTRY_CODEC.parse(ops, entries.getCompound(key))
                     .mapError(e -> "Couldn't read quest entry " + e).getOrThrow()));
-            this.questEntries = builder.build();
+            this.tasks = builder.build();
         } else {
-            this.questEntries = this.quest.resolveTasks(data, this, this.questIndex);
+            this.tasks = this.getActiveQuest().resolveTasks(this);
         }
-        ListTag list = tag.getList("FinishedEntries", Tag.TAG_STRING);
-        list.forEach(t -> this.entries.add(t.getAsString()));
+        ListTag list = tag.contains("CompletedTasks") ? tag.getList("CompletedTasks", Tag.TAG_STRING) : tag.getList("FinishedEntries", Tag.TAG_STRING);
+        list.forEach(t -> this.completedTasks.add(t.getAsString()));
 
         CompoundTag progressionTrackers = tag.getCompound("ProgressionTrackers");
         progressionTrackers.getAllKeys().forEach(key -> {
@@ -295,22 +365,73 @@ public class QuestProgress {
     }
 
     private void loadTracker(ProgressionTrackerKey<?, ResolvedQuestTask> key, Map<String, ProgressionTracker<?, ?>> map, String name, CompoundTag tag) {
-        if (this.quest == null) {
-            SimpleQuestsAPI.LOGGER.error("Quest not set. This shouldn't be!");
-            throw new IllegalStateException();
-        }
         try {
-            ProgressionTracker<?, ResolvedQuestTask> entry = ProgressionTrackerRegistry.deserialize(key, this.questEntries.get(name), tag.get(name));
+            ProgressionTracker<?, ResolvedQuestTask> entry = ProgressionTrackerRegistry.deserialize(key, this.tasks.get(name), tag.get(name));
             map.putIfAbsent(name, entry);
         } catch (ClassCastException e) {
             SimpleQuestsAPI.LOGGER.error("Couldn't find quest entry for tracker {}", name);
         }
     }
 
-    public enum SubmitType {
-        COMPLETE,
-        PARTIAL,
-        PARTIAL_COMPLETE,
-        NOTHING
+    private class QuestProgressState {
+
+        private final QuestDefinition definition;
+        @Nullable
+        private final ResolvedQuest quest;
+        private int nextIndex;
+
+        private QuestProgressState(QuestDefinition definition, int index) {
+            this.definition = definition;
+            this.quest = definition.resolve(QuestProgress.this);
+            this.nextIndex = index;
+        }
+
+        private QuestProgressState(String idS, CompoundTag tag, HolderLookup.Provider provider) {
+            ResourceLocation id = ResourceLocation.parse(idS);
+            this.definition = QuestProgress.this.getActiveDefinition().getSubQuest(id).orElse(QuestsManager.instance().getQuest(id));
+            if (this.definition == null) {
+                throw new InvalidQuestStateException("Cant find quest with id " + id + "!");
+            }
+            this.quest = this.definition.load(QuestProgress.this, tag.get("Quest"), provider);
+            this.nextIndex = tag.getInt("QuestIndex");
+        }
+
+        public boolean canAdvance() {
+            if (this.quest == null) {
+                return false;
+            }
+            return this.quest.source().advanceable() && this.nextIndex < this.quest.source().getSubQuests().size();
+        }
+
+        public QuestDefinition advance() {
+            if (!this.canAdvance()) {
+                return null;
+            }
+            List<QuestHolder> subQuests = this.quest.source().getSubQuests();
+            if (this.nextIndex >= subQuests.size()) {
+                return null;
+            }
+            return subQuests.get(this.nextIndex++).getDefinition();
+        }
+
+        public ResolvedQuest quest() {
+            return this.quest;
+        }
+
+        public int index() {
+            return this.nextIndex - 1;
+        }
+
+        public Tag save(HolderLookup.Provider provider) {
+            CompoundTag tag = new CompoundTag();
+            tag.put("Quest", this.quest == null ? ByteTag.ZERO : this.quest.save(provider));
+            tag.putInt("QuestIndex", this.nextIndex);
+            return tag;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("QuestState(%s, %s)", this.definition, this.nextIndex - 1);
+        }
     }
 }

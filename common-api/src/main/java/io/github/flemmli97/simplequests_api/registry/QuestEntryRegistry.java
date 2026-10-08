@@ -12,8 +12,8 @@ import io.github.flemmli97.simplequests_api.impls.tasks.ItemTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.PredicateTask;
 import io.github.flemmli97.simplequests_api.impls.tasks.XPTask;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.resources.ResourceLocation;
 
@@ -47,7 +47,7 @@ public class QuestEntryRegistry {
      * Register a deserializer for a {@link ResolvedQuestTask}
      */
     @SuppressWarnings("unchecked")
-    public static synchronized <R extends ResolvedQuestTask, T extends QuestTask<R>> void registerSerializer(QuestEntryKey<T> id, MapCodec<T> deserializer, MapCodec<R> entrySerializer) {
+    public static synchronized <R extends ResolvedQuestTask, T extends QuestTask<R>> void registerSerializer(QuestTaskKey<T> id, MapCodec<T> deserializer, MapCodec<R> entrySerializer) {
         if (MAP.containsKey(id.id()))
             throw new IllegalStateException("Deserializer for " + id + " already registered");
         MAP.put(id.id(), (TaskCodec<ResolvedQuestTask>) new TaskCodec<>(deserializer, entrySerializer));

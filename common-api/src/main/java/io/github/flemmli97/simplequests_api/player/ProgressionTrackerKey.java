@@ -1,24 +1,24 @@
 package io.github.flemmli97.simplequests_api.player;
 
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * A custom Resourcelocation class to ensure generics
  *
- * @param questEntryKey The quest entry type linked to this tracker
+ * @param questTaskKey The quest entry type linked to this tracker
  */
 public record ProgressionTrackerKey<V, R extends ResolvedQuestTask>(ResourceLocation id,
-                                                                    QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
+                                                                    QuestTaskKey<? extends QuestTask<R>> questTaskKey) {
 
-    public ProgressionTrackerKey(String id, QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
-        this(ResourceLocation.parse(id), questEntryKey);
+    public ProgressionTrackerKey(String id, QuestTaskKey<? extends QuestTask<R>> questTaskKey) {
+        this(ResourceLocation.parse(id), questTaskKey);
     }
 
-    public ProgressionTrackerKey(String namespace, String path, QuestEntryKey<? extends QuestTask<R>> questEntryKey) {
-        this(ResourceLocation.fromNamespaceAndPath(namespace, path), questEntryKey);
+    public ProgressionTrackerKey(String namespace, String path, QuestTaskKey<? extends QuestTask<R>> questTaskKey) {
+        this(ResourceLocation.fromNamespaceAndPath(namespace, path), questTaskKey);
     }
 
     @Override

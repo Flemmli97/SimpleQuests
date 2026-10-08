@@ -2,14 +2,10 @@ package io.github.flemmli97.simplequests.gui;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
-import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -36,15 +32,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<CompositeQuestScreenHandler.GuiData> {
+public class SelectionQuestScreenHandler extends ServerOnlyScreenHandler<SelectionQuestScreenHandler.GuiData> {
 
-    private List<ResourceLocation> quests;
-    private final CompositeQuest quest;
+    private final QuestDefinition quest;
     private final QuestCategory category;
     private final boolean canGoBack;
-    private int page;
+    private final int page;
 
-    private CompositeQuestScreenHandler(int syncId, Inventory playerInventory, CompositeQuest quest, QuestCategory category, boolean canGoBack, int page) {
+    private SelectionQuestScreenHandler(int syncId, Inventory playerInventory, QuestDefinition quest, QuestCategory category, boolean canGoBack, int page) {
         super(syncId, playerInventory, (quest.getSubQuests().size() / 7) + 1, new GuiData(quest, category, (quest.getSubQuests().size() / 7) + 1, page, canGoBack));
         this.quest = quest;
         this.category = category;
@@ -52,11 +47,11 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         this.page = page;
     }
 
-    public static void openScreen(ServerPlayer player, CompositeQuest quest, QuestCategory category, boolean canGoBack, int page) {
+    public static void openScreen(ServerPlayer player, QuestDefinition quest, QuestCategory category, boolean canGoBack, int page) {
         MenuProvider fac = new MenuProvider() {
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-                return new CompositeQuestScreenHandler(syncId, inv, quest, category, canGoBack, page);
+                return new SelectionQuestScreenHandler(syncId, inv, quest, category, canGoBack, page);
             }
 
             @Override
@@ -67,10 +62,10 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         player.openMenu(fac);
     }
 
-    private ItemStack ofQuest(Quest quest, int idx, ServerPlayer player) {
+    private ItemStack ofQuest(QuestDefinition quest, int idx, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         ItemStack stack = quest.getIcon();
-        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(QuestGui.NAME_STYLE));
+        stack.set(DataComponents.CUSTOM_NAME, quest.name(player).setStyle(QuestGui.NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(player.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.UNBREAKING), 1);
             if (stack.has(DataComponents.STORED_ENCHANTMENTS))
@@ -88,15 +83,15 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
     protected void fillInventoryWith(Player player, SeparateInv inv, GuiData additionalData) {
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, Quest> questMap = additionalData.quest.getSubQuests()
-                .stream().map(r -> Pair.of(r, QuestsManager.instance().getQuest(r)))
-                .filter(p -> p.getSecond() instanceof Quest).collect(Collectors.toMap(
+        Map<ResourceLocation, QuestDefinition> questMap = additionalData.quest.getSubQuests()
+                .stream().map(h -> Pair.of(h.getId(), h.getDefinition()))
+                .filter(p -> p.getSecond().isValidAsRoot()).collect(Collectors.toMap(
                         Pair::getFirst,
-                        e -> (Quest) e.getSecond(),
+                        Pair::getSecond,
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
-        this.quests = new ArrayList<>(questMap.keySet());
+        List<ResourceLocation> quests = new ArrayList<>(questMap.keySet());
         int id = 0;
         for (int i = 0; i < additionalData.rows * 9; i++) {
             int mod = i % 9;
@@ -107,8 +102,8 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
             } else if ((additionalData.rows > 2 && (i < 9 || i > this.size - 1)) || mod == 0 || mod == 8)
                 inv.updateStack(i, QuestGui.emptyFiller());
             else {
-                if (id < this.quests.size()) {
-                    ItemStack stack = this.ofQuest(questMap.get(this.quests.get(id)), id, serverPlayer);
+                if (id < quests.size()) {
+                    ItemStack stack = this.ofQuest(questMap.get(quests.get(id)), id, serverPlayer);
                     if (!stack.isEmpty()) {
                         inv.updateStack(i, stack);
                         id++;
@@ -144,11 +139,6 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         if (opt.isEmpty())
             return false;
         int idx = opt.get();
-        QuestBase actual = this.quest.resolveToQuest(player, idx);
-        if (actual == null) {
-            SimpleQuests.LOGGER.error("No such quest for composite {}", this.quest.id);
-            return false;
-        }
         ConfirmScreenHandler.openConfirmScreen(player, b -> {
             if (b) {
                 player.closeContainer();
@@ -166,6 +156,6 @@ public class CompositeQuestScreenHandler extends ServerOnlyScreenHandler<Composi
         return true;
     }
 
-    record GuiData(CompositeQuest quest, QuestCategory category, int rows, int page, boolean canGoBack) {
+    protected record GuiData(QuestDefinition quest, QuestCategory category, int rows, int page, boolean canGoBack) {
     }
 }

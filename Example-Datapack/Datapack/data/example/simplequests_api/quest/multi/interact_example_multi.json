@@ -1,17 +1,4 @@
 {
-  "name": "Example for a multi entity interaction quest",
-  "description": [],
-  "parent_id": [],
-  "redo_parent": false,
-  "need_unlock": false,
-  "icon": "minecraft:dirt",
-  "repeat_delay": 0,
-  "repeat_daily": 0,
-  "max_repeat": 0,
-  "sorting_id": 0,
-  "daily_quest": false,
-  "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "tasks": {
@@ -45,5 +32,18 @@
       "id": "simplequests_api:entity_interact"
     }
   },
+  "sorting_id": 0,
+  "icon": "minecraft:dirt",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": 0,
+  "repeat_daily": 0,
+  "name": "Example for a multi entity interaction quest",
+  "description": [],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "type": "simplequests_api:quest"
 }

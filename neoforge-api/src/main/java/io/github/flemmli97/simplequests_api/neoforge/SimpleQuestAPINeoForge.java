@@ -4,7 +4,7 @@ import io.github.flemmli97.simplequests_api.CommonEvents;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.registry.ProgressionTrackerRegistry;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.registry.QuestDefinitionRegistry;
 import io.github.flemmli97.simplequests_api.registry.QuestEntryRegistry;
 import io.github.flemmli97.simplequests_api.util.QuestNumberProvider;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -35,7 +35,7 @@ public class SimpleQuestAPINeoForge {
         NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::interactBlock);
         NeoForge.EVENT_BUS.addListener(SimpleQuestAPINeoForge::breakBlock);
 
-        QuestBaseRegistry.register();
+        QuestDefinitionRegistry.register();
         QuestEntryRegistry.register();
         ProgressionTrackerRegistry.register();
     }

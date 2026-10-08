@@ -1,9 +1,9 @@
 package io.github.flemmli97.simplequests_api.fabric;
 
 import io.github.flemmli97.simplequests_api.APIPlatform;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
+import io.github.flemmli97.simplequests_api.events.OnQuestComplete;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.OnQuestComplete;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
 
@@ -15,7 +15,7 @@ public class ApiPlatformImpl implements APIPlatform {
     }
 
     @Override
-    public boolean onQuestComplete(ServerPlayer player, String trigger, Quest quest, QuestProgress progress) {
+    public boolean onQuestComplete(ServerPlayer player, String trigger, ResolvedQuest quest, QuestProgress progress) {
         return SimpleQuestsAPIFabric.QUEST_COMPLETE.invoker().onComplete(player, trigger, quest, progress);
     }
 

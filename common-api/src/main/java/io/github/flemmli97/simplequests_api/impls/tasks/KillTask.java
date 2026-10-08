@@ -5,11 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.progression.KillTracker;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
@@ -32,7 +31,7 @@ import java.util.Optional;
 
 public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
 
-    public static final QuestEntryKey<KillTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "kill"));
+    public static final QuestTaskKey<KillTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "kill"));
     public static final MapCodec<KillTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(JsonCodecs.nonEmptyList(DescriptiveValue.withTranslation(EntityPredicate.CODEC), "predicates can't be empty").fieldOf("predicates").forGetter(d -> d.predicates),
                     NumberProviders.CODEC.fieldOf("amount").forGetter(d -> d.amount),
@@ -70,15 +69,15 @@ public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
     }
 
     @Override
-    public QuestEntryKey<KillTask> getId() {
+    public QuestTaskKey<KillTask> getId() {
         return ID;
     }
 
     @Override
-    public KillTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public KillTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         DescriptiveValue<EntityPredicate> val = this.predicates.get(ctx.getRandom().nextInt(this.predicates.size()));
-        return new KillTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
+        return new KillTaskResolved(val, QuestUtils.getAmount(this.amount, ctx, progress.data(), quest.id()), this.playerPredicate);
     }
 
     public record KillTaskResolved(DescriptiveValue<EntityPredicate> predicate, int amount,
@@ -96,7 +95,7 @@ public class KillTask implements QuestTask<KillTask.KillTaskResolved> {
         }
 
         @Override
-        public QuestEntryKey<KillTask> getId() {
+        public QuestTaskKey<KillTask> getId() {
             return ID;
         }
 

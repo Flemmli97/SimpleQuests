@@ -2,17 +2,17 @@ package io.github.flemmli97.simplequests.api;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.data.PlayerData;
+import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 public class SimpleQuestImplAPI {
 
@@ -21,11 +21,11 @@ public class SimpleQuestImplAPI {
      *
      * @param key        The key to be used
      * @param with       The value used to progress
-     * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
+     * @param onFulfill  Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */
-    public static <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFullfill) {
-        return trigger(serverPlayer, key, with, onFullfill, "");
+    public static <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFulfill) {
+        return trigger(serverPlayer, key, with, onFulfill, "");
     }
 
     /**
@@ -33,11 +33,11 @@ public class SimpleQuestImplAPI {
      *
      * @param key        The key to be used
      * @param with       The value used to progress
-     * @param onFullfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
+     * @param onFulfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */
-    public static <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFullfill, @NotNull String trigger) {
-        return PlayerData.get(serverPlayer).trigger(key, with, onFullfill, trigger);
+    public static <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFulfill, @NotNull String trigger) {
+        return PlayerData.get(serverPlayer).trigger(key, with, onFulfill, trigger);
     }
 
     /**
@@ -48,7 +48,7 @@ public class SimpleQuestImplAPI {
      * @param sendFailMessage If true and player has no active quests notifies the player
      * @return The quests that got partially or fully completed
      */
-    public static <T extends ResolvedQuestTask> Map<ResourceLocation, QuestState> submit(ServerPlayer serverPlayer, @NotNull String trigger, boolean sendFailMessage) {
+    public static <T extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<?>> submit(ServerPlayer serverPlayer, @NotNull String trigger, boolean sendFailMessage) {
         return PlayerData.get(serverPlayer).submit(trigger, sendFailMessage);
     }
 
@@ -61,7 +61,7 @@ public class SimpleQuestImplAPI {
 
     public interface QuestTriggerHook<R> {
 
-        void onFullfill(QuestProgress progress, Pair<String, R> task, QuestState state);
+        void onFulfill(QuestProgress progress, Pair<String, R> task, QuestState state);
 
     }
 }

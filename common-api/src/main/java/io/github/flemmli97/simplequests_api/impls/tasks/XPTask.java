@@ -4,11 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.QuestUtils;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -27,7 +26,7 @@ import java.util.Optional;
 
 public class XPTask implements QuestTask<XPTask.XPTaskResolved> {
 
-    public static final QuestEntryKey<XPTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "xp"));
+    public static final QuestTaskKey<XPTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "xp"));
     public static final MapCodec<XPTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(NumberProviders.CODEC.fieldOf("amount").forGetter(d -> d.amount),
                     Codec.STRING.optionalFieldOf("description").forGetter(d -> d.description.isEmpty() ? Optional.empty() : Optional.of(d.description)),
@@ -58,14 +57,14 @@ public class XPTask implements QuestTask<XPTask.XPTaskResolved> {
     }
 
     @Override
-    public QuestEntryKey<XPTask> getId() {
+    public QuestTaskKey<XPTask> getId() {
         return ID;
     }
 
     @Override
-    public XPTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
-        return new XPTaskResolved(QuestUtils.getAmount(this.amount, ctx, data, base.id), this.playerPredicate);
+    public XPTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
+        return new XPTaskResolved(QuestUtils.getAmount(this.amount, ctx, progress.data(), quest.id()), this.playerPredicate);
     }
 
     public record XPTaskResolved(int amount, @Nullable EntityPredicate playerPredicate) implements ResolvedQuestTask {
@@ -87,7 +86,7 @@ public class XPTask implements QuestTask<XPTask.XPTaskResolved> {
         }
 
         @Override
-        public QuestEntryKey<XPTask> getId() {
+        public QuestTaskKey<XPTask> getId() {
             return ID;
         }
 

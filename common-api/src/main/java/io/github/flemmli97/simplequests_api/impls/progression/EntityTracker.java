@@ -33,7 +33,7 @@ public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteract
     public boolean progress(ServerPlayer player, QuestProgress prog, Entity with) {
         if (this.questEntry().check(player, with)) {
             if (this.entities.contains(with.getUUID())) {
-                if (!prog.getQuest().category.isSilent)
+                if (!prog.getRootQuest().source().category().isSilent)
                     player.sendSystemMessage(Component.translatable(EntityInteractTask.ID + ".dupe").withStyle(ChatFormatting.DARK_RED));
                 return false;
             }

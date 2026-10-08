@@ -4,9 +4,8 @@ import io.github.flemmli97.simplequests.SimpleQuests;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests.gui.inv.SeparateInv;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -46,7 +45,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
     public static final Style TASK_STYLE = Style.EMPTY.withItalic(false).applyFormat(ChatFormatting.YELLOW);
     public static final String STACK_NBT_ID = "SimpleQuestsQuest";
 
-    public static int QUEST_PER_PAGE = 12;
+    public static final int QUEST_PER_PAGE = 12;
 
     private int page, maxPages;
     private List<ResourceLocation> quests;
@@ -56,7 +55,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
 
     private final boolean canGoBack;
 
-    private Map<Integer, QuestBase> updateList;
+    private Map<Integer, QuestDefinition> updateList;
     private final List<Integer> toremove = new ArrayList<>();
 
     protected QuestGui(int syncId, Inventory playerInventory, QuestGui.QuestGuiData data) {
@@ -90,23 +89,23 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         player.openMenu(fac);
     }
 
-    public static List<MutableComponent> questComponents(PlayerData data, QuestBase quest, PlayerData.AcceptType type) {
+    public static List<MutableComponent> questComponents(PlayerData data, QuestDefinition quest, PlayerData.AcceptType type) {
         List<MutableComponent> components = new ArrayList<>();
-        quest.getDescription(data.getPlayer()).forEach(c -> components.add(c.setStyle(DESCRIPTION_STYLE)));
+        quest.description(data.getPlayer()).forEach(c -> components.add(c.setStyle(DESCRIPTION_STYLE)));
         components.add(Component.literal(""));
         if (type == PlayerData.AcceptType.DELAY) {
             components.add(Component.translatable(type.langKey(), data.formattedCooldown(quest)).withStyle(ChatFormatting.DARK_RED));
         }
-        for (MutableComponent comp : quest.getTasks(data.getPlayer(), TASK_STYLE))
+        for (MutableComponent comp : quest.tasksDescription(data.getPlayer(), TASK_STYLE))
             components.add(comp.setStyle(DESCRIPTION_STYLE));
         return components;
     }
 
-    private ItemStack ofQuest(int i, QuestBase quest, ServerPlayer player) {
+    private ItemStack ofQuest(int i, QuestDefinition quest, ServerPlayer player) {
         PlayerData data = PlayerData.get(player);
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
-        stack.set(DataComponents.CUSTOM_NAME, quest.getName(player).setStyle(NAME_STYLE));
+        stack.set(DataComponents.CUSTOM_NAME, quest.name(player).setStyle(NAME_STYLE));
         if (data.isActive(quest)) {
             stack.enchant(player.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.UNBREAKING), 1);
             if (stack.has(DataComponents.STORED_ENCHANTMENTS))
@@ -126,7 +125,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         if (requirement != null)
             lore.add(requirement);
         stack.set(DataComponents.LORE, new ItemLore(lore));
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id.toString()));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putString(QuestGui.STACK_NBT_ID, quest.id().toString()));
         return stack;
     }
 
@@ -151,10 +150,10 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         this.updateList = new HashMap<>();
         if (!(player instanceof ServerPlayer serverPlayer))
             return;
-        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(data.category());
+        Map<ResourceLocation, QuestDefinition> questMap = QuestsManager.instance().getQuestsForCategory(data.category());
         this.quests = new ArrayList<>(questMap.keySet());
         this.quests.removeIf(res -> {
-            QuestBase quest = questMap.get(res);
+            QuestDefinition quest = questMap.get(res);
             if (!SimpleQuests.canAcceptQuest(serverPlayer, quest))
                 return true;
             return PlayerData.get(serverPlayer).canAcceptQuest(quest).guiVisible(serverPlayer);
@@ -194,7 +193,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
 
     private void flipPage() {
         this.updateList.clear();
-        Map<ResourceLocation, QuestBase> questMap = QuestsManager.instance().getQuestsForCategory(this.category);
+        Map<ResourceLocation, QuestDefinition> questMap = QuestsManager.instance().getQuestsForCategory(this.category);
         int id = this.page * QUEST_PER_PAGE;
         for (int i = 0; i < 54; i++) {
             if (i == 0) {
@@ -260,21 +259,21 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         if (opt.isEmpty())
             return false;
         ResourceLocation id = opt.get();
-        QuestBase quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
+        QuestDefinition quest = QuestsManager.instance().getQuestsForCategory(this.category).get(id);
         if (quest == null) {
             SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
         boolean remove = stack.isEnchanted();
-        if (quest instanceof CompositeQuest composite) {
+        if (!quest.isValidAsRoot()) {
             if (remove) {
                 ConfirmScreenHandler.openConfirmScreen(player, b -> {
                     if (b) {
                         player.closeContainer();
                         PlayerData data = PlayerData.get(player);
-                        composite.getSubQuests().forEach(r -> {
-                            if (data.isActive(r))
-                                data.reset(r, true);
+                        quest.getSubQuests().forEach(r -> {
+                            if (data.isActive(r.getId()))
+                                data.reset(r.getId(), true);
                         });
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
@@ -284,13 +283,13 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                     }
                 }, "simplequests.gui.reset");
             } else
-                CompositeQuestScreenHandler.openScreen(player, composite, this.category, this.canGoBack, this.page);
+                SelectionQuestScreenHandler.openScreen(player, quest, this.category, this.canGoBack, this.page);
         } else {
             ConfirmScreenHandler.openConfirmScreen(player, b -> {
                 if (b) {
                     player.closeContainer();
                     if (remove) {
-                        PlayerData.get(player).reset(quest.id, true);
+                        PlayerData.get(player).reset(quest.id(), true);
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
                         if (PlayerData.get(player).acceptQuest(quest, 0))

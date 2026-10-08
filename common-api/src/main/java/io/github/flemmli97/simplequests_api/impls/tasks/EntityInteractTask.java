@@ -5,11 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.JsonCodecs;
@@ -36,7 +35,7 @@ import java.util.Optional;
  */
 public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityInteractTaskResolved> {
 
-    public static final QuestEntryKey<EntityInteractTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "entity_interact"));
+    public static final QuestTaskKey<EntityInteractTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "entity_interact"));
     public static final MapCodec<EntityInteractTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(Codec.BOOL.fieldOf("consume").forGetter(d -> d.consume),
                     Codec.STRING.fieldOf("description").forGetter(d -> d.description),
@@ -87,16 +86,16 @@ public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityIn
     }
 
     @Override
-    public QuestEntryKey<EntityInteractTask> getId() {
+    public QuestTaskKey<EntityInteractTask> getId() {
         return ID;
     }
 
     @Override
-    public EntityInteractTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public EntityInteractTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         DescriptiveValue<EntityPredicate> entity = this.entityPredicates.get(ctx.getRandom().nextInt(this.entityPredicates.size()));
         DescriptiveValue<ItemPredicate> item = this.itemPredicates.isEmpty() ? null : this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
-        return new EntityInteractTaskResolved(entity, item, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.consume, this.playerPredicate);
+        return new EntityInteractTaskResolved(entity, item, QuestUtils.getAmount(this.amount, ctx, progress.data(), quest.id()), this.consume, this.playerPredicate);
     }
 
     public record EntityInteractTaskResolved(DescriptiveValue<EntityPredicate> entityPredicate,
@@ -120,7 +119,7 @@ public class EntityInteractTask implements QuestTask<EntityInteractTask.EntityIn
         }
 
         @Override
-        public QuestEntryKey<EntityInteractTask> getId() {
+        public QuestTaskKey<EntityInteractTask> getId() {
             return ID;
         }
 

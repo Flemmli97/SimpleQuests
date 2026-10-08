@@ -11,10 +11,10 @@ import com.google.gson.JsonParseException;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.IdSetter;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
-import io.github.flemmli97.simplequests_api.registry.QuestBaseRegistry;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
+import io.github.flemmli97.simplequests_api.registry.QuestDefinitionRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -49,11 +49,12 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
     private final HolderLookup.Provider provider;
     private Map<ResourceLocation, QuestCategory> categories;
 
-    private Map<ResourceLocation, QuestBase> questMap;
-    private Map<QuestCategory, Map<ResourceLocation, QuestBase>> quests;
+    private Map<ResourceLocation, QuestDefinition> quests;
+    private Map<QuestDefinition, ResourceLocation> lookup;
+    private Map<QuestCategory, Map<ResourceLocation, QuestDefinition>> categoryQuests;
     private Set<ResourceLocation> subQuests;
 
-    private Map<QuestCategory, Set<Quest>> dailyQuests;
+    private Map<QuestCategory, Set<QuestDefinition>> dailyQuests;
 
     public QuestsManager(HolderLookup.Provider provider) {
         this.provider = provider;
@@ -92,7 +93,6 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         return map;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void apply(ResourceResult result, ResourceManager resourceManager, ProfilerFiller profiler) {
         ImmutableMap.Builder<ResourceLocation, QuestCategory> categoryBuilder = new ImmutableMap.Builder<>();
@@ -110,41 +110,43 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         categoryBuilder.orderEntriesByValue(QuestCategory::compareTo);
         this.categories = categoryBuilder.build();
 
-        Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, QuestBase>> map = new HashMap<>();
+        Map<QuestCategory, ImmutableMap.Builder<ResourceLocation, QuestDefinition>> map = new HashMap<>();
+        ImmutableMap.Builder<ResourceLocation, QuestDefinition> quests = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<QuestDefinition, ResourceLocation> lookup = new ImmutableMap.Builder<>();
         result.quests.forEach((res, el) -> {
             if (el.isJsonObject()) {
                 try {
                     JsonObject obj = el.getAsJsonObject();
                     if (!obj.keySet().isEmpty()) {
-                        obj.addProperty(QuestBase.ID_FIELD, res.toString());
-                        QuestBase base = QuestBaseRegistry.CODEC.apply(QuestBaseRegistry.DATA_LOAD)
-                                .parse(ops, obj).getOrThrow();
-                        map.computeIfAbsent(base.category, c -> new ImmutableMap.Builder<>())
-                                .put(res, base);
+                        QuestDefinition definition = QuestDefinitionRegistry.CODEC.parse(ops, obj).getOrThrow();
+                        if (definition instanceof IdSetter setter) {
+                            setter.setId(res);
+                        }
+                        map.computeIfAbsent(definition.category(), c -> new ImmutableMap.Builder<>())
+                                .put(res, definition);
+                        quests.put(res, definition);
+                        lookup.put(definition, res);
                     }
                 } catch (Exception e) {
                     SimpleQuestsAPI.LOGGER.error("Unable to load quest {} {}", res, e);
                 }
             }
         });
+        this.quests = quests.build();
+        this.lookup = lookup.build();
         // Post processing
-        ImmutableMap.Builder<QuestCategory, Map<ResourceLocation, QuestBase>> questsCats = new ImmutableMap.Builder<>();
-        ImmutableMap.Builder<ResourceLocation, QuestBase> quests = new ImmutableMap.Builder<>();
-        ImmutableMap.Builder<QuestCategory, Set<Quest>> daily = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<QuestCategory, Map<ResourceLocation, QuestDefinition>> questsCats = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<QuestCategory, Set<QuestDefinition>> daily = new ImmutableMap.Builder<>();
         ImmutableSet.Builder<ResourceLocation> subQuests = new ImmutableSet.Builder<>();
         map.forEach((category, builder) -> {
-            ImmutableMap<ResourceLocation, QuestBase> catQuests = builder.orderEntriesByValue(QuestBase::compareTo).build();
+            ImmutableMap<ResourceLocation, QuestDefinition> catQuests = builder.orderEntriesByValue(QuestDefinition::compareTo).build();
             questsCats.put(category, catQuests);
-            catQuests.forEach((id, quest) -> {
-                quests.put(id, quest);
-                subQuests.addAll(quest.getSubQuests());
-            });
-            daily.put(category, catQuests.values().stream().filter(quest -> quest.isDailyQuest && quest instanceof Quest)
-                    .map(quest -> (Quest) quest)
+            catQuests.forEach((id, quest) ->
+                    quest.getSubQuests().forEach(h -> h.registeredQuestId().ifPresent(subQuests::add)));
+            daily.put(category, catQuests.values().stream().filter(quest -> quest.isDailyQuest() && quest.isValidAsRoot())
                     .collect(ImmutableSet.toImmutableSet()));
         });
-        this.quests = questsCats.build();
-        this.questMap = quests.build();
+        this.categoryQuests = questsCats.build();
         this.dailyQuests = daily.build();
         this.subQuests = subQuests.build();
     }
@@ -153,56 +155,53 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
      * Gets all quests registered ignoring contexts
      * See {@link QuestCategory#matchesContext(ResourceLocation)} for more info
      */
-    public Map<ResourceLocation, QuestBase> getAllQuests() {
-        return this.questMap;
+    public Map<ResourceLocation, QuestDefinition> getAllQuests() {
+        return this.quests;
     }
 
     /**
      * Gets the given quest registered ignoring contexts
      * See {@link QuestCategory#matchesContext(ResourceLocation)} for more info
      */
-    public QuestBase getQuest(ResourceLocation id) {
-        return this.questMap.get(id);
+    public QuestDefinition getQuest(ResourceLocation id) {
+        return this.quests.get(id);
+    }
+
+    public ResourceLocation getId(QuestDefinition definition) {
+        return this.lookup.get(definition);
     }
 
     /**
      * Gets the given quest registered under the given context
      * See {@link QuestCategory#matchesContext(ResourceLocation)} for more info
      */
-    public QuestBase getQuest(ResourceLocation id, @Nullable ResourceLocation context) {
-        QuestBase base = this.getQuest(id);
-        if (base == null || !base.category.matchesContext(context))
+    public QuestDefinition getQuest(ResourceLocation id, @Nullable ResourceLocation context) {
+        QuestDefinition base = this.getQuest(id);
+        if (base == null || !base.category().matchesContext(context))
             return null;
         return base;
-    }
-
-    public Quest getActualQuest(ResourceLocation id, @Nullable ResourceLocation context) {
-        QuestBase base = this.getQuest(id, context);
-        if (base instanceof Quest quest)
-            return quest;
-        return null;
     }
 
     public boolean isSubQuest(ResourceLocation quest) {
         return this.subQuests.contains(quest);
     }
 
-    public Map<ResourceLocation, QuestBase> getQuestsForCategory(ResourceLocation res, @Nullable ResourceLocation context) {
+    public Map<ResourceLocation, QuestDefinition> getQuestsForCategory(ResourceLocation res, @Nullable ResourceLocation context) {
         QuestCategory category = this.getQuestCategory(res, context);
         if (category == null)
             throw new IllegalArgumentException("No such category for " + res);
         return this.getQuestsForCategory(category);
     }
 
-    public Map<ResourceLocation, QuestBase> getQuestsForCategory(QuestCategory category) {
-        return this.quests.getOrDefault(category, Map.of());
+    public Map<ResourceLocation, QuestDefinition> getQuestsForCategory(QuestCategory category) {
+        return this.categoryQuests.getOrDefault(category, Map.of());
     }
 
-    public Set<Quest> getDailyQuests() {
+    public Set<QuestDefinition> getDailyQuests() {
         return this.getDailyQuests(QuestCategory.DEFAULT_CATEGORY);
     }
 
-    public Set<Quest> getDailyQuests(QuestCategory category) {
+    public Set<QuestDefinition> getDailyQuests(QuestCategory category) {
         return this.dailyQuests.getOrDefault(category, Set.of());
     }
 
@@ -233,7 +232,7 @@ public class QuestsManager extends SimplePreparableReloadListener<QuestsManager.
         return this.categories.values().stream().filter(cat -> cat.matchesContext(context)).toList();
     }
 
-    protected record ResourceResult(Map<ResourceLocation, JsonElement> categories,
-                                    Map<ResourceLocation, JsonElement> quests) {
+    public record ResourceResult(Map<ResourceLocation, JsonElement> categories,
+                                 Map<ResourceLocation, JsonElement> quests) {
     }
 }

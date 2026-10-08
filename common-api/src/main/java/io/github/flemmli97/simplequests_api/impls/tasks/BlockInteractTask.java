@@ -5,11 +5,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.progression.BlockTracker;
-import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
-import io.github.flemmli97.simplequests_api.quest.entry.QuestEntryKey;
+import io.github.flemmli97.simplequests_api.quest.ResolvedQuest;
 import io.github.flemmli97.simplequests_api.quest.entry.QuestTask;
+import io.github.flemmli97.simplequests_api.quest.entry.QuestTaskKey;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.util.DescriptiveValue;
 import io.github.flemmli97.simplequests_api.util.QuestUtils;
@@ -36,7 +35,7 @@ import java.util.Optional;
  */
 public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInteractTaskResolved> {
 
-    public static final QuestEntryKey<BlockInteractTask> ID = new QuestEntryKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "block_interact"));
+    public static final QuestTaskKey<BlockInteractTask> ID = new QuestTaskKey<>(ResourceLocation.fromNamespaceAndPath(SimpleQuestsAPI.MODID, "block_interact"));
     public static final MapCodec<BlockInteractTask> CODEC = RecordCodecBuilder.mapCodec((instance) ->
             instance.group(Codec.BOOL.fieldOf("use").forGetter(d -> d.use),
                     Codec.BOOL.optionalFieldOf("allow_dupes").forGetter(d -> d.allowDupes ? Optional.of(true) : Optional.empty()),
@@ -100,20 +99,20 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
     }
 
     @Override
-    public QuestEntryKey<BlockInteractTask> getId() {
+    public QuestTaskKey<BlockInteractTask> getId() {
         return ID;
     }
 
     @Override
-    public BlockInteractTaskResolved resolve(PlayerQuestData data, QuestProgress progress, QuestBase base) {
-        LootContext ctx = SimpleQuestsAPI.createContext(data, base.id);
+    public BlockInteractTaskResolved resolve(QuestProgress progress, ResolvedQuest quest) {
+        LootContext ctx = SimpleQuestsAPI.createContext(progress.data(), quest.id());
         DescriptiveValue<ItemPredicate> val = this.itemPredicates.isEmpty() ? null : this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
         DescriptiveValue<BlockPredicate> block = this.blockPredicates.isEmpty() ? null : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
         while (val == null && block == null) {
             val = this.itemPredicates.isEmpty() ? null : this.itemPredicates.get(ctx.getRandom().nextInt(this.itemPredicates.size()));
             block = this.blockPredicates.isEmpty() ? null : this.blockPredicates.get(ctx.getRandom().nextInt(this.blockPredicates.size()));
         }
-        return new BlockInteractTaskResolved(val, block, QuestUtils.getAmount(this.amount, ctx, data, base.id), this.use, this.consume, this.allowDupes, this.playerPredicate);
+        return new BlockInteractTaskResolved(val, block, QuestUtils.getAmount(this.amount, ctx, progress.data(), quest.id()), this.use, this.consume, this.allowDupes, this.playerPredicate);
     }
 
     public record BlockInteractTaskResolved(DescriptiveValue<ItemPredicate> heldItem,
@@ -146,7 +145,7 @@ public class BlockInteractTask implements QuestTask<BlockInteractTask.BlockInter
         }
 
         @Override
-        public QuestEntryKey<BlockInteractTask> getId() {
+        public QuestTaskKey<BlockInteractTask> getId() {
             return ID;
         }
 

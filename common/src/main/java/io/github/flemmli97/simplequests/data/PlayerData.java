@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.api.SimpleQuestImplAPI;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
+import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
-import io.github.flemmli97.simplequests_api.impls.quests.Quest;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
+import io.github.flemmli97.simplequests_api.quest.InvalidQuestStateException;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import net.minecraft.ChatFormatting;
@@ -65,17 +66,17 @@ public class PlayerData implements PlayerQuestData {
     private boolean adminMode;
 
     public static PlayerData get(ServerPlayer player) {
-        return ((SimpleQuestDataGet) player).simpleQuestPlayerData();
+        return ((SimpleQuestDataGet) player).simpleQuest$PlayerData();
     }
 
     public PlayerData(ServerPlayer player) {
         this.player = player;
     }
 
-    public boolean acceptQuest(QuestBase quest, int subQuestIndex) {
-        int maxConcurrent = quest.category.getMaxConcurrentQuests() == -1 ? ConfigHandler.CONFIG.maxConcurrentQuest : quest.category.getMaxConcurrentQuests();
+    public boolean acceptQuest(QuestDefinition quest, int subQuestIndex) {
+        int maxConcurrent = quest.category().getMaxConcurrentQuests() == -1 ? ConfigHandler.CONFIG.maxConcurrentQuest : quest.category().getMaxConcurrentQuests();
         if (maxConcurrent > 0 && this.currentQuests.stream()
-                .filter(p -> !p.getQuest().isDailyQuest && (!quest.category.sameCategoryOnly || p.getQuest().category == quest.category)).toList().size() >= maxConcurrent) {
+                .filter(p -> !p.getRootDefinition().isDailyQuest() && (!quest.category().sameCategoryOnly || p.getRootDefinition().category() == quest.category())).toList().size() >= maxConcurrent) {
             this.player.sendSystemMessage(Component.translatable("simplequests.active.full").withStyle(ChatFormatting.DARK_RED));
             return false;
         }
@@ -92,10 +93,14 @@ public class PlayerData implements PlayerQuestData {
             return false;
         }
         QuestProgress prog = new QuestProgress(quest, this, subQuestIndex);
+        if (!prog.valid()) {
+            SimpleQuestsAPI.LOGGER.error("Invalid progress state. Root quest doesn't resolve to anything for quest {}", quest);
+            return false;
+        }
         this.currentQuests.add(prog);
-        if (!prog.getQuest().category.isSilent) {
+        if (!prog.getRootDefinition().category().isSilent) {
             this.player.sendSystemMessage(Component.translatable("simplequests.accept",
-                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)).withStyle(ChatFormatting.GREEN));
+                    prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)).withStyle(ChatFormatting.GREEN));
             this.player.sendSystemMessage(Component.literal(""));
             for (MutableComponent comp : prog.getTaskComponents(this.player)) {
                 this.player.sendSystemMessage(Component.translatable("simplequests.task.chat_format",
@@ -105,38 +110,41 @@ public class PlayerData implements PlayerQuestData {
         return true;
     }
 
-    public Map<ResourceLocation, QuestState> submit(String trigger, boolean sendFailMessage) {
+    public List<PlayerQuestData.ProgressResult<?>> submit(String trigger, boolean sendFailMessage) {
         if (this.currentQuests.isEmpty()) {
             if (sendFailMessage)
                 this.player.sendSystemMessage(Component.translatable("simplequests.current.no").withStyle(ChatFormatting.DARK_RED));
-            return Map.of();
+            return List.of();
         }
-        Map<ResourceLocation, QuestState> completion = new HashMap<>();
         List<QuestProgress> completed = new ArrayList<>();
+        List<PlayerQuestData.ProgressResult<?>> completion = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
-            List<ResolvedQuestTask> tasks = new ArrayList<>();
-            switch (prog.submit(this, trigger, tasks::add)) {
+            Set<Pair<String, ResolvedQuestTask>> fulfilled = prog.submit(trigger);
+            QuestState state = prog.tryComplete(trigger);
+            switch (state) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
-                    completion.put(prog.getQuest().id, QuestState.COMPLETE);
+                    completion.add(new ProgressResult<>(prog, fulfilled, QuestState.COMPLETE));
                 }
                 case PARTIAL_COMPLETE -> {
-                    completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
+                    completion.add(new ProgressResult<>(prog, fulfilled, QuestState.PARTIAL_COMPLETE));
                     this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                    prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                    prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 }
-                case PARTIAL -> {
-                    this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                    if (!prog.getQuest().category.isSilent) {
-                        tasks.forEach(t -> this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", t.translation(this.player)
-                                .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+                case NO -> {
+                    if (fulfilled.isEmpty()) {
+                        if (sendFailMessage)
+                            this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                    } else {
+                        completion.add(new ProgressResult<>(prog, fulfilled, state));
+                        this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+                        if (!prog.getRootDefinition().category().isSilent) {
+                            fulfilled.forEach(t -> this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", t.getSecond().translation(this.player)
+                                    .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+                        }
                     }
-                }
-                case NOTHING -> {
-                    if (sendFailMessage)
-                        this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                 }
             }
         }
@@ -144,30 +152,38 @@ public class PlayerData implements PlayerQuestData {
         return completion;
     }
 
-    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, SimpleQuestImplAPI.QuestTriggerHook<R> onFullfill, String trigger) {
+    public <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ProgressionTrackerKey<V, R> key, V with, SimpleQuestImplAPI.QuestTriggerHook<R> onFulfill, String trigger) {
         if (key.equals(EntityTracker.KEY)) {
             if (this.interactionCooldown > 0)
-                return Map.of();
+                return List.of();
             this.interactionCooldown = 2;
         }
         List<QuestProgress> completed = new ArrayList<>();
-        Map<ResourceLocation, QuestState> completion = new HashMap<>();
+        List<PlayerQuestData.ProgressResult<R>> completion = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
-            Set<Pair<String, R>> fulfilled = prog.tryFullFill(this.player, key, with);
+            Set<Pair<String, R>> fulfilled = prog.tryFulfill(this.player, key, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
             }
-            QuestState state = prog.tryComplete(this, trigger);
-            fulfilled.forEach(p -> onFullfill.onFullfill(prog, p, state));
-            if (state == QuestState.COMPLETE) {
-                this.completeQuest(prog);
-                completed.add(prog);
-                completion.put(prog.getQuest().id, QuestState.COMPLETE);
-            } else if (state == QuestState.PARTIAL_COMPLETE) {
-                completion.put(prog.getQuest().id, QuestState.PARTIAL_COMPLETE);
-                this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
-                        .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            QuestState state = prog.tryComplete(trigger);
+            fulfilled.forEach(p -> onFulfill.onFulfill(prog, p, state));
+            switch (state) {
+                case COMPLETE -> {
+                    this.completeQuest(prog);
+                    completed.add(prog);
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
+                }
+                case PARTIAL_COMPLETE -> {
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
+                    this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
+                                    prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                }
+                case NO -> {
+                    if (!fulfilled.isEmpty()) {
+                        completion.add(new ProgressResult<>(prog, fulfilled, state));
+                    }
+                }
             }
         });
         this.currentQuests.removeAll(completed);
@@ -175,33 +191,33 @@ public class PlayerData implements PlayerQuestData {
     }
 
     @Override
-    public <V, R extends ResolvedQuestTask> Map<ResourceLocation, QuestState> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger) {
+    public <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger) {
         return this.trigger(key, with, (prog, p, state) -> {
-            if (state == QuestState.NO && !prog.getQuest().category.isSilent)
+            if (state == QuestState.NO && !prog.getRootDefinition().category().isSilent)
                 this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", p.getSecond().translation(this.player)
                         .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         }, trigger);
     }
 
     private void completeQuest(QuestProgress prog) {
-        prog.getQuest().onComplete(this.player);
+        prog.getRootQuest().onComplete(this.player);
         prog.getCompletionID().forEach(id -> {
             this.cooldownTracker.put(id, this.player.level().getGameTime());
             this.unlockTracker.add(id);
             this.dailyQuestsTracker.compute(id, (key, i) -> i == null ? 1 : ++i);
             this.finishedQuestsTracker.compute(id, (key, i) -> i == null ? 1 : ++i);
         });
-        this.dailyQuestsTracker.compute(prog.getQuest().category.id, (key, i) -> i == null ? 1 : ++i);
+        this.dailyQuestsTracker.compute(prog.getRootDefinition().category().id, (key, i) -> i == null ? 1 : ++i);
         this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-        if (!prog.getQuest().category.isSilent)
+        if (!prog.getRootDefinition().category().isSilent)
             this.player.sendSystemMessage(Component.translatable("simplequests.finish",
-                            prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                            prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-        if (!prog.getQuest().neededParentQuests.isEmpty() && prog.getQuest().redoParent) {
-            prog.getQuest().neededParentQuests.forEach(res -> {
-                Quest quest = QuestsManager.instance().getActualQuest(res, null);
+        if (!prog.getRootDefinition().requiredParentQuests().isEmpty() && prog.getRootDefinition().redoParent()) {
+            prog.getRootDefinition().requiredParentQuests().forEach(res -> {
+                QuestDefinition quest = QuestsManager.instance().getQuest(res, null);
                 if (quest != null)
-                    this.unlockTracker.remove(quest.id);
+                    this.unlockTracker.remove(quest.id());
             });
         }
     }
@@ -218,7 +234,7 @@ public class PlayerData implements PlayerQuestData {
         }
         QuestProgress prog = null;
         for (QuestProgress p : this.currentQuests) {
-            if (p.getQuest().id.equals(res)) {
+            if (p.getRootId().equals(res)) {
                 prog = p;
                 break;
             }
@@ -235,11 +251,11 @@ public class PlayerData implements PlayerQuestData {
             return;
         } else if (forced || this.player.level().getGameTime() - this.resetTick < 600) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable("simplequests.reset", prog.getName(this.player)
+                this.player.sendSystemMessage(Component.translatable("simplequests.reset", prog.name(this.player)
                         .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)).withStyle(ChatFormatting.DARK_RED));
             this.currentQuests.remove(prog);
             this.removeTickableQuestProgress(prog);
-            prog.getQuest().onReset(this.player);
+            prog.getRootQuest().onReset(this.player);
         }
         this.resetTick = -1;
     }
@@ -249,37 +265,37 @@ public class PlayerData implements PlayerQuestData {
         return ImmutableList.copyOf(this.currentQuests);
     }
 
-    public boolean isActive(QuestBase quest) {
-        return this.isActive(quest.id);
+    public boolean isActive(QuestDefinition quest) {
+        return this.isActive(quest.id());
     }
 
     public boolean isActive(ResourceLocation quest) {
-        return this.currentQuests.stream().anyMatch(prog -> prog.getQuest().id.equals(quest));
+        return this.currentQuests.stream().anyMatch(prog -> prog.getRootId().equals(quest));
     }
 
     public List<QuestProgress> getCurrentQuests(QuestCategory category) {
-        return this.currentQuests.stream().filter(p -> p.getQuest().category.id.equals(category.id)).toList();
+        return this.currentQuests.stream().filter(p -> p.getRootDefinition().category().id.equals(category.id)).toList();
     }
 
-    public AcceptType canAcceptQuest(QuestBase quest) {
-        if (quest.isDailyQuest || quest.needsUnlock && !this.unlockTracker.contains(quest.id)) {
+    public AcceptType canAcceptQuest(QuestDefinition quest) {
+        if (quest.isDailyQuest() || quest.needsUnlock() && !this.unlockTracker.contains(quest.id())) {
             return AcceptType.LOCKED;
         }
         if (!quest.isUnlocked(this.player)
-                || (!quest.neededParentQuests.isEmpty() && !this.unlockTracker.containsAll(quest.neededParentQuests))) {
+                || (!quest.requiredParentQuests().isEmpty() && !this.unlockTracker.containsAll(quest.requiredParentQuests()))) {
             return AcceptType.REQUIREMENTS;
         }
-        if (quest.repeatDaily > 0 && this.dailyQuestsTracker.getOrDefault(quest.id, 0) >= quest.repeatDaily)
+        if (quest.repeatDaily() > 0 && this.dailyQuestsTracker.getOrDefault(quest.id(), 0) >= quest.repeatDaily())
             return AcceptType.DAILYFULL;
-        if (quest.category.maxDaily > 0 && this.dailyQuestsCategoryTracker.getOrDefault(quest.category.id, 0) >= quest.category.maxDaily)
+        if (quest.category().maxDaily > 0 && this.dailyQuestsCategoryTracker.getOrDefault(quest.category().id, 0) >= quest.category().maxDaily)
             return AcceptType.DAILYFULL;
-        if (quest.maxRepeat > 0 && this.finishedQuestsTracker.getOrDefault(quest.category.id, 0) >= quest.maxRepeat)
+        if (quest.maxRepeat() > 0 && this.finishedQuestsTracker.getOrDefault(quest.category().id, 0) >= quest.maxRepeat())
             return AcceptType.MAX;
         //One time quests
-        if (quest.repeatDelay < 0 && this.cooldownTracker.containsKey(quest.id))
+        if (quest.repeatDelay().time() < 0 && this.getTimesCompleted(quest.id()) > 0)
             return AcceptType.ONETIME;
-        if (this.cooldownTracker.containsKey(quest.id)) {
-            return (quest.repeatDelay == 0 || Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id)) > quest.repeatDelay) ? AcceptType.ACCEPT : AcceptType.DELAY;
+        if (this.cooldownTracker.containsKey(quest.id())) {
+            return (quest.repeatDelay().time() == 0 || Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id())) > quest.repeatDelay().time()) ? AcceptType.ACCEPT : AcceptType.DELAY;
         }
         return AcceptType.ACCEPT;
     }
@@ -324,11 +340,11 @@ public class PlayerData implements PlayerQuestData {
     public void tickTickableQuests(String trigger) {
         List<QuestProgress> completed = new ArrayList<>();
         this.tickables.removeIf(prog -> {
-            Pair<Boolean, Set<ResolvedQuestTask>> fulfilled = prog.tickProgress(this);
+            Pair<Boolean, Set<ResolvedQuestTask>> fulfilled = prog.tickProgress();
             if (!fulfilled.getSecond().isEmpty()) {
                 this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
             }
-            QuestState state = prog.tryComplete(this, trigger);
+            QuestState state = prog.tryComplete(trigger);
             switch (state) {
                 case COMPLETE -> {
                     this.completeQuest(prog);
@@ -336,10 +352,10 @@ public class PlayerData implements PlayerQuestData {
                     return true;
                 }
                 case PARTIAL_COMPLETE -> this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                prog.getName(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 case NO -> fulfilled.getSecond().forEach(e -> {
-                    if (!prog.getQuest().category.isSilent)
+                    if (!prog.getRootDefinition().category().isSilent)
                         this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));
                 });
             }
@@ -357,20 +373,23 @@ public class PlayerData implements PlayerQuestData {
             this.dailySeed = this.player.getRandom().nextLong();
             this.questTrackerTime = now;
             this.dailyQuestsTracker.forEach((r, i) -> {
-                Quest quest = QuestsManager.instance().getActualQuest(r, null);
-                if (quest != null && quest.isDailyQuest)
+                QuestDefinition quest = QuestsManager.instance().getQuest(r, null);
+                if (quest != null && quest.isDailyQuest())
                     this.reset(r, true, false);
             });
             this.dailyQuestsTracker.clear();
             this.dailyQuestsCategoryTracker.clear();
-            List<Quest> daily = QuestsManager.instance().getDailyQuests().stream().toList();
+            List<QuestDefinition> daily = QuestsManager.instance().getDailyQuests().stream().toList();
             this.questRandom.setSeed(this.dailySeed);
             Collections.shuffle(daily, this.questRandom);
             int amount = ConfigHandler.CONFIG.dailyQuestAmount == -1 ? daily.size() : Mth.clamp(ConfigHandler.CONFIG.dailyQuestAmount, 0, daily.size());
             for (int i = 0; i < amount; i++) {
-                Quest quest = daily.get(i);
-                this.currentQuests.add(new QuestProgress(quest, this, 0));
-                this.dailyQuestsTracker.put(quest.id, 1);
+                QuestDefinition quest = daily.get(i);
+                QuestProgress prog = new QuestProgress(quest, this, 0);
+                if (prog.valid()) {
+                    this.currentQuests.add(prog);
+                    this.dailyQuestsTracker.put(quest.id(), 1);
+                }
             }
         }
     }
@@ -381,8 +400,8 @@ public class PlayerData implements PlayerQuestData {
         return this.dailySeed + time;
     }
 
-    public String formattedCooldown(QuestBase quest) {
-        long sec = Math.max(0, quest.repeatDelay - Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id))) / 20;
+    public String formattedCooldown(QuestDefinition quest) {
+        long sec = Math.max(0, quest.repeatDelay().time() - Math.abs(this.player.level().getGameTime() - this.cooldownTracker.get(quest.id()))) / 20;
         if (sec > 86400) {
             long days = sec / 86400;
             long hours = (sec % 86400) / 3600;
@@ -426,17 +445,16 @@ public class PlayerData implements PlayerQuestData {
     }
 
     public void load(CompoundTag tag) {
-        if (tag.contains("ActiveQuests")) {
-            ListTag quests = tag.getList("ActiveQuests", Tag.TAG_COMPOUND);
-            quests.forEach(q -> {
-                try {
-                    QuestProgress prog = new QuestProgress((CompoundTag) q, this);
-                    if (prog.getQuest() != null)
-                        this.currentQuests.add(prog);
-                } catch (IllegalStateException ignored) {
-                }
-            });
-        }
+        ListTag quests = tag.getList("ActiveQuests", Tag.TAG_COMPOUND);
+        quests.forEach(q -> {
+            try {
+                QuestProgress prog = new QuestProgress((CompoundTag) q, this);
+                if (prog.valid())
+                    this.currentQuests.add(prog);
+            } catch (InvalidQuestStateException e) {
+                SimpleQuestsAPI.LOGGER.error("Skipping QuestProgress! ", e);
+            }
+        });
         CompoundTag done = tag.getCompound("FinishedQuests");
         done.getAllKeys().forEach(key -> this.cooldownTracker.put(ResourceLocation.parse(key), done.getLong(key)));
         if (tag.contains("TimeTracker"))
@@ -466,7 +484,7 @@ public class PlayerData implements PlayerQuestData {
     }
 
     public void resetAll() {
-        this.currentQuests.forEach(p -> p.getQuest().onReset(this.player));
+        this.currentQuests.forEach(p -> p.getRootQuest().onReset(this.player));
         this.currentQuests.clear();
         this.tickables.clear();
         this.cooldownTracker.clear();

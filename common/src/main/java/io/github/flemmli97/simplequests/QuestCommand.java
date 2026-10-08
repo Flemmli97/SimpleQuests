@@ -13,9 +13,8 @@ import io.github.flemmli97.simplequests.gui.CurrentQuestGui;
 import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
-import io.github.flemmli97.simplequests_api.impls.quests.CompositeQuest;
-import io.github.flemmli97.simplequests_api.quest.QuestBase;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
+import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -42,7 +41,7 @@ public class QuestCommand {
                                 .suggests(QuestCommand::quests).executes(QuestCommand::accept))
                         .then(Commands.literal("select").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SELECT))
                                 .then(Commands.argument("quest", ResourceLocationArgument.id())
-                                        .suggests(QuestCommand::questsComposite).then(Commands.argument("select", ResourceLocationArgument.id())
+                                        .suggests(QuestCommand::nonRootQuests).then(Commands.argument("select", ResourceLocationArgument.id())
                                                 .suggests(QuestCommand::selectionQuests).executes(QuestCommand::acceptComposite)))))
                 .then(Commands.literal("submit").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SUBMIT)).executes(QuestCommand::submit)
                         .then(Commands.argument("type", StringArgumentType.string()).requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SUBMIT_TYPE, true))
@@ -67,7 +66,7 @@ public class QuestCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         List<QuestCategory> categories = QuestsManager.instance().categories(null);
         if (categories.size() == 1) {
-            QuestGui.openGui(player, categories.get(0), false, 0);
+            QuestGui.openGui(player, categories.getFirst(), false, 0);
         } else {
             QuestCategoryGui.openGui(player);
         }
@@ -89,16 +88,16 @@ public class QuestCommand {
     private static int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        QuestBase base = QuestsManager.instance().getQuest(id, null);
-        if (base == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), base)) {
+        QuestDefinition quest = QuestsManager.instance().getQuest(id, null);
+        if (quest == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), quest)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
             return 0;
         }
-        if (base instanceof CompositeQuest) {
-            ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.is_selection", id), false);
+        if (!quest.isValidAsRoot()) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.is_not_root", id), false);
             return 0;
         }
-        if (PlayerData.get(player).acceptQuest(base, 0))
+        if (PlayerData.get(player).acceptQuest(quest, 0))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
@@ -106,29 +105,24 @@ public class QuestCommand {
     private static int acceptComposite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
-        QuestBase base = QuestsManager.instance().getQuest(id, null);
-        if (base == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), base)) {
+        QuestDefinition quest = QuestsManager.instance().getQuest(id, null);
+        if (quest == null || !SimpleQuests.canAcceptQuest(ctx.getSource(), quest)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
             return 0;
         }
-        if (!(base instanceof CompositeQuest composite)) {
+        if (quest.isValidAsRoot()) {
             ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.composite.noexist", id), false);
             return 0;
         }
         ResourceLocation select = ResourceLocationArgument.getId(ctx, "select");
         int i = -1;
-        for (int idx = 0; idx < composite.getSubQuests().size(); idx++) {
-            if (composite.getSubQuests().get(idx).equals(select)) {
+        for (int idx = 0; idx < quest.getSubQuests().size(); idx++) {
+            if (quest.getSubQuests().get(idx).getId().equals(select)) {
                 i = idx;
                 break;
             }
         }
-        QuestBase quest = composite.resolveToQuest(player, i);
-        if (quest == null) {
-            ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.composite.resolve.none", composite, select), false);
-            return 0;
-        }
-        if (PlayerData.get(player).acceptQuest(composite, i))
+        if (PlayerData.get(player).acceptQuest(quest, i))
             return Command.SINGLE_SUCCESS;
         return 0;
     }
@@ -215,27 +209,27 @@ public class QuestCommand {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), false), build);
     }
 
-    public static CompletableFuture<Suggestions> questsComposite(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+    public static CompletableFuture<Suggestions> nonRootQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), true), build);
     }
 
     public static CompletableFuture<Suggestions> activequests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(PlayerData.get(context.getSource().getPlayerOrException())
-                .getCurrentQuest().stream().map(prog -> prog.getQuest().id.toString())
+                .getCurrentQuest().stream().map(prog -> prog.getRootId().toString())
                 .toList(), build);
     }
 
-    private static List<String> acceptableQuests(ServerPlayer player, boolean composite) {
+    private static List<String> acceptableQuests(ServerPlayer player, boolean nonRoot) {
         return QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> SimpleQuests.canAcceptQuest(player, e.getValue()) && (e.getValue() instanceof CompositeQuest == composite) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
+                .filter(e -> SimpleQuests.canAcceptQuest(player, e.getValue()) && (nonRoot == !e.getValue().isValidAsRoot()) && PlayerData.get(player).canAcceptQuest(e.getValue()) == PlayerData.AcceptType.ACCEPT)
                 .map(e -> e.getKey().toString()).toList();
     }
 
     public static CompletableFuture<Suggestions> selectionQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
-        QuestBase base = QuestsManager.instance().getQuest(ResourceLocationArgument.getId(context, "quest"));
-        if (base instanceof CompositeQuest comp) {
-            return SharedSuggestionProvider.suggest(comp.getSubQuests().stream().map(ResourceLocation::toString).toList(), build);
+        QuestDefinition quest = QuestsManager.instance().getQuest(ResourceLocationArgument.getId(context, "quest"));
+        if (!quest.isValidAsRoot()) {
+            return SharedSuggestionProvider.suggest(quest.getSubQuests().stream().map(h -> h.getId().toString()).toList(), build);
         }
         return SharedSuggestionProvider.suggest(List.of(), build);
     }
@@ -243,7 +237,7 @@ public class QuestCommand {
     public static CompletableFuture<Suggestions> lockedQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
         return SharedSuggestionProvider.suggest(QuestsManager.instance().getAllQuests()
                 .entrySet().stream()
-                .filter(e -> SimpleQuests.canAcceptQuest(context.getSource(), e.getValue()) && e.getValue().needsUnlock)
+                .filter(e -> SimpleQuests.canAcceptQuest(context.getSource(), e.getValue()) && e.getValue().needsUnlock())
                 .map(e -> e.getKey().toString()).collect(Collectors.toList()), build);
     }
 

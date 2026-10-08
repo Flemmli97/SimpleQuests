@@ -1,18 +1,4 @@
 {
-  "category": "example:category_2",
-  "name": "Example for an item quest with category 2",
-  "description": [],
-  "parent_id": [],
-  "redo_parent": false,
-  "need_unlock": false,
-  "icon": "minecraft:andesite",
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "max_repeat": 0,
-  "sorting_id": 0,
-  "daily_quest": false,
-  "visibility": "DEFAULT",
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "command": "",
   "submission_trigger": "",
   "tasks": {
@@ -30,5 +16,19 @@
       "id": "simplequests_api:item"
     }
   },
+  "sorting_id": 0,
+  "icon": "minecraft:andesite",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "category": "example:category_2",
+  "name": "Example for an item quest with category 2",
+  "description": [],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
   "type": "simplequests_api:quest"
 }

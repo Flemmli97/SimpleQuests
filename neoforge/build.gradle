@@ -13,6 +13,9 @@ neoForge {
             programArguments.addAll "--output", common.file("src/generated/resources").absolutePath
             systemProperty("ExampleGenPath", project.rootProject.file("Example-Datapack/Datapack").absolutePath)
         }
+        client {
+            jvmArgument "-XX:+AllowEnhancedClassRedefinition"
+        }
     }
 }
 

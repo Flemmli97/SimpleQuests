@@ -5,19 +5,19 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * A custom Resourcelocation class to ensure generics
  */
-public record QuestEntryKey<E extends QuestTask<? extends ResolvedQuestTask>>(ResourceLocation id) {
+public record QuestTaskKey<E extends QuestTask<? extends ResolvedQuestTask>>(ResourceLocation id) {
 
-    public QuestEntryKey(String id) {
+    public QuestTaskKey(String id) {
         this(ResourceLocation.parse(id));
     }
 
-    public QuestEntryKey(String namespace, String path) {
+    public QuestTaskKey(String namespace, String path) {
         this(ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof QuestEntryKey<?> key)
+        if (obj instanceof QuestTaskKey<?> key)
             return this.id.equals(key.id);
         return false;
     }

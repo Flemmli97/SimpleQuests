@@ -12,23 +12,23 @@ import java.util.function.Function;
 
 public class PlayerQuestDataRegistry {
 
-    private static final Map<ResourceLocation, Function<ServerPlayer, PlayerQuestData>> MAP = new HashMap<>();
+    private static final Map<ResourceLocation, Function<ServerPlayer, PlayerQuestData>> REGISTRY = new HashMap<>();
 
     public static synchronized void registerFetcher(ResourceLocation id, Function<ServerPlayer, PlayerQuestData> fetcher) {
-        if (MAP.containsKey(id))
+        if (REGISTRY.containsKey(id))
             throw new IllegalStateException("Fetcher for " + id + " already registered");
-        MAP.put(id, fetcher);
+        REGISTRY.put(id, fetcher);
     }
 
     public static Optional<PlayerQuestData> get(ResourceLocation id, ServerPlayer player) {
-        Function<ServerPlayer, PlayerQuestData> func = MAP.get(id);
+        Function<ServerPlayer, PlayerQuestData> func = REGISTRY.get(id);
         if (func != null)
             return Optional.ofNullable(func.apply(player));
         return Optional.empty();
     }
 
     public static void applyAll(ServerPlayer player, Consumer<PlayerQuestData> app) {
-        for (Function<ServerPlayer, PlayerQuestData> fetch : MAP.values()) {
+        for (Function<ServerPlayer, PlayerQuestData> fetch : REGISTRY.values()) {
             app.accept(fetch.apply(player));
         }
     }

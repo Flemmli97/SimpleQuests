@@ -34,7 +34,7 @@ public class LangGen implements DataProvider {
     }
 
     protected void addTranslations() {
-        this.add("simplequests.missing.requirements", "Requirements not fullfilled for the quest");
+        this.add("simplequests.missing.requirements", "Requirements not fulfilled for the quest");
         this.add("simplequests.active", "This quest is already active");
         this.add("simplequests.active.full", "You already have the max amount of active quests");
         this.add("simplequests.accept", "Accepted quest %s");
@@ -51,7 +51,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.adminMode", "Admin mode: %s");
 
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
-        this.add("simplequests.quest.is_selection", "Quest with id %s is a selection-quest!");
+        this.add("simplequests.quest.is_not_root", "Quest with id %s is invalid here!");
         this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
         this.add("simplequests.quest.composite.resolve.none", "Selection-quest with id %1$s has no selectable quest with %2$s!");
         this.add("simplequests.quest.category.noexist", "No quest category exists with id %s");
