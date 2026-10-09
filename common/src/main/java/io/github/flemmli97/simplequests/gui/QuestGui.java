@@ -274,8 +274,8 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                         player.closeContainer();
                         PlayerData data = PlayerData.get(player);
                         quest.getSubQuests().forEach(r -> {
-                            if (data.isActive(r.getId()))
-                                data.reset(r.getId(), true);
+                            if (data.isActive(r.getDefinition()))
+                                data.reset(r.getDefinition(), true);
                         });
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
@@ -291,7 +291,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 if (b) {
                     player.closeContainer();
                     if (remove) {
-                        PlayerData.get(player).reset(quest.id(), true);
+                        PlayerData.get(player).reset(quest, true);
                         playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                     } else {
                         if (PlayerData.get(player).acceptQuest(quest, 0))

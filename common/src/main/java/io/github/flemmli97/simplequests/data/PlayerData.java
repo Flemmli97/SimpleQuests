@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class PlayerData implements PlayerQuestData {
 
@@ -243,10 +244,18 @@ public class PlayerData implements PlayerQuestData {
     }
 
     public void reset(ResourceLocation res, boolean forced) {
-        this.reset(res, forced, true);
+        this.reset(p -> p.getRootId().equals(res), forced, true);
     }
 
-    public void reset(ResourceLocation res, boolean forced, boolean sendMsg) {
+    public void reset(QuestDefinition definition, boolean forced) {
+        this.reset(definition, forced, true);
+    }
+
+    public void reset(QuestDefinition definition, boolean forced, boolean sendMsg) {
+        this.reset(p -> p.getRootDefinition().equals(definition), forced, sendMsg);
+    }
+
+    public void reset(Predicate<QuestProgress> predicate, boolean forced, boolean sendMsg) {
         if (this.currentQuests.isEmpty()) {
             if (sendMsg)
                 this.player.sendSystemMessage(Component.translatable("simplequests.current.no").withStyle(ChatFormatting.DARK_RED));
@@ -254,14 +263,14 @@ public class PlayerData implements PlayerQuestData {
         }
         QuestProgress prog = null;
         for (QuestProgress p : this.currentQuests) {
-            if (p.getRootId().equals(res)) {
+            if (predicate.test(p)) {
                 prog = p;
                 break;
             }
         }
         if (prog == null) {
             if (sendMsg)
-                this.player.sendSystemMessage(Component.translatable("simplequests.reset.notfound", res).withStyle(ChatFormatting.DARK_RED));
+                this.player.sendSystemMessage(Component.translatable("simplequests.reset.notfound", predicate).withStyle(ChatFormatting.DARK_RED));
             return;
         }
         if (!forced && this.resetTick == -1) {
@@ -286,7 +295,7 @@ public class PlayerData implements PlayerQuestData {
     }
 
     public boolean isActive(QuestDefinition quest) {
-        return this.isActive(quest.id());
+        return this.currentQuests.stream().anyMatch(prog -> prog.getRootDefinition().equals(quest));
     }
 
     public boolean isActive(ResourceLocation quest) {
@@ -401,7 +410,7 @@ public class PlayerData implements PlayerQuestData {
             this.dailyQuestsTracker.forEach((r, i) -> {
                 QuestDefinition quest = QuestsManager.instance().getQuest(r, null);
                 if (quest != null && quest.isDailyQuest())
-                    this.reset(r, true, false);
+                    this.reset(quest, true, false);
             });
             this.dailyQuestsTracker.clear();
             this.dailyQuestsCategoryTracker.clear();

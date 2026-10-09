@@ -196,7 +196,7 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
             ConfirmScreenHandler.openConfirmScreen(player, b -> {
                 if (b) {
                     player.closeContainer();
-                    PlayerData.get(player).reset(quest.id(), true);
+                    PlayerData.get(player).reset(quest, true);
                     QuestGui.playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
                 } else {
                     player.closeContainer();
