@@ -39,7 +39,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.active.full", "You already have the max amount of active quests");
         this.add("simplequests.accept", "Accepted quest %s");
         this.add("simplequests.finish", "Finished quest %s");
-        this.add("simplequests.finish.sub", "Finished sub-quest %s");
+        this.add("simplequests.finish.sub", "Finished subquest for %s");
         this.add("simplequests.current.no", "No active quest");
         this.add("simplequests.reset", "Reset current quest %s");
         this.add("simplequests.reset.confirm", "Are you sure? Submitted items will not be refunded! Type again to confirm");
@@ -52,8 +52,11 @@ public class LangGen implements DataProvider {
 
         this.add("simplequests.quest.noexist", "No quest exists with id %s");
         this.add("simplequests.quest.is_not_root", "Quest with id %s is invalid here!");
-        this.add("simplequests.quest.composite.noexist", "Quest with id %s is not a selection quest!");
-        this.add("simplequests.quest.composite.resolve.none", "Selection-quest with id %1$s has no selectable quest with %2$s!");
+        this.add("simplequests.quest.selection.noexist", "Quest with id %s is not a selection quest!");
+        this.add("simplequests.quest.selection.resolve.none", "Quest with id %1$s has no selectable subquest with %2$s!");
+        this.add("simplequests.quest.selection.advance", "Finished subquest for %s. Choose your next quest [%s]");
+        this.add("simplequests.quest.selection.advance.click", "Click here");
+        this.add("simplequests.quest.selection.choice", "A choice is required to continue! Click here.");
         this.add("simplequests.quest.category.noexist", "No quest category exists with id %s");
         this.add("simplequests.task.complete", "Finished task [%s]");
         this.add("simplequests.task.chat_format", "▶ %s");
@@ -73,6 +76,7 @@ public class LangGen implements DataProvider {
         this.add("simplequests.gui.yes", "Yes");
         this.add("simplequests.gui.no", "No");
         this.add("simplequests.gui.quest.current", "Active Quests");
+        this.add("simplequests.gui.quest.active", "Active");
 
         this.add("simplequests.gui.next", "Next Page");
         this.add("simplequests.gui.previous", "Previous Page");

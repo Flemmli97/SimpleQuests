@@ -1,0 +1,136 @@
+{
+  "sorting_id": 0,
+  "icon": "minecraft:chest",
+  "visibility": "DEFAULT",
+  "max_repeat": 0,
+  "daily_quest": false,
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_delay": 36000,
+  "repeat_daily": 0,
+  "category": "example:category_1",
+  "name": "Example for a nested selection quest. Or: A quest where you can select other quest during its progression instead of beginning only",
+  "description": [],
+  "quests": [
+    {
+      "command": "",
+      "submission_trigger": "",
+      "tasks": {
+        "stone": {
+          "predicates": [
+            {
+              "value": {
+                "items": "minecraft:stone"
+              }
+            }
+          ],
+          "amount": 15.0,
+          "consume_items": true,
+          "description": "Give 15 stone",
+          "id": "simplequests_api:item"
+        }
+      },
+      "sorting_id": 0,
+      "icon": "minecraft:paper",
+      "visibility": "DEFAULT",
+      "max_repeat": 0,
+      "daily_quest": false,
+      "need_unlock": false,
+      "parent_id": [],
+      "redo_parent": false,
+      "repeat_delay": 0,
+      "repeat_daily": 0,
+      "name": "Internal quest a",
+      "description": [],
+      "loot_table": "minecraft:empty",
+      "type": "simplequests_api:quest"
+    },
+    {
+      "sorting_id": 0,
+      "icon": "minecraft:paper",
+      "visibility": "DEFAULT",
+      "max_repeat": 0,
+      "daily_quest": false,
+      "need_unlock": false,
+      "parent_id": [],
+      "redo_parent": false,
+      "repeat_delay": 0,
+      "repeat_daily": 0,
+      "name": "Internal b",
+      "description": [],
+      "quests": [
+        {
+          "command": "",
+          "submission_trigger": "",
+          "tasks": {
+            "sand": {
+              "predicates": [
+                {
+                  "value": {
+                    "items": "minecraft:sand"
+                  }
+                }
+              ],
+              "amount": 15.0,
+              "consume_items": true,
+              "description": "Give 15 sand",
+              "id": "simplequests_api:item"
+            }
+          },
+          "sorting_id": 0,
+          "icon": "minecraft:paper",
+          "visibility": "DEFAULT",
+          "max_repeat": 0,
+          "daily_quest": false,
+          "need_unlock": false,
+          "parent_id": [],
+          "redo_parent": false,
+          "repeat_delay": 0,
+          "repeat_daily": 0,
+          "name": "Internal quest b_1",
+          "description": [],
+          "loot_table": "minecraft:empty",
+          "type": "simplequests_api:quest"
+        },
+        {
+          "command": "",
+          "submission_trigger": "",
+          "tasks": {
+            "gravel": {
+              "predicates": [
+                {
+                  "value": {
+                    "items": "minecraft:gravel"
+                  }
+                }
+              ],
+              "amount": 15.0,
+              "consume_items": true,
+              "description": "Give 15 gravel",
+              "id": "simplequests_api:item"
+            }
+          },
+          "sorting_id": 0,
+          "icon": "minecraft:paper",
+          "visibility": "DEFAULT",
+          "max_repeat": 0,
+          "daily_quest": false,
+          "need_unlock": false,
+          "parent_id": [],
+          "redo_parent": false,
+          "repeat_delay": 0,
+          "repeat_daily": 0,
+          "name": "Internal quest b_2",
+          "description": [],
+          "loot_table": "minecraft:empty",
+          "type": "simplequests_api:quest"
+        }
+      ],
+      "type": "simplequests_api:composite_quest"
+    }
+  ],
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "command": "",
+  "type": "simplequests_api:sequential_quest"
+}

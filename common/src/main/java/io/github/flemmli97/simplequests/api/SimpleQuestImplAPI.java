@@ -19,9 +19,9 @@ public class SimpleQuestImplAPI {
     /**
      * Triggers the players current accepted quests
      *
-     * @param key        The key to be used
-     * @param with       The value used to progress
-     * @param onFulfill  Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
+     * @param key       The key to be used
+     * @param with      The value used to progress
+     * @param onFulfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */
     public static <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ServerPlayer serverPlayer, ProgressionTrackerKey<V, R> key, V with, QuestTriggerHook<R> onFulfill) {
@@ -31,8 +31,8 @@ public class SimpleQuestImplAPI {
     /**
      * Triggers the players current accepted quests
      *
-     * @param key        The key to be used
-     * @param with       The value used to progress
+     * @param key       The key to be used
+     * @param with      The value used to progress
      * @param onFulfill Gets run when the predicate matches. Usually used for sending a message to the player to tell of the completion
      * @return The completed quests
      */

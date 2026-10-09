@@ -10,7 +10,7 @@
   "repeat_delay": 36000,
   "repeat_daily": 0,
   "category": "example:category_1",
-  "name": "Example for a nested sequential quest and definition builtin",
+  "name": "Example for a nested sequential quest but the subquests are in the same file",
   "description": [],
   "quests": [
     {

@@ -148,7 +148,7 @@ public class SelectionQuestScreenHandler extends ServerOnlyScreenHandler<Selecti
                     QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             } else {
                 player.closeContainer();
-                player.getServer().execute(() -> QuestGui.openGui(player, this.category, this.canGoBack, this.page));
+                player.getServer().execute(() -> SelectionQuestScreenHandler.openScreen(player, this.quest, this.category, this.canGoBack, this.page));
                 QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
             }
         }, "simplequests.gui.confirm");

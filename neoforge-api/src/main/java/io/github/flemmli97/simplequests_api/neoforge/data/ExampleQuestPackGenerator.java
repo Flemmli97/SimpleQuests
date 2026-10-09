@@ -415,7 +415,7 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                         .addQuest(ResourceLocation.fromNamespaceAndPath("example", "hidden/sequential_d")));
 
         this.addQuest(ResourceLocation.fromNamespaceAndPath("example", "sequential_quest_example_with_builtin"),
-                new SequentialQuestDefinition.Builder("Example for a nested sequential quest and definition builtin", ResourceLocation.parse("chests/abandoned_mineshaft"))
+                new SequentialQuestDefinition.Builder("Example for a nested sequential quest but the subquests are in the same file", ResourceLocation.parse("chests/abandoned_mineshaft"))
                         .setRepeatDelay(36000)
                         .withCategory(category)
                         .withIcon(new ItemStack(Items.CHEST))
@@ -423,6 +423,18 @@ public class ExampleQuestPackGenerator extends QuestProvider {
                                 .addTaskEntry("stone", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.STONE).build()).build(), ConstantValue.exactly(15), "Give 15 stone", true, null)).build())
                         .addQuest(new TasksQuestDefinition.Builder("Internal quest b", BuiltInLootTables.EMPTY.location())
                                 .addTaskEntry("sand", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.SAND).build()).build(), ConstantValue.exactly(15), "Give 15 sand", true, null)).build()));
+        this.addQuest(ResourceLocation.fromNamespaceAndPath("example", "nested_selection_quest"),
+                new SequentialQuestDefinition.Builder("Example for a nested selection quest. Or: A quest where you can select other quest during its progression instead of beginning only", ResourceLocation.parse("chests/abandoned_mineshaft"))
+                        .setRepeatDelay(36000)
+                        .withCategory(category)
+                        .withIcon(new ItemStack(Items.CHEST))
+                        .addQuest(new TasksQuestDefinition.Builder("Internal quest a", BuiltInLootTables.EMPTY.location())
+                                .addTaskEntry("stone", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.STONE).build()).build(), ConstantValue.exactly(15), "Give 15 stone", true, null)).build())
+                        .addQuest(new CompositeQuestDefinition.Builder("Internal b")
+                                .addQuest(new TasksQuestDefinition.Builder("Internal quest b_1", BuiltInLootTables.EMPTY.location())
+                                        .addTaskEntry("sand", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.SAND).build()).build(), ConstantValue.exactly(15), "Give 15 sand", true, null)).build())
+                                .addQuest(new TasksQuestDefinition.Builder("Internal quest b_2", BuiltInLootTables.EMPTY.location())
+                                        .addTaskEntry("gravel", new ItemTask(DescriptiveValue.list(ItemPredicate.Builder.item().of(Items.GRAVEL).build()).build(), ConstantValue.exactly(15), "Give 15 gravel", true, null)).build()).build()));
     }
 
     @Override

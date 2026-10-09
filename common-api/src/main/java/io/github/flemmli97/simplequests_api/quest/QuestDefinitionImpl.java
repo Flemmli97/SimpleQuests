@@ -79,7 +79,7 @@ public abstract class QuestDefinitionImpl implements QuestDefinition, IdSetter {
     @Override
     public void setId(ResourceLocation id) {
         if (this.id != null) {
-            throw new IllegalStateException("Id already set!");
+            throw new IllegalStateException("Id already set to" + this.id + "!");
         }
         this.id = id;
         ResourceLocation root = this.id();
@@ -183,7 +183,7 @@ public abstract class QuestDefinitionImpl implements QuestDefinition, IdSetter {
 
     @Override
     public String toString() {
-        return String.format("[Quest:%s]", this.id());
+        return String.format("[%s:%s]", this.getClass().getSimpleName(), this.id() == null ? "undefined" : this.id());
     }
 
     public record BaseData(Optional<ResourceLocation> category,

@@ -106,17 +106,19 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
         PlayerData.AcceptType type = data.canAcceptQuest(quest);
         ItemStack stack = type == PlayerData.AcceptType.ACCEPT ? quest.getIcon() : new ItemStack(Items.BOOK);
         stack.set(DataComponents.CUSTOM_NAME, quest.name(player).setStyle(NAME_STYLE));
+        if (type == PlayerData.AcceptType.DELAY) {
+            this.updateList.put(i, quest);
+        }
+        List<Component> lore = new ArrayList<>(questComponents(data, quest, type));
         if (data.isActive(quest)) {
             stack.enchant(player.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.UNBREAKING), 1);
             if (stack.has(DataComponents.STORED_ENCHANTMENTS))
                 stack.set(DataComponents.STORED_ENCHANTMENTS, stack.get(DataComponents.STORED_ENCHANTMENTS).withTooltip(false));
             else if (stack.has(DataComponents.ENCHANTMENTS))
                 stack.set(DataComponents.ENCHANTMENTS, stack.get(DataComponents.ENCHANTMENTS).withTooltip(false));
+            lore.add(Component.empty());
+            lore.add(Component.translatable("simplequests.gui.quest.active").withStyle(Style.EMPTY.withItalic(false).applyFormats(ChatFormatting.AQUA)));
         }
-        if (type == PlayerData.AcceptType.DELAY) {
-            this.updateList.put(i, quest);
-        }
-        List<Component> lore = new ArrayList<>(questComponents(data, quest, type));
         MutableComponent requirement = switch (type) {
             case ACCEPT, DELAY -> null;
             default ->
@@ -183,7 +185,7 @@ public class QuestGui extends ServerOnlyScreenHandler<QuestGui.QuestGuiData> {
                 if (id < this.quests.size()) {
                     ItemStack stack = this.ofQuest(i, questMap.get(this.quests.get(id)), serverPlayer);
                     if (!stack.isEmpty()) {
-                        inv.updateStack(i, this.ofQuest(i, questMap.get(this.quests.get(id)), serverPlayer));
+                        inv.updateStack(i, stack);
                         id++;
                     }
                 }

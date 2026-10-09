@@ -20,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -125,21 +126,25 @@ public class PlayerData implements PlayerQuestData {
                 case COMPLETE -> {
                     this.completeQuest(prog);
                     completed.add(prog);
-                    completion.add(new ProgressResult<>(prog, fulfilled, QuestState.COMPLETE));
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
                 }
                 case PARTIAL_COMPLETE -> {
-                    completion.add(new ProgressResult<>(prog, fulfilled, QuestState.PARTIAL_COMPLETE));
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
                     this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                    prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                    prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE))
+                            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                }
+                case SELECT -> {
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
+                    this.player.sendSystemMessage(Component.translatable("simplequests.quest.selection.advance",
+                                    prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE),
+                                    Component.translatable("simplequests.quest.selection.advance.click")
+                                            .withStyle(s -> s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/simplequests select " + prog.getRootId()))))
                             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 }
                 case NO -> {
-                    if (fulfilled.isEmpty()) {
-                        if (sendFailMessage)
-                            this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
-                    } else {
+                    if (!fulfilled.isEmpty()) {
                         completion.add(new ProgressResult<>(prog, fulfilled, state));
-                        this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
                         if (!prog.getRootDefinition().category().isSilent) {
                             fulfilled.forEach(t -> this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", t.getSecond().translation(this.player)
                                     .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
@@ -147,6 +152,13 @@ public class PlayerData implements PlayerQuestData {
                     }
                 }
             }
+        }
+        if (completion.isEmpty()) {
+            if (sendFailMessage) {
+                this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_NO, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
+            }
+        } else {
+            this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.VILLAGER_YES, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         }
         this.currentQuests.removeAll(completed);
         return completion;
@@ -176,7 +188,15 @@ public class PlayerData implements PlayerQuestData {
                 case PARTIAL_COMPLETE -> {
                     completion.add(new ProgressResult<>(prog, fulfilled, state));
                     this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                    prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                    prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE))
+                            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                }
+                case SELECT -> {
+                    completion.add(new ProgressResult<>(prog, fulfilled, state));
+                    this.player.sendSystemMessage(Component.translatable("simplequests.quest.selection.advance",
+                                    prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE),
+                                    Component.translatable("simplequests.quest.selection.advance.click")
+                                            .withStyle(s -> s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/simplequests select " + prog.getRootId()))))
                             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 }
                 case NO -> {
@@ -211,7 +231,7 @@ public class PlayerData implements PlayerQuestData {
         this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
         if (!prog.getRootDefinition().category().isSilent)
             this.player.sendSystemMessage(Component.translatable("simplequests.finish",
-                            prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                            prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE))
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         if (!prog.getRootDefinition().requiredParentQuests().isEmpty() && prog.getRootDefinition().redoParent()) {
             prog.getRootDefinition().requiredParentQuests().forEach(res -> {
@@ -352,8 +372,14 @@ public class PlayerData implements PlayerQuestData {
                     return true;
                 }
                 case PARTIAL_COMPLETE -> this.player.sendSystemMessage(Component.translatable("simplequests.finish.sub",
-                                prog.name(this.player).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                                prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE))
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                case SELECT ->
+                        this.player.sendSystemMessage(Component.translatable("simplequests.quest.selection.advance",
+                                        prog.name(this.player).withStyle(ChatFormatting.DARK_GREEN, ChatFormatting.UNDERLINE),
+                                        Component.translatable("simplequests.quest.selection.advance.click")
+                                                .withStyle(s -> s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/simplequests select " + prog.getRootId()))))
+                                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 case NO -> fulfilled.getSecond().forEach(e -> {
                     if (!prog.getRootDefinition().category().isSilent)
                         this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", e.translation(this.player)).withStyle(ChatFormatting.DARK_GREEN));

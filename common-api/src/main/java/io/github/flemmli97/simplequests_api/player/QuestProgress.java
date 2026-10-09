@@ -69,8 +69,6 @@ public class QuestProgress {
         this.data = data;
         this.load(tag);
         this.setup();
-        if (!this.tickables.isEmpty())
-            data.addTickableProgress(this);
     }
 
     private void setup() {
@@ -82,6 +80,8 @@ public class QuestProgress {
                     this.tickables.put(s, ticker);
             }
         });
+        if (!this.tickables.isEmpty())
+            this.data.addTickableProgress(this);
     }
 
     public QuestDefinition getRootDefinition() {
@@ -108,11 +108,12 @@ public class QuestProgress {
         return this.getRootQuest() != null;
     }
 
+    @Nullable
     public ResolvedQuest getActiveQuest() {
         return this.questStack.getLast().quest();
     }
 
-    private QuestDefinition getActiveDefinition() {
+    public QuestDefinition getActiveDefinition() {
         return this.questStack.isEmpty() ? this.rootDefinition : this.questStack.getLast().definition;
     }
 
@@ -197,16 +198,48 @@ public class QuestProgress {
     }
 
     public QuestState tryComplete(String trigger) {
+        if (this.requireSelect())
+            return QuestState.SELECT;
         ServerPlayer player = this.data.getPlayer();
         boolean completed = this.completedTasks.containsAll(this.tasks.keySet()) && this.getRootQuest().submissionTrigger(player).equals(trigger);
         if (completed && !APIPlatform.INSTANCE.onQuestComplete(player, trigger, this.getRootQuest(), this))
             completed = false;
         if (completed) {
             if (this.advanceQuest()) {
+                if (this.requireSelect())
+                    return QuestState.SELECT;
                 return QuestState.PARTIAL_COMPLETE;
             }
         }
         return completed ? QuestState.COMPLETE : QuestState.NO;
+    }
+
+    public boolean requireSelect() {
+        if (this.getActiveQuest() != null)
+            return false;
+        QuestDefinition def = this.getActiveDefinition();
+        return !def.advanceable() && !def.getSubQuests().isEmpty();
+    }
+
+    public boolean selectSubQuest(int idx) {
+        if (!this.requireSelect())
+            return false;
+        QuestDefinition def = this.getActiveDefinition();
+        if (idx < def.getSubQuests().size()) {
+            this.questStack.removeLast();
+            def = def.getSubQuests().get(idx).getDefinition();
+            this.questStack.add(new QuestProgressState(def, 0));
+            this.setupQuest();
+            this.advanceQuest();
+            return true;
+        }
+        return false;
+    }
+
+    public List<QuestDefinition> selectableSubQuests() {
+        if (!this.requireSelect())
+            return List.of();
+        return this.getActiveDefinition().getSubQuests().stream().map(QuestHolder::getDefinition).toList();
     }
 
     /**
@@ -222,9 +255,7 @@ public class QuestProgress {
 
     private boolean advanceRecursively() {
         if (this.questStack.getFirst().definition.getSubQuests().isEmpty()) {
-            this.tasks = this.getActiveQuest().resolveTasks(this);
-            this.resetTrackers();
-            this.setup();
+            this.setupQuest();
             return false;
         }
         QuestProgressState state = this.questStack.getLast();
@@ -232,11 +263,9 @@ public class QuestProgress {
         if (next != null) {
             this.questStack.add(new QuestProgressState(next, 0));
             if (!this.advanceRecursively()) {
-                this.tasks = this.getActiveQuest().resolveTasks(this);
-                this.resetTrackers();
-                this.setup();
-                if (!this.tickables.isEmpty())
-                    this.data.addTickableProgress(this);
+                this.setupQuest();
+            } else {
+                this.clearStates();
             }
             return true;
         }
@@ -279,6 +308,20 @@ public class QuestProgress {
             return false;
         });
         return Pair.of(this.tickables.isEmpty(), fulfilled);
+    }
+
+    private void setupQuest() {
+        this.clearStates();
+        ResolvedQuest quest = this.getActiveQuest();
+        if (quest != null) {
+            this.tasks = quest.resolveTasks(this);
+        }
+        this.setup();
+    }
+
+    private void clearStates() {
+        this.tasks = Map.of();
+        this.resetTrackers();
     }
 
     public void resetTrackers() {

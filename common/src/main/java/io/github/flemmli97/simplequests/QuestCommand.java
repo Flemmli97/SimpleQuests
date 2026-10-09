@@ -9,10 +9,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.flemmli97.simplequests.config.ConfigHandler;
 import io.github.flemmli97.simplequests.data.PlayerData;
+import io.github.flemmli97.simplequests.gui.ActiveSelectionQuestScreenHandler;
 import io.github.flemmli97.simplequests.gui.CurrentQuestGui;
 import io.github.flemmli97.simplequests.gui.QuestCategoryGui;
 import io.github.flemmli97.simplequests.gui.QuestGui;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
+import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import net.minecraft.ChatFormatting;
@@ -26,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -59,7 +62,13 @@ public class QuestCommand {
                 .then(Commands.literal("unlock").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.UNLOCK, true))
                         .then(Commands.argument("target", EntityArgument.players())
                                 .then(Commands.argument("quest", ResourceLocationArgument.id())
-                                        .suggests(QuestCommand::lockedQuests).executes(QuestCommand::unlock)))));
+                                        .suggests(QuestCommand::lockedQuests).executes(QuestCommand::unlock))))
+                .then(Commands.literal("select").requires(src -> LoaderHandler.INSTANCE.hasPerm(src, QuestCommandPerms.SELECT))
+                        .then(Commands.argument("quest", ResourceLocationArgument.id())
+                                .executes(QuestCommand::openSelectActiveSubQuestGui)
+                                .suggests(QuestCommand::activeSelectionPending).then(Commands.argument("select", ResourceLocationArgument.id())
+                                        .suggests(QuestCommand::selectionQuestsOf).executes(QuestCommand::selectActiveSubQuest))))
+        );
     }
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -205,12 +214,67 @@ public class QuestCommand {
         return i;
     }
 
+    private static int openSelectActiveSubQuestGui(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
+        Optional<QuestProgress> progress = PlayerData.get(player)
+                .getCurrentQuest().stream().filter(prog -> prog.requireSelect() && prog.getRootId().equals(id))
+                .findFirst();
+        if (progress.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
+            return 0;
+        }
+        ActiveSelectionQuestScreenHandler.openScreen(player, progress.get());
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int selectActiveSubQuest(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "quest");
+        Optional<QuestProgress> progress = PlayerData.get(player)
+                .getCurrentQuest().stream().filter(prog -> prog.requireSelect() && prog.getRootId().equals(id))
+                .findFirst();
+        if (progress.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("simplequests.quest.noexist", id), false);
+            return 0;
+        }
+        QuestDefinition def = progress.get().getActiveDefinition();
+        ResourceLocation select = ResourceLocationArgument.getId(ctx, "select");
+        int i = -1;
+        for (int idx = 0; idx < def.getSubQuests().size(); idx++) {
+            if (def.getSubQuests().get(idx).getId().equals(select)) {
+                i = idx;
+                break;
+            }
+        }
+        if (progress.get().selectSubQuest(i)) {
+            return Command.SINGLE_SUCCESS;
+        }
+        return 0;
+    }
+
     public static CompletableFuture<Suggestions> quests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), false), build);
     }
 
     public static CompletableFuture<Suggestions> nonRootQuests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
         return SharedSuggestionProvider.suggest(acceptableQuests(context.getSource().getPlayerOrException(), true), build);
+    }
+
+    public static CompletableFuture<Suggestions> activeSelectionPending(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        return SharedSuggestionProvider.suggest(PlayerData.get(context.getSource().getPlayerOrException())
+                .getCurrentQuest().stream().filter(QuestProgress::requireSelect).map(prog -> prog.getRootId().toString())
+                .toList(), build);
+    }
+
+    public static CompletableFuture<Suggestions> selectionQuestsOf(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {
+        ResourceLocation id = ResourceLocationArgument.getId(context, "quest");
+        Optional<QuestProgress> quest = PlayerData.get(context.getSource().getPlayerOrException())
+                .getCurrentQuest().stream().filter(prog -> prog.requireSelect() && prog.getRootId().equals(id))
+                .findFirst();
+        return quest.map(prog ->
+                        SharedSuggestionProvider.suggest(prog.getActiveDefinition().getSubQuests().stream().map(h -> h.getId().toString()).toList(), build))
+                .orElse(SharedSuggestionProvider.suggest(List.of(), build));
     }
 
     public static CompletableFuture<Suggestions> activequests(CommandContext<CommandSourceStack> context, SuggestionsBuilder build) throws CommandSyntaxException {

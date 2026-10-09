@@ -52,15 +52,12 @@ public class QuestHolder {
             if (q instanceof IdSetter setter) {
                 setter.setId(id);
             }
-            int i = 1;
-            for (QuestHolder holder : q.getSubQuests()) {
-                holder.setId(this.getId().withSuffix("_" + i++));
-            }
         });
     }
 
     @Override
     public String toString() {
-        return this.getId().toString();
+        QuestDefinition def = this.getDefinition();
+        return String.format("Holder[%s]", def == null ? "Undefined with " + this.getId() : def);
     }
 }

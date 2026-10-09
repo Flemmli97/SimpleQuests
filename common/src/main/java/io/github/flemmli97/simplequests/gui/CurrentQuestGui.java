@@ -66,6 +66,10 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
         List<Component> lore = new ArrayList<>();
         progress.description(player).forEach(c -> lore.add(c.setStyle(QuestGui.DESCRIPTION_STYLE)));
         lore.add(Component.literal(""));
+        if (progress.requireSelect()) {
+            lore.add(Component.translatable("simplequests.quest.selection.choice").setStyle(QuestGui.DESCRIPTION_STYLE)
+                    .withStyle(ChatFormatting.AQUA));
+        }
         List<String> finished = progress.completedTasks();
         progress.getTasks().entrySet().stream()
                 .filter(e -> !finished.contains(e.getKey()))
@@ -185,18 +189,22 @@ public class CurrentQuestGui extends ServerOnlyScreenHandler<Object> {
             SimpleQuests.LOGGER.error("No such quest {}", id);
             return false;
         }
-        QuestDefinition quest = questOpt.get().getRootDefinition();
-        ConfirmScreenHandler.openConfirmScreen(player, b -> {
-            if (b) {
-                player.closeContainer();
-                PlayerData.get(player).reset(quest.id(), true);
-                QuestGui.playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
-            } else {
-                player.closeContainer();
-                player.getServer().execute(() -> CurrentQuestGui.openGui(player));
-                QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
-            }
-        }, "simplequests.gui.reset");
+        if (questOpt.get().requireSelect() && clickType == 0) {
+            ActiveSelectionQuestScreenHandler.openScreen(player, questOpt.get(), () -> player.getServer().execute(() -> CurrentQuestGui.openGui(player)));
+        } else {
+            QuestDefinition quest = questOpt.get().getRootDefinition();
+            ConfirmScreenHandler.openConfirmScreen(player, b -> {
+                if (b) {
+                    player.closeContainer();
+                    PlayerData.get(player).reset(quest.id(), true);
+                    QuestGui.playSongToPlayer(player, SoundEvents.ANVIL_FALL, 1, 1.2f);
+                } else {
+                    player.closeContainer();
+                    player.getServer().execute(() -> CurrentQuestGui.openGui(player));
+                    QuestGui.playSongToPlayer(player, SoundEvents.VILLAGER_NO, 1, 1f);
+                }
+            }, "simplequests.gui.reset");
+        }
         QuestGui.playSongToPlayer(player, SoundEvents.UI_BUTTON_CLICK, 1, 1f);
         return true;
     }
