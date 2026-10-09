@@ -4,6 +4,7 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.FishingTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.player.TaskResult;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
@@ -27,15 +28,18 @@ public class FishingTracker extends ProgressionTrackerBase<Collection<ItemStack>
     }
 
     @Override
-    public boolean progress(ServerPlayer player, QuestProgress prog, Collection<ItemStack> with) {
+    public TaskResult progress(ServerPlayer player, QuestProgress prog, Collection<ItemStack> with) {
         int amount = 0;
         for (ItemStack stack : with) {
             if (this.questEntry().check(player, stack)) {
                 amount += stack.getCount();
             }
         }
+        if (amount == 0) {
+            return TaskResult.NONE;
+        }
         this.value += amount;
-        return this.value >= this.questEntry().amount();
+        return this.value >= this.questEntry().amount() ? TaskResult.COMPLETED : TaskResult.ADVANCED;
     }
 
     @Override

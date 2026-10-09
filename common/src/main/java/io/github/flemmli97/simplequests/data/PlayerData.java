@@ -8,8 +8,10 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
 import io.github.flemmli97.simplequests_api.impls.progression.EntityTracker;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.ProgressionResult;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.player.TaskResult;
 import io.github.flemmli97.simplequests_api.quest.InvalidQuestStateException;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
@@ -121,7 +123,7 @@ public class PlayerData implements PlayerQuestData {
         List<QuestProgress> completed = new ArrayList<>();
         List<PlayerQuestData.ProgressResult<?>> completion = new ArrayList<>();
         for (QuestProgress prog : this.currentQuests) {
-            Set<Pair<String, ResolvedQuestTask>> fulfilled = prog.submit(trigger);
+            Set<ProgressionResult<ResolvedQuestTask>> fulfilled = prog.submit(trigger);
             QuestState state = prog.tryComplete(trigger);
             switch (state) {
                 case COMPLETE -> {
@@ -147,8 +149,12 @@ public class PlayerData implements PlayerQuestData {
                     if (!fulfilled.isEmpty()) {
                         completion.add(new ProgressResult<>(prog, fulfilled, state));
                         if (!prog.getRootDefinition().category().isSilent) {
-                            fulfilled.forEach(t -> this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", t.getSecond().translation(this.player)
-                                    .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+                            fulfilled.forEach(t -> {
+                                if (t.result() == TaskResult.COMPLETED) {
+                                    this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", t.task().translation(this.player)
+                                            .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                                }
+                            });
                         }
                     }
                 }
@@ -174,7 +180,7 @@ public class PlayerData implements PlayerQuestData {
         List<QuestProgress> completed = new ArrayList<>();
         List<PlayerQuestData.ProgressResult<R>> completion = new ArrayList<>();
         this.currentQuests.forEach(prog -> {
-            Set<Pair<String, R>> fulfilled = prog.tryFulfill(this.player, key, with);
+            Set<ProgressionResult<R>> fulfilled = prog.tryFulfill(this.player, key, with);
             if (!fulfilled.isEmpty()) {
                 this.player.level().playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), SoundEvents.PLAYER_LEVELUP, this.player.getSoundSource(), 2 * 0.75f, 1.0f);
             }
@@ -214,8 +220,8 @@ public class PlayerData implements PlayerQuestData {
     @Override
     public <V, R extends ResolvedQuestTask> List<PlayerQuestData.ProgressResult<R>> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger) {
         return this.trigger(key, with, (prog, p, state) -> {
-            if (state == QuestState.NO && !prog.getRootDefinition().category().isSilent)
-                this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", p.getSecond().translation(this.player)
+            if (state == QuestState.NO && !prog.getRootDefinition().category().isSilent && p.result() == TaskResult.COMPLETED)
+                this.player.sendSystemMessage(Component.translatable("simplequests.task.complete", p.task().translation(this.player)
                         .withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         }, trigger);
     }

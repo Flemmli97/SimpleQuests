@@ -1,6 +1,5 @@
 package io.github.flemmli97.simplequests_api.player;
 
-import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests_api.quest.QuestState;
 import io.github.flemmli97.simplequests_api.quest.entry.ResolvedQuestTask;
 import io.github.flemmli97.simplequests_api.registry.PlayerQuestDataRegistry;
@@ -32,7 +31,7 @@ public interface PlayerQuestData {
 
     <V, R extends ResolvedQuestTask> List<ProgressResult<R>> trigger(ProgressionTrackerKey<V, R> key, V with, @NotNull String trigger);
 
-    record ProgressResult<T extends ResolvedQuestTask>(QuestProgress progress, Set<Pair<String, T>> completedTasks,
+    record ProgressResult<T extends ResolvedQuestTask>(QuestProgress progress, Set<ProgressionResult<T>> completedTasks,
                                                        QuestState questState) {
     }
 }

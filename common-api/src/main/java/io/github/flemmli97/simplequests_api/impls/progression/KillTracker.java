@@ -4,6 +4,7 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.KillTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.player.TaskResult;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
@@ -25,12 +26,12 @@ public class KillTracker extends ProgressionTrackerBase<LivingEntity, KillTask.K
     }
 
     @Override
-    public boolean progress(ServerPlayer player, QuestProgress prog, LivingEntity with) {
+    public TaskResult progress(ServerPlayer player, QuestProgress prog, LivingEntity with) {
         if (this.questEntry().check(player, with)) {
             this.value += 1;
-            return this.value >= this.questEntry().amount();
+            return this.value >= this.questEntry().amount() ? TaskResult.COMPLETED : TaskResult.ADVANCED;
         }
-        return false;
+        return TaskResult.NONE;
     }
 
     @Override

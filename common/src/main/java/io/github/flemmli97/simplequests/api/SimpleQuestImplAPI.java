@@ -1,8 +1,8 @@
 package io.github.flemmli97.simplequests.api;
 
-import com.mojang.datafixers.util.Pair;
 import io.github.flemmli97.simplequests.data.PlayerData;
 import io.github.flemmli97.simplequests_api.player.PlayerQuestData;
+import io.github.flemmli97.simplequests_api.player.ProgressionResult;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
 import io.github.flemmli97.simplequests_api.quest.QuestCategory;
@@ -59,9 +59,9 @@ public class SimpleQuestImplAPI {
         return PlayerData.get(serverPlayer).getCurrentQuests(category);
     }
 
-    public interface QuestTriggerHook<R> {
+    public interface QuestTriggerHook<R extends ResolvedQuestTask> {
 
-        void onFulfill(QuestProgress progress, Pair<String, R> task, QuestState state);
+        void onFulfill(QuestProgress progress, ProgressionResult<R> task, QuestState state);
 
     }
 }

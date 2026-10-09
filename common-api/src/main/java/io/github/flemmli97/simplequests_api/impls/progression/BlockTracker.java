@@ -5,6 +5,7 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.BlockInteractTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.player.TaskResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -34,18 +35,18 @@ public class BlockTracker extends ProgressionTrackerBase<Pair<BlockPos, Boolean>
     }
 
     @Override
-    public boolean progress(ServerPlayer player, QuestProgress prog, Pair<BlockPos, Boolean> with) {
+    public TaskResult progress(ServerPlayer player, QuestProgress prog, Pair<BlockPos, Boolean> with) {
         if (this.questEntry().check(player, with.getFirst(), with.getSecond())) {
             if (!this.allowDupes && this.pos.contains(with.getFirst())) {
                 if (!prog.getRootQuest().source().category().isSilent)
                     player.sendSystemMessage(Component.translatable(BlockInteractTask.ID + "block.dupe." + this.questEntry().use()).withStyle(ChatFormatting.DARK_RED));
-                return false;
+                return TaskResult.NONE;
             }
             this.pos.add(with.getFirst());
             this.amount++;
-            return this.amount >= this.questEntry().amount();
+            return this.amount >= this.questEntry().amount() ? TaskResult.COMPLETED : TaskResult.ADVANCED;
         }
-        return false;
+        return TaskResult.NONE;
     }
 
     @Override

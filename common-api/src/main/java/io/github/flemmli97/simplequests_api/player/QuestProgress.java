@@ -151,19 +151,19 @@ public class QuestProgress {
         return this.tasks;
     }
 
-    public Set<Pair<String, ResolvedQuestTask>> submit(String trigger) {
+    public Set<ProgressionResult<ResolvedQuestTask>> submit(String trigger) {
         return this.submit(trigger, Integer.MAX_VALUE);
     }
 
-    public Set<Pair<String, ResolvedQuestTask>> submit(String trigger, int amount) {
+    public Set<ProgressionResult<ResolvedQuestTask>> submit(String trigger, int amount) {
         ServerPlayer player = this.data.getPlayer();
-        Set<Pair<String, ResolvedQuestTask>> fulfilled = new HashSet<>();
+        Set<ProgressionResult<ResolvedQuestTask>> fulfilled = new HashSet<>();
         for (Map.Entry<String, ResolvedQuestTask> entry : this.tasks.entrySet()) {
             if (this.completedTasks.contains(entry.getKey()) && !this.getRootQuest().submissionTrigger(player).equals(trigger))
                 continue;
             if (entry.getValue().submit(player)) {
                 this.completedTasks.add(entry.getKey());
-                fulfilled.add(Pair.of(entry.getKey(), entry.getValue()));
+                fulfilled.add(new ProgressionResult<>(entry.getKey(), entry.getValue(), TaskResult.COMPLETED));
                 if (fulfilled.size() >= amount) {
                     break;
                 }
@@ -172,22 +172,25 @@ public class QuestProgress {
         return fulfilled;
     }
 
-    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
+    public <V, R extends ResolvedQuestTask> Set<ProgressionResult<R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with) {
         return this.tryFulfill(player, key, with, Integer.MAX_VALUE);
     }
 
     @SuppressWarnings("unchecked")
-    public <V, R extends ResolvedQuestTask> Set<Pair<String, R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with, int amount) {
-        Set<Pair<String, R>> fulfilled = new HashSet<>();
+    public <V, R extends ResolvedQuestTask> Set<ProgressionResult<R>> tryFulfill(ServerPlayer player, ProgressionTrackerKey<V, R> key, V with, int amount) {
+        Set<ProgressionResult<R>> fulfilled = new HashSet<>();
         for (Map.Entry<String, ResolvedQuestTask> e : this.tasks.entrySet()) {
             if (this.completedTasks.contains(e.getKey()))
                 continue;
             if (e.getValue().getId().equals(key.questTaskKey())) {
                 R entry = (R) e.getValue();
                 ProgressionTracker<V, R> tracker = this.getOrCreateTracker(key, entry, e.getKey());
-                if (tracker.progress(player, this, with)) {
-                    fulfilled.add(Pair.of(e.getKey(), entry));
-                    this.completedTasks.add(e.getKey());
+                TaskResult result = tracker.progress(player, this, with);
+                if (result != TaskResult.NONE) {
+                    fulfilled.add(new ProgressionResult<>(e.getKey(), entry, result));
+                    if (result == TaskResult.COMPLETED) {
+                        this.completedTasks.add(e.getKey());
+                    }
                     if (fulfilled.size() >= amount) {
                         break;
                     }

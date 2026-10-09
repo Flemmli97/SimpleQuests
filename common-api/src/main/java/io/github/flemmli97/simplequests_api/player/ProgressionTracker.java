@@ -17,11 +17,12 @@ public interface ProgressionTracker<T, E extends ResolvedQuestTask> {
 
     E questEntry();
 
-    boolean progress(ServerPlayer player, QuestProgress prog, T with);
+    TaskResult progress(ServerPlayer player, QuestProgress prog, T with);
 
     MutableComponent formattedProgress(ServerPlayer player, QuestProgress progress);
 
     Tag save();
 
     void load(Tag tag);
+
 }

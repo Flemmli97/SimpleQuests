@@ -4,6 +4,7 @@ import io.github.flemmli97.simplequests_api.SimpleQuestsAPI;
 import io.github.flemmli97.simplequests_api.impls.tasks.EntityInteractTask;
 import io.github.flemmli97.simplequests_api.player.ProgressionTrackerKey;
 import io.github.flemmli97.simplequests_api.player.QuestProgress;
+import io.github.flemmli97.simplequests_api.player.TaskResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -30,17 +31,17 @@ public class EntityTracker extends ProgressionTrackerBase<Entity, EntityInteract
     }
 
     @Override
-    public boolean progress(ServerPlayer player, QuestProgress prog, Entity with) {
+    public TaskResult progress(ServerPlayer player, QuestProgress prog, Entity with) {
         if (this.questEntry().check(player, with)) {
             if (this.entities.contains(with.getUUID())) {
                 if (!prog.getRootQuest().source().category().isSilent)
                     player.sendSystemMessage(Component.translatable(EntityInteractTask.ID + ".dupe").withStyle(ChatFormatting.DARK_RED));
-                return false;
+                return TaskResult.NONE;
             }
             this.entities.add(with.getUUID());
-            return this.entities.size() >= this.questEntry().amount();
+            return this.entities.size() >= this.questEntry().amount() ? TaskResult.COMPLETED : TaskResult.ADVANCED;
         }
-        return false;
+        return TaskResult.NONE;
     }
 
     @Override
