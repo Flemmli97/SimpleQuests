@@ -9,6 +9,8 @@ Simple Quests 2.3.0
   - Allows defining sub quest in one file instead of needing id to point to other quests (Relevant for sequential and selection quests)
     - Quests defined these way are not in the QuestManager so manually hiding them is not needed
   - Allows subquests within subquests now.
+    - For sequential quests they are finished in order
+    - For selection quests the player will then select the next one to do
 - Main mod reflects 3.0.0 changes
 
 Simple Quests 2.2.0
