@@ -1,20 +1,20 @@
 {
-  "sorting_id": 0,
-  "icon": "minecraft:cobbled_deepslate",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
+  "type": "simplequests_api:composite_quest",
+  "category": "example:category_1",
   "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:cobbled_deepslate",
+  "max_repeat": 0,
+  "name": "Example for a selection quest",
   "need_unlock": false,
   "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "category": "example:category_1",
-  "name": "Example for a selection quest",
-  "description": [],
   "quests": [
     "example:hidden/selection_a",
     "example:hidden/selection_b"
   ],
-  "type": "simplequests_api:composite_quest"
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
+  "visibility": "DEFAULT"
 }

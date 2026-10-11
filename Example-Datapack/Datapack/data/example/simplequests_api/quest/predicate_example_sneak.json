@@ -1,54 +1,54 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:map",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for a predicate quest using a predicate type. Player needs to sneak additionally",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 0,
+  "sorting_id": 1,
   "submission_trigger": "",
   "tasks": {
     "structure": {
+      "id": "simplequests_api:predicates",
       "predicates": [
         {
           "description": "Find a warm ocean ruin. Sneak when there",
           "value": {
-            "location": {
-              "structures": "minecraft:ocean_ruin_warm"
-            },
             "flags": {
               "is_sneaking": true
+            },
+            "location": {
+              "structures": "minecraft:ocean_ruin_warm"
             }
           }
         }
       ],
-      "submit": false,
-      "id": "simplequests_api:predicates"
+      "submit": false
     },
     "structure2": {
+      "id": "simplequests_api:predicates",
       "predicates": [
         {
           "description": "Find a cold ocean ruin. Sneak when there",
           "value": {
-            "location": {
-              "structures": "minecraft:ocean_ruin_cold"
-            },
             "flags": {
               "is_sneaking": true
+            },
+            "location": {
+              "structures": "minecraft:ocean_ruin_cold"
             }
           }
         }
       ],
-      "submit": false,
-      "id": "simplequests_api:predicates"
+      "submit": false
     }
   },
-  "sorting_id": 1,
-  "icon": "minecraft:map",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 0,
-  "repeat_daily": 0,
-  "name": "Example for a predicate quest using a predicate type. Player needs to sneak additionally",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

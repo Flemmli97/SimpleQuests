@@ -1,8 +1,25 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:dirt",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "max_repeat": 0,
+  "name": "Example for an item quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "sword": {
+      "amount": 1.0,
+      "consume_items": true,
+      "description": "Give 1 diamond sword with sharp 2 or 3",
+      "id": "simplequests_api:item",
       "predicates": [
         {
           "description": "Diamond Sword (Sharpness 2-3)",
@@ -13,33 +30,16 @@
                 {
                   "enchantments": "minecraft:sharpness",
                   "levels": {
-                    "min": 2,
-                    "max": 3
+                    "max": 3,
+                    "min": 2
                   }
                 }
               ]
             }
           }
         }
-      ],
-      "amount": 1.0,
-      "consume_items": true,
-      "description": "Give 1 diamond sword with sharp 2 or 3",
-      "id": "simplequests_api:item"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:dirt",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "name": "Example for an item quest",
-  "description": [],
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

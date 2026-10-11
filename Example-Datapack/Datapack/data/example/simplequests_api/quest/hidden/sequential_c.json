@@ -1,33 +1,33 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:paper",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Sequential Quest Example c",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "sand": {
+      "amount": 15.0,
+      "consume_items": true,
+      "description": "Give 15 sand",
+      "id": "simplequests_api:item",
       "predicates": [
         {
           "value": {
             "items": "minecraft:sand"
           }
         }
-      ],
-      "amount": 15.0,
-      "consume_items": true,
-      "description": "Give 15 sand",
-      "id": "simplequests_api:item"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:paper",
-  "visibility": "NEVER",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "name": "Sequential Quest Example c",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "NEVER"
 }

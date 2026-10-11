@@ -1,33 +1,33 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:dirt",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for an item quest completable only once per day",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 1,
+  "repeat_delay": 0,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "fish": {
+      "amount": 15.0,
+      "consume_items": true,
+      "description": "Give 15 cods",
+      "id": "simplequests_api:item",
       "predicates": [
         {
           "value": {
             "items": "minecraft:cod"
           }
         }
-      ],
-      "amount": 15.0,
-      "consume_items": true,
-      "description": "Give 15 cods",
-      "id": "simplequests_api:item"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:dirt",
-  "visibility": "ALWAYS",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 0,
-  "repeat_daily": 1,
-  "name": "Example for an item quest completable only once per day",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "ALWAYS"
 }

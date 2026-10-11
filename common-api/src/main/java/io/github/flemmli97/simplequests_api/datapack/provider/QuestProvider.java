@@ -1,11 +1,6 @@
 package io.github.flemmli97.simplequests_api.datapack.provider;
 
-import com.google.common.hash.Hashing;
-import com.google.common.hash.HashingOutputStream;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.JsonOps;
 import io.github.flemmli97.simplequests_api.datapack.QuestsManager;
@@ -13,29 +8,18 @@ import io.github.flemmli97.simplequests_api.quest.QuestCategory;
 import io.github.flemmli97.simplequests_api.quest.QuestDefinition;
 import io.github.flemmli97.simplequests_api.quest.QuestDefinitionImpl;
 import io.github.flemmli97.simplequests_api.registry.QuestDefinitionRegistry;
-import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class QuestProvider implements DataProvider {
-
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private final Map<ResourceLocation, QuestCategory> categories = new HashMap<>();
     private final Map<ResourceLocation, QuestDefinition> quests = new HashMap<>();
@@ -69,7 +53,7 @@ public abstract class QuestProvider implements DataProvider {
                     JsonElement obj = QuestCategory.CODEC.apply(this.full)
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();
-                    return saveStable(cache, obj, path);
+                    return DataProvider.saveStable(cache, obj, path);
                 }).toArray(CompletableFuture<?>[]::new)),
                 CompletableFuture.allOf(this.quests.entrySet().stream().map(entry -> {
                     Path path = this.output.getOutputFolder(PackOutput.Target.DATA_PACK).resolve(entry.getKey().getNamespace() + "/" + QuestsManager.QUEST_DIRECTORY + "/" + entry.getKey().getPath() + ".json");
@@ -77,7 +61,7 @@ public abstract class QuestProvider implements DataProvider {
                     JsonElement obj = codec
                             .encodeStart(provider.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
                             .getOrThrow();
-                    return saveStable(cache, obj, path);
+                    return DataProvider.saveStable(cache, obj, path);
                 }).toArray(CompletableFuture<?>[]::new))
         ));
     }
@@ -102,37 +86,6 @@ public abstract class QuestProvider implements DataProvider {
         if (prev != null)
             throw new IllegalStateException("Quest with " + id + " already registered");
         this.quests.put(id, quest);
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    static CompletableFuture<?> saveStable(CachedOutput output, JsonElement json, Path path) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha256(), byteArrayOutputStream);
-                JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(hashingOutputStream, StandardCharsets.UTF_8));
-
-                try {
-                    jsonWriter.setSerializeNulls(false);
-                    jsonWriter.setIndent("  ");
-                    GSON.toJson(json, jsonWriter);
-                } catch (Throwable var9) {
-                    try {
-                        jsonWriter.close();
-                    } catch (Throwable var8) {
-                        var9.addSuppressed(var8);
-                    }
-
-                    throw var9;
-                }
-
-                jsonWriter.close();
-                output.writeIfNeeded(path, byteArrayOutputStream.toByteArray(), hashingOutputStream.hash());
-            } catch (IOException var10) {
-                LOGGER.error("Failed to save file to {}", path, var10);
-            }
-
-        }, Util.backgroundExecutor());
     }
 }
 

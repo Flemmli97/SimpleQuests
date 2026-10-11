@@ -1,8 +1,37 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [
+    "This is an example description",
+    "This is another example description"
+  ],
+  "icon": "minecraft:cod",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for an item quest that increases in difficulty the more times you complete it",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "fish": {
+      "amount": {
+        "type": "simplequests_api:context_multiplier",
+        "max": 10.0,
+        "multiplier": 1.0,
+        "value": {
+          "type": "minecraft:uniform",
+          "max": 15.0,
+          "min": 10.0
+        }
+      },
+      "consume_items": true,
+      "description": "Give 10-15 * amount of quest completed cods or salmon",
+      "id": "simplequests_api:item",
       "predicates": [
         {
           "description": "cod",
@@ -10,37 +39,8 @@
             "items": "minecraft:cod"
           }
         }
-      ],
-      "amount": {
-        "multiplier": 1.0,
-        "max": 10.0,
-        "value": {
-          "min": 10.0,
-          "max": 15.0,
-          "type": "minecraft:uniform"
-        },
-        "type": "simplequests_api:context_multiplier"
-      },
-      "consume_items": true,
-      "description": "Give 10-15 * amount of quest completed cods or salmon",
-      "id": "simplequests_api:item"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:cod",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "name": "Example for an item quest that increases in difficulty the more times you complete it",
-  "description": [
-    "This is an example description",
-    "This is another example description"
-  ],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

@@ -1,5 +1,18 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:purpur_block",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for an xp quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": "1w:5d:3h:2m",
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "xp": {
@@ -7,18 +20,5 @@
       "id": "simplequests_api:xp"
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:purpur_block",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": "1w:5d:3h:2m",
-  "repeat_daily": 0,
-  "name": "Example for an xp quest",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

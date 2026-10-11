@@ -1,8 +1,28 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:crafting_table",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example of use of a multi crafting task",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": "1d",
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "crafting": {
+      "amount": {
+        "type": "minecraft:uniform",
+        "max": 5.0,
+        "min": 3.0
+      },
+      "description": "Craft some items",
+      "id": "simplequests_api:crafting",
       "item_predicates": [
         {
           "description": "Craft sticks x2$sx",
@@ -16,28 +36,8 @@
             "items": "minecraft:furnace"
           }
         }
-      ],
-      "amount": {
-        "min": 3.0,
-        "max": 5.0,
-        "type": "minecraft:uniform"
-      },
-      "description": "Craft some items",
-      "id": "simplequests_api:crafting"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:crafting_table",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": "1d",
-  "repeat_daily": 0,
-  "name": "Example of use of a multi crafting task",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

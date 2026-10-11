@@ -1,8 +1,28 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:dirt",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for a multi entity interaction quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 0,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "interact": {
+      "amount": {
+        "type": "minecraft:uniform",
+        "max": 6.0,
+        "min": 3.0
+      },
+      "consume": true,
+      "description": "Use a nametag on either a cow/chicken 3-6 times",
       "entity_predicates": [
         {
           "value": {
@@ -15,35 +35,15 @@
           }
         }
       ],
+      "id": "simplequests_api:entity_interact",
       "item_predicates": [
         {
           "value": {
             "items": "minecraft:name_tag"
           }
         }
-      ],
-      "amount": {
-        "min": 3.0,
-        "max": 6.0,
-        "type": "minecraft:uniform"
-      },
-      "consume": true,
-      "description": "Use a nametag on either a cow/chicken 3-6 times",
-      "id": "simplequests_api:entity_interact"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:dirt",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 0,
-  "repeat_daily": 0,
-  "name": "Example for a multi entity interaction quest",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

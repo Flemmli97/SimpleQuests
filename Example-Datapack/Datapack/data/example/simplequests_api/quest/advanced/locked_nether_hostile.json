@@ -1,39 +1,30 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:nether_brick",
+  "loot_table": "minecraft:chests/end_city_treasure",
+  "max_repeat": 0,
+  "name": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
+  "need_unlock": true,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": "2w",
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
-    "piglin": {
-      "predicates": [
-        {
-          "value": {
-            "type": "minecraft:zombified_piglin"
-          }
-        }
-      ],
-      "amount": 15.0,
-      "id": "simplequests_api:kill"
-    },
     "blaze": {
+      "amount": 5.0,
+      "id": "simplequests_api:kill",
       "predicates": [
         {
           "value": {
             "type": "minecraft:blaze"
           }
         }
-      ],
-      "amount": 5.0,
-      "id": "simplequests_api:kill"
-    },
-    "wither_skeleton": {
-      "predicates": [
-        {
-          "value": {
-            "type": "minecraft:wither_skeleton"
-          }
-        }
-      ],
-      "amount": 5.0,
-      "id": "simplequests_api:kill"
+      ]
     },
     "fortress": {
       "advancements": [
@@ -41,22 +32,31 @@
           "value": "minecraft:nether/find_fortress"
         }
       ],
-      "reset": false,
-      "id": "simplequests_api:advancement"
+      "id": "simplequests_api:advancement",
+      "reset": false
+    },
+    "piglin": {
+      "amount": 15.0,
+      "id": "simplequests_api:kill",
+      "predicates": [
+        {
+          "value": {
+            "type": "minecraft:zombified_piglin"
+          }
+        }
+      ]
+    },
+    "wither_skeleton": {
+      "amount": 5.0,
+      "id": "simplequests_api:kill",
+      "predicates": [
+        {
+          "value": {
+            "type": "minecraft:wither_skeleton"
+          }
+        }
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:nether_brick",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": true,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": "2w",
-  "repeat_daily": 0,
-  "name": "Example of a locked quest. Needs to be unlocked (via command) to accept it.",
-  "description": [],
-  "loot_table": "minecraft:chests/end_city_treasure",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

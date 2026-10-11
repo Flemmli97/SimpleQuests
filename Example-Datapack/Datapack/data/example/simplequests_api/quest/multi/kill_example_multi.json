@@ -1,8 +1,28 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:purpur_block",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for a multi kill quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": "3d:5h",
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "cows": {
+      "amount": {
+        "type": "minecraft:uniform",
+        "max": 8.0,
+        "min": 5.0
+      },
+      "description": "Task: 5-8 cows or cows in a plains biome",
+      "id": "simplequests_api:kill",
       "predicates": [
         {
           "value": {
@@ -12,34 +32,14 @@
         {
           "description": "Kill %2$s plains cow",
           "value": {
+            "type": "minecraft:cow",
             "location": {
               "biomes": "minecraft:plains"
-            },
-            "type": "minecraft:cow"
+            }
           }
         }
-      ],
-      "amount": {
-        "min": 5.0,
-        "max": 8.0,
-        "type": "minecraft:uniform"
-      },
-      "description": "Task: 5-8 cows or cows in a plains biome",
-      "id": "simplequests_api:kill"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:purpur_block",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": "3d:5h",
-  "repeat_daily": 0,
-  "name": "Example for a multi kill quest",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

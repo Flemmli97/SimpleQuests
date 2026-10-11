@@ -1,8 +1,22 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:purpur_block",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for block breaking task",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": "1w:5d:3h:2m",
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "break": {
+      "amount": 3.0,
       "block_predicates": [
         {
           "value": {
@@ -10,6 +24,9 @@
           }
         }
       ],
+      "consume": false,
+      "description": "",
+      "id": "simplequests_api:block_interact",
       "item_predicates": [
         {
           "value": {
@@ -17,25 +34,8 @@
           }
         }
       ],
-      "amount": 3.0,
-      "consume": false,
-      "use": false,
-      "description": "",
-      "id": "simplequests_api:block_interact"
+      "use": false
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:purpur_block",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": "1w:5d:3h:2m",
-  "repeat_daily": 0,
-  "name": "Example for block breaking task",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

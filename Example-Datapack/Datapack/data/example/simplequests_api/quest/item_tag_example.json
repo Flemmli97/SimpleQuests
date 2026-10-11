@@ -1,35 +1,35 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [
+    "This is an example description",
+    "This is another example description"
+  ],
+  "icon": "minecraft:oak_log",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for an item tag quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "fish": {
+      "amount": 15.0,
+      "consume_items": true,
+      "id": "simplequests_api:item",
       "predicates": [
         {
           "value": {
             "items": "#minecraft:logs"
           }
         }
-      ],
-      "amount": 15.0,
-      "consume_items": true,
-      "id": "simplequests_api:item"
+      ]
     }
   },
-  "sorting_id": 0,
-  "icon": "minecraft:oak_log",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "name": "Example for an item tag quest",
-  "description": [
-    "This is an example description",
-    "This is another example description"
-  ],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

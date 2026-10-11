@@ -1,8 +1,23 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": "minecraft:compass",
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for a multi predicate quests",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 0,
+  "sorting_id": 1,
   "submission_trigger": "",
   "tasks": {
     "structure": {
+      "description": "Find a warm or cold ocean ruin",
+      "id": "simplequests_api:predicates",
       "predicates": [
         {
           "description": "Go to warm ocean ruin",
@@ -21,23 +36,8 @@
           }
         }
       ],
-      "description": "Find a warm or cold ocean ruin",
-      "submit": false,
-      "id": "simplequests_api:predicates"
+      "submit": false
     }
   },
-  "sorting_id": 1,
-  "icon": "minecraft:compass",
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 0,
-  "repeat_daily": 0,
-  "name": "Example for a multi predicate quests",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }

@@ -1,12 +1,12 @@
 {
-  "name": "Example category 2",
   "description": [],
   "icon": "minecraft:beacon",
-  "only_same_category": false,
-  "max_concurrent_quests": -1,
-  "sorting_id": 0,
-  "max_daily": 0,
-  "required_context": [],
+  "is_silent": false,
   "is_visible": false,
-  "is_silent": false
+  "max_concurrent_quests": -1,
+  "max_daily": 0,
+  "name": "Example category 2",
+  "only_same_category": false,
+  "required_context": [],
+  "sorting_id": 0
 }

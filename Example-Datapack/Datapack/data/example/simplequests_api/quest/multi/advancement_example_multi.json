@@ -1,5 +1,21 @@
 {
+  "type": "simplequests_api:quest",
   "command": "",
+  "daily_quest": false,
+  "description": [],
+  "icon": {
+    "count": 5,
+    "id": "minecraft:map"
+  },
+  "loot_table": "minecraft:chests/abandoned_mineshaft",
+  "max_repeat": 0,
+  "name": "Example for a multi advancements quest",
+  "need_unlock": false,
+  "parent_id": [],
+  "redo_parent": false,
+  "repeat_daily": 0,
+  "repeat_delay": 36000,
+  "sorting_id": 0,
   "submission_trigger": "",
   "tasks": {
     "trade": {
@@ -14,26 +30,10 @@
           "value": "minecraft:adventure/ol_betsy"
         }
       ],
-      "reset": true,
       "description": "Task Description. Will select one of the following advancements: adventure/trade, adventure/bullseye, adventure/ol_betsy",
-      "id": "simplequests_api:advancement"
+      "id": "simplequests_api:advancement",
+      "reset": true
     }
   },
-  "sorting_id": 0,
-  "icon": {
-    "id": "minecraft:map",
-    "count": 5
-  },
-  "visibility": "DEFAULT",
-  "max_repeat": 0,
-  "daily_quest": false,
-  "need_unlock": false,
-  "parent_id": [],
-  "redo_parent": false,
-  "repeat_delay": 36000,
-  "repeat_daily": 0,
-  "name": "Example for a multi advancements quest",
-  "description": [],
-  "loot_table": "minecraft:chests/abandoned_mineshaft",
-  "type": "simplequests_api:quest"
+  "visibility": "DEFAULT"
 }
