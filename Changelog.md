@@ -2,11 +2,11 @@ Simple Quests 2.3.0
 ================
 - SimpleQuest API 3.0.0
   - Huge internal rewrite with large breaking changes
-  - Datapack and current player data are unaffected
+  - Datapack and current player data are unaffected. Do make a backup just in case though!
   - Split into QuestDefinition and ResolvedQuest instance
     - QuestDefinition is the template
     - ResolvedQuest is the used instance when player accepts a quest
-  - Allows defining sub quest in one file instead of needing id to point to other quests (Relevant for sequential and selection quests)
+  - Allow defining sub quest in one file instead of needing ids to point to other quests (Relevant for sequential and selection quests)
     - Quests defined these way are not in the QuestManager so manually hiding them is not needed
   - Allows subquests within subquests now.
     - For sequential quests they are finished in order
