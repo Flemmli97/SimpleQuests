@@ -2,7 +2,9 @@ plugins {
     id 'io.github.flemmli97.multiloader.platform-common'
 }
 
-archivesBaseName = rootProject.api_mod_id
+base {
+    archivesName = rootProject.api_mod_id
+}
 version = "${project.minecraft_version}-${rootProject.api_version}-common"
 
 dependencies {

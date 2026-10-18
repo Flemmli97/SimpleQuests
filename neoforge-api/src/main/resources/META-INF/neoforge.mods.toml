@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[${loader_version},)"
+loaderVersion = "[${neoforge_loader_version},)"
 license="MIT"
 issueTrackerURL="https://github.com/Flemmli97/SimpleQuests/issues"
 [[mixins]]
@@ -13,7 +13,7 @@ description='''API handling questing'''
 [[dependencies.simplequests_api]]
 modId="minecraft"
 type="required"
-versionRange="[${mcversion},)"
+versionRange = "[${minecraft_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simplequests_api]]

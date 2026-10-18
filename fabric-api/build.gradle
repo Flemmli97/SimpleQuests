@@ -1,10 +1,11 @@
 plugins {
     id 'fabric-loom'
-    id 'io.github.flemmli97.multiloader.changelog'
     id 'io.github.flemmli97.multiloader.common-convention'
 }
 
-archivesBaseName = rootProject.api_mod_id
+base {
+    archivesName = rootProject.api_mod_id
+}
 version = "${project.minecraft_version}-${rootProject.api_version}-fabric"
 
 loom {
@@ -23,19 +24,6 @@ loom {
     }
 }
 
-ext {
-    mod_meta = ["version": project.version, "mcversion": minecraft_version, "fabric_version": fabric_version]
-}
-
-configurations {
-    remapCommon {
-        canBeConsumed = true
-    }
-    remapCommonArtifact {
-        canBeConsumed = true
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.layered {
@@ -43,22 +31,11 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     compileOnly(project(':common-api'))
     compileOnly(project(path: ':common-api', configuration: 'commonDependency'))
 
     modImplementation include("io.github.flemmli97:lingua_bib:${lingua_bib}-fabric")
-}
-
-afterEvaluate {
-    artifacts {
-        configurations.named("compileClasspath").get().resolvedConfiguration.resolvedArtifacts.stream()
-                .filter { artifact ->
-                    configurations.named("remapCommon").get().incoming.dependencies.any {
-                        artifact.moduleVersion.id.group.contains(it.group) && it.name == artifact.moduleVersion.id.name && it.version == artifact.moduleVersion.id.version
-                    }
-                }.each { add("remapCommonArtifact", it.file) }
-    }
 }
 
 processResources {
@@ -90,9 +67,9 @@ tasks.register('cleanPublish') {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(remapJar)
-            artifact(sourcesJar)
-            artifactId api_mod_id
+            from(components["java"])
+            artifactId = api_mod_id
+            suppressPomMetadataWarningsFor("runtimeElements")
         }
     }
 }

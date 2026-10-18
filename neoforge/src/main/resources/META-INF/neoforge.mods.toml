@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[${loader_version},)"
+loaderVersion = "[${neoforge_loader_version},)"
 license="All rights reserved"
 issueTrackerURL="https://github.com/Flemmli97/SimpleQuests/issues"
 [[mixins]]
@@ -15,7 +15,7 @@ description='''Server sided questing'''
 [[dependencies.simplequests]]
 modId="minecraft"
 type="required"
-versionRange="[${mcversion},)"
+versionRange = "[${minecraft_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simplequests]]

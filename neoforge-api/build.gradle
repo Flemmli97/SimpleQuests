@@ -1,10 +1,11 @@
 plugins {
     id 'net.neoforged.moddev'
-    id 'io.github.flemmli97.multiloader.changelog'
     id 'io.github.flemmli97.multiloader.common-convention'
 }
 
-archivesBaseName = rootProject.api_mod_id
+base {
+    archivesName = rootProject.api_mod_id
+}
 version = "${project.minecraft_version}-${rootProject.api_version}-neoforge"
 
 neoForge {
@@ -45,10 +46,6 @@ neoForge {
     }
 }
 
-ext {
-    mod_meta = ["version": project.version, "loader_version": neo_loader_version, "mcversion": minecraft_version, "neoforge_version": neoforge_version]
-}
-
 repositories {
     maven {
         name = 'Fabric'
@@ -62,7 +59,6 @@ repositories {
 dependencies {
     compileOnly(project(':common-api'))
     compileOnly(project(path: ':common-api', configuration: 'commonDependency'))
-    compileOnly(project(path: ':fabric-api', configuration: 'remapCommonArtifact'))
 
     jarJar(implementation("io.github.flemmli97:lingua_bib:${lingua_bib}-neoforge"))
 }
@@ -95,9 +91,9 @@ tasks.register('cleanPublish') {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(jar)
-            artifact(sourcesJar)
-            artifactId api_mod_id
+            from(components["java"])
+            artifactId = api_mod_id
+            suppressPomMetadataWarningsFor("runtimeElements")
         }
     }
 }
