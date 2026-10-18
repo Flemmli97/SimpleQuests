@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,12 +44,12 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
 
     public static final MapCodec<TasksQuestDefinition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BaseData.CODEC.forGetter(q -> q.get(true)),
-            ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot.location()),
+            ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(d -> d.loot == null ? Optional.empty() : Optional.of(d.loot.location())),
             Codec.STRING.optionalFieldOf("command").forGetter(d -> Optional.of(d.command)),
             Codec.STRING.optionalFieldOf("submission_trigger").forGetter(d -> Optional.of(d.trigger)),
             Codec.unboundedMap(Codec.STRING, QuestEntryRegistry.ENTRY_CODEC).fieldOf("tasks").forGetter(d -> d.tasks)
     ).apply(instance, (data, loot, command, trigger, tasks) -> {
-        Builder builder = data.applyTo(name -> new Builder(name, loot));
+        Builder builder = data.applyTo(name -> new Builder(name, loot.orElse(null)));
         tasks.forEach(builder::addTaskEntry);
         builder.withSubmissionTrigger(trigger.orElse(""));
         builder.setCompletionCommand(command.orElse(""));
@@ -57,12 +58,12 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
 
     public static final MapCodec<TasksQuestDefinition> OPT_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BaseData.CODEC.forGetter(q -> q.get(false)),
-            ResourceLocation.CODEC.fieldOf("loot_table").forGetter(d -> d.loot.location()),
+            ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(d -> d.loot == null ? Optional.empty() : Optional.of(d.loot.location())),
             Codec.STRING.optionalFieldOf("command").forGetter(d -> !d.command.isEmpty() ? Optional.of(d.command) : Optional.empty()),
             Codec.STRING.optionalFieldOf("submission_trigger").forGetter(d -> !d.trigger.isEmpty() ? Optional.of(d.trigger) : Optional.empty()),
             Codec.unboundedMap(Codec.STRING, QuestEntryRegistry.ENTRY_CODEC).fieldOf("tasks").forGetter(d -> d.tasks)
     ).apply(instance, (data, loot, command, trigger, tasks) -> {
-        Builder builder = data.applyTo(name -> new Builder(name, loot));
+        Builder builder = data.applyTo(name -> new Builder(name, loot.orElse(null)));
         tasks.forEach(builder::addTaskEntry);
         builder.withSubmissionTrigger(trigger.orElse(""));
         builder.setCompletionCommand(command.orElse(""));
@@ -71,6 +72,7 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
 
     private final Map<String, QuestTask<?>> tasks;
 
+    @Nullable
     private final ResourceKey<LootTable> loot;
     private final String command;
 
@@ -84,7 +86,7 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
                                    ResourceLocation loot, String command, String trigger) {
         super(category, name, description, requiredParentQuests, redoParent, repeatDelay, repeatDaily, maxRepeat, isDailyQuest, needsUnlock, unlockCondition, sortingId, icon, visibility);
         this.tasks = tasks;
-        this.loot = ResourceKey.create(Registries.LOOT_TABLE, loot);
+        this.loot = loot == null ? null : ResourceKey.create(Registries.LOOT_TABLE, loot);
         this.command = command;
         this.trigger = trigger;
     }
@@ -152,7 +154,9 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
 
         @Override
         public void onComplete(ServerPlayer player) {
-            ResolvedQuest.dropLoot(player, this.source().loot);
+            if (this.source().loot != null) {
+                ResolvedQuest.dropLoot(player, this.source().loot);
+            }
             ResolvedQuest.runCommand(player, this.source().command);
         }
     }
@@ -164,6 +168,10 @@ public class TasksQuestDefinition extends QuestDefinitionImpl {
         protected final ResourceLocation loot;
         protected String command = "";
         protected String trigger = "";
+
+        public Builder(String name) {
+            this(name, null);
+        }
 
         public Builder(String name, ResourceLocation loot) {
             super(name);
